@@ -1,7 +1,9 @@
 <template>
-  <transition name="page">
-    <slot />
-  </transition>
+  <v-app theme="dark">
+    <!-- <transition name="page"> -->
+      <slot />
+    <!-- </transition> -->
+  </v-app>
 </template>
 
 <style>
