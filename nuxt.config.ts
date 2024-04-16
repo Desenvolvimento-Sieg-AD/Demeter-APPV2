@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const API_URL = 'http://localhost:8000/api'
+import { resolve } from 'path';
 
 export default defineNuxtConfig({
 	typescript: {
@@ -31,14 +33,32 @@ export default defineNuxtConfig({
 		'@/assets/css/fonts.css',
 		'vuetify/lib/styles/main.sass',
 		'@mdi/font/css/materialdesignicons.min.css',
+		'devextreme/dist/css/dx.light.css',
+		'devextreme/dist/css/dx.dark.css',
 	],
-	plugins: [],
+	plugins: [
+		'@/plugins/maska',
+	],
+	modules: [
+		'@pinia/nuxt',
+		'dayjs-nuxt',
+	],
 	build: {
 		transpile: ['vuetify'],
 	},
 	vite: {
 		define: {
 			'process.env.DEBUG': false,
-		}
-	}
+		},
+		resolve: {
+			alias: {
+				'@api': resolve(__dirname, 'src/api'),
+			},
+		},
+	},
+	runtimeConfig: {
+		public: {
+			apiURL: API_URL,
+		},
+	},
 });

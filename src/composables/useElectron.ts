@@ -12,7 +12,8 @@ export default function useElectron() {
     minimize: () => electron.ipcRenderer.invoke('titlebar:action', 'minimize'),
     toggleMaximize: () => electron.ipcRenderer.invoke('titlebar:action', 'toggleMaximize'),
     isMaximized: () => electron.ipcRenderer.invoke('isMaximized:app', null),
-    close: () => electron.ipcRenderer.invoke('close:app', null)
+    close: () => electron.ipcRenderer.invoke('close:app', null),
+    reload: () => electron.ipcRenderer.invoke('reload:app', null)
   }
 
   // Window title bar stats
@@ -29,6 +30,9 @@ export default function useElectron() {
     windowStats.value.isFullscreen = value
   })
 
+  //reload app
+  const reload = () => electron.ipcRenderer.invoke('reload:app', null);
+
   // Initialize ipcRenderer
-  return { isElectron, titleBarActions, windowStats }
+  return { isElectron, titleBarActions, windowStats, reload }
 }

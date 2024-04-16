@@ -5,6 +5,7 @@ import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
+import osModule from './modules/os'
 
 // Initilize
 // =========
@@ -13,7 +14,7 @@ const isProduction = process.env.NODE_ENV !== 'development'
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32'
 const headerSize = 32
-const modules = [titleBarActionsModule, updaterModule]
+const modules = [titleBarActionsModule, updaterModule, osModule]
 
 // Initialize app window
 // =====================

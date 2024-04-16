@@ -4,6 +4,11 @@
 	"compilerOptions": {
 		"types": [
 		  "vuetify",
+		  "devextreme",
+		  "devextreme-vue",
+		  "maska",
+		  "vue3-toastify/global",
+		  "@nuxt/types"
 		]
 	  }
 }
