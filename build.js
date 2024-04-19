@@ -1,4 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
+const { build } = require('electron-builder')
 const builder = require('electron-builder')
 const Platform = builder.Platform
 
@@ -14,13 +15,16 @@ const options = {
   // schemes: ['deeplink']
   // },
   // - Electron auto-updater config
-  // publish: [
-  //   {
-  //     provider: 'github',
-  //     owner: 'eternalc0der',
-  //     repo: 'electron-nuxt3',
-  //     releaseType: 'release'
-  //   }
+//   owner: SIEG AD - Tecnologia
+// repo: 'https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2',
+// provider: github
+  publish: [
+    {
+      provider: 'github',
+      owner: 'SIEG AD - Tecnologia',
+      repo: 'https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2',
+    },
+  ],
   // ],
 
   // "store" | "normal" | "maximum" - For testing builds, use 'store' to reduce build time significantly.

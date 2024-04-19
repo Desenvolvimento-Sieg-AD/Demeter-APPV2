@@ -3,8 +3,6 @@
 		<div v-if="logged" class="pageClass">
 			<LayoutSidebar :user="user" />
 
-			<img src="../img/S®800px.png" class="logo-fixo" />
-
 			<transition name="page" appear>
 				<div class="aj">
 					<slot />
@@ -13,7 +11,7 @@
 		</div>
 
 		<div v-else class="unlogged">
-			<img src="../img/triste.png" />
+			<img src="/img/triste.png" />
 
 			<h1>{{ message }}</h1>
 			<h1>Por favor, entre em contato com o responsável técnico.</h1>
@@ -79,7 +77,6 @@ const reload = async () => {
 	width: 100%;
 	height: 100%;
 	background-color: rgba(240, 240, 240, 0.288);
-	background-image: url('../img/fundo.jpg');
 	background-size: cover;
 	background-position: center;
 }

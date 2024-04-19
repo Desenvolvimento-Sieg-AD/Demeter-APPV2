@@ -98,7 +98,6 @@
 								<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
 							</div>
 						</v-btn>
-						{{ item.anexos_pagamento.length > 1 ? console.log(item, item.anexos_pagamento) : null}}
 					</div>
 				</template>
 				<template #item-data="{ data: { data: item } }">
