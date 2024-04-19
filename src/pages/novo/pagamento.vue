@@ -1,270 +1,268 @@
 <template>
-	<CustomHeader title="Solicitação de Pagamento" />
-	<LayoutForm ref="layoutFormRef" class="mb-10" :submit="sendForm" title="Realize sua solicitação de pagamento">
-		<v-form ref="formValidate">
-		<v-card class="pt-2 card-pagamento" flat>
-			<CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
-			<v-row class="pa-3">
-				<v-col cols="2" md="3">
-					<CustomInput
-						type="autocomplete"
-						:required="true"
-						label="Grupo do pedido"
-						:items="grupos"
-						v-model="grupo"
-						itemValue="id"
-						itemTitle="nome"
-						hide-details
-					/>
-				</v-col>
-				<v-col cols="4" md="3">
-					<CustomInput
-						:disabled="!grupo"
-						ref="categoriaRef"
-						type="autocomplete"
-						required
-						label="Categoria"
-						:items="categoriasSelecionadas"
-						v-model="form.categoria_id"
-						itemValue="id"
-						itemTitle="nome"
-						hide-details
-					/>
-				</v-col>
-				<v-col cols="12" md="6">
-					<CustomInput
-						append-inner-icon="mdi-file-upload-outline"
-						type="file"
-						label="Nota fiscal"
-						v-model="form.nf"
-						hide-details
-						:loading="loadingImport"
-						accept="image/*,application/pdf"
-						:disabled="!form.categoria_id"
-					>
-						<template #selection="{ fileNames }">
-							<span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
-						</template>
-					</CustomInput>
-				</v-col>
-			</v-row>
-		</v-card>
-		<v-divider class="mt-2 mb-2" />
-		<v-card class="pt-2 card-pagamento" flat>
-			<CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
-			<v-row class="pa-3">
-				<v-col cols="12" md="3">
-					<CustomInput
-						append-inner-icon="mdi-content-copy"
-						@click:append-inner="pasteFromClipboard"
-						type="text"
-						:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
-						required
-						:label="docFornecedor"
-						v-model="form.fornecedor.documento"
-						hide-details
-						:change="verifyDocumento()"
-					/>
-				</v-col>
+	<div>
+		<CustomHeader title="Solicitação de Pagamento" />
+		<LayoutForm class="mb-12">
+			<v-form ref="formValidate">
+				<v-card class="card-pagamento " flat>
+					<CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
+					<v-row class="pa-3">
+						<v-col cols="2" md="3">
+							<CustomInput
+								type="autocomplete"
+								:required="true"
+								label="Grupo do pedido"
+								:items="grupos"
+								v-model="grupo"
+								itemValue="id"
+								itemTitle="nome"
+								hide-details
+							/>
+						</v-col>
+						<v-col cols="4" md="3">
+							<CustomInput
+								:disabled="!grupo"
+								ref="categoriaRef"
+								type="autocomplete"
+								required
+								label="Categoria"
+								:items="categoriasSelecionadas"
+								v-model="form.categoria_id"
+								itemValue="id"
+								itemTitle="nome"
+								hide-details
+							/>
+						</v-col>
+						<v-col cols="12" md="6">
+							<CustomInput
+								append-inner-icon="mdi-file-upload-outline"
+								type="file"
+								label="Nota fiscal"
+								v-model="form.nf"
+								hide-details
+								:loading="loadingImport"
+								accept="image/*,application/pdf"
+								:disabled="!form.categoria_id"
+							>
+								<template #selection="{ fileNames }">
+									<span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
+								</template>
+							</CustomInput>
+						</v-col>
+					</v-row>
+				</v-card>
+				<v-divider class="mt-2 mb-2" />
+				<v-card class="pt-2 card-pagamento" flat>
+					<CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
+					<v-row class="pa-3">
+						<v-col cols="12" md="3">
+							<CustomInput
+								append-inner-icon="mdi-content-copy"
+								@click:append-inner="pasteFromClipboard"
+								type="text"
+								:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
+								required
+								:label="docFornecedor"
+								v-model="form.fornecedor.documento"
+								hide-details
+								:change="verifyDocumento()"
+							/>
+						</v-col>
+						<v-col cols="12" md="3">
+							<CustomInput
+								append-inner-icon="mdi-card-account-details-outline"
+								:disabled="fornecedorExistente"
+								type="select"
+								:required="true"
+								label="Tipo fornecedor"
+								:items="tiposFornecedor"
+								v-model="form.fornecedor.tipo"
+								itemValue="value"
+								itemTitle="nome"
+								hide-details
+							/>
+						</v-col>
+						<v-col cols="12" md="6">
+							<CustomInput
+								type="combobox"
+								append-inner-icon="mdi-shopping-outline"
+								:required="true"
+								label="Fornecedor"
+								:items="fornecedores"
+								v-model="form.fornecedor.nome"
+								itemValue="razao_social"
+								itemTitle="razao_social"
+								hideDetails
+								:onchange="verifyFornecedor()"
+							/>
+						</v-col>
+						<v-col cols="12" md="3">
+							<CustomInput type="text" label="Número NF" v-model="form.numero_nf" />
+						</v-col>
+						<v-col cols="12" md="9">
+							<CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :maxLength="50" />
+						</v-col>
+					</v-row>
+				</v-card>
+				<v-divider class="mt-2 mb-2" />
+				<v-card class="pt-2 card-pagamento" flat>
+					<CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
+					<v-row class="pa-3">
+						<v-col cols="12" md="6">
+							<CustomInput
+								append-inner-icon="mdi-domain"
+								type="select"
+								required
+								label="Empresa pagadora"
+								:items="empresas"
+								v-model="form.empresa_id"
+								itemValue="id"
+								itemTitle="nome"
+								hide-details
+							/>
+						</v-col>
+						<v-col cols="12" md="6">
+							<CustomInput
+								append-inner-icon="mdi-file-upload-outline"
+								type="file"
+								label="Documento"
+								v-model="form.doc"
+								:required="documentRequired"
+								accept="image/*,application/pdf"
+								hint="Ex: Boleto, Comprovante, Certidão"
+								persistent-hint
+							>
+								<template #selection="{ fileNames }">
+									<span class="text-truncate">
+										{{ defineFileTitle(fileNames[0]) }}
+									</span>
+								</template>
+							</CustomInput>
+						</v-col>
+					</v-row>
+				</v-card>
+				<v-divider class="mt-2 mb-2" />
+				<v-card class="pt-2 card-pagamento" flat>
+					<CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
+					<v-row class="pa-2">
+						<v-col cols="12" md="4">
+							<CustomInput
+								append-inner-icon="mdi-chat-question-outline"
+								type="textarea"
+								:required="true"
+								:no-resize="false"
+								label="Motivo"
+								v-model="form.motivo"
+								hide-details
+							/>
+						</v-col>
+						<v-col cols="8">
+							<CustomInput
+								type="textarea"
+								:no-resize="false"
+								label="Observações"
+								v-model="form.dados_complementares"
+								hide-details
+							/>
+						</v-col>
+						<v-col cols="12">
+							<CustomInput
+								v-if="user.setor.exibir_projetos"
+								append-inner-icon="mdi-briefcase-plus-outline"
+								type="autocomplete"
+								:required="true"
+								label="Projetos"
+								:items="projetos"
+								v-model="projeto_id"
+								itemValue="id"
+								itemTitle="name"
+								hide-details
+							/>
+						</v-col>
+					</v-row>
+				</v-card>
+				<v-divider class="mt-2 mb-2" />
+				<v-card class="pt-2 card-pagamento" flat>
+					<CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
+					<v-row class="pa-3">
+						<v-col>
+							<CustomInput
+								append-inner-icon="mdi-cash-clock"
+								type="select"
+								required
+								label="Forma de pagamento"
+								:items="pagamento_tipo"
+								v-model="form.tipo_id"
+								itemValue="id"
+								itemTitle="nome"
+								hide-details
+								:change="verifyPaymenteType()"
+							/>
+						</v-col>
+						<v-col v-if="form.tipo_id === 1">
+							<CustomInput
+								v-model="tipoChavePix"
+								append-inner-icon="mdi-key"
+								type="select"
+								required
+								:items="chavesPix"
+								itemTitle="nome"
+								itemValue="id"
+								label="Tipo de Chave"
+								/>
+						</v-col>
+						<v-col v-else>
+							<div class="mt-5">
+								<v-divider color="#118B9F"></v-divider>
+							</div>
+						</v-col>
+						<v-col>
+							<CustomInput
+								type="date"
+								:required="true"
+								label="Data de vencimento"
+								v-model="form.data_vencimento"
+								:messages="isExpired ? 'Esse prazo já expirou' : ''"
+								:min="minDate"
+							/>
+						</v-col>
+						<v-col>
+							<CustomInput
+								type="text"
+								mask="money"
+								required
+								label="Valor total"
+								v-model="form.valor_total"
+								hide-details
+							/>
+						</v-col>
+		
+					</v-row>
+					<v-row class="pa-3 mt-n12">
+						<v-col>
+							<CustomInput
+								:disabled="!tipos.descricao"
+								type="text"
+								:label="!tipos.descriTcao ? 'Descrição' : tipos.descricao"
+								v-model="form.descricao"
+								:mask="maskDescription"
+								:required="tipos.obrigatorio"
+							/>
+						</v-col>
+					</v-row>
+				</v-card>
+				<div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
+					<v-btn color="red" class="ml-2" @click="reset">
+						Limpar
+						<v-icon size="small" icon="mdi-trash-can-outline" class="ml-1" />
+					</v-btn>
+					<v-btn color="green" class="custom-btn approve-btn" @click="sendForm"
+						>Solicitar <v-icon size="small" icon="mdi-currency-usd" class="ml-1" />
+					</v-btn>
+				</div>
+			</v-form>
+		</LayoutForm>
+	</div>
 
-				<v-col cols="12" md="3">
-					<CustomInput
-						append-inner-icon="mdi-card-account-details-outline"
-						:disabled="fornecedorExistente"
-						type="select"
-						:required="true"
-						label="Tipo fornecedor"
-						:items="tiposFornecedor"
-						v-model="form.fornecedor.tipo"
-						itemValue="value"
-						itemTitle="nome"
-						hide-details
-					/>
-				</v-col>
-
-				<v-col cols="12" md="6">
-					<CustomInput
-						type="combobox"
-						append-inner-icon="mdi-shopping-outline"
-						:required="true"
-						label="Fornecedor"
-						:items="fornecedores"
-						v-model="form.fornecedor.nome"
-						itemValue="razao_social"
-						itemTitle="razao_social"
-						hideDetails
-						:onchange="verifyFornecedor()"
-					/>
-				</v-col>
-				<v-col cols="12" md="3">
-					<CustomInput type="text" label="Número NF" v-model="form.numero_nf" />
-				</v-col>
-				<v-col cols="12" md="9">
-					<CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :maxLength="50" />
-				</v-col>
-			</v-row>
-		</v-card>
-		<v-divider class="mt-2 mb-2" />
-		<v-card class="pt-2 card-pagamento" flat>
-			<CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
-			<v-row class="pa-3">
-				<v-col cols="12" md="6">
-					<CustomInput
-						append-inner-icon="mdi-domain"
-						type="select"
-						required
-						label="Empresa pagadora"
-						:items="empresas"
-						v-model="form.empresa_id"
-						itemValue="id"
-						itemTitle="nome"
-						hide-details
-					/>
-				</v-col>
-				<v-col cols="12" md="6">
-					<CustomInput
-						append-inner-icon="mdi-file-upload-outline"
-						type="file"
-						label="Documento"
-						v-model="form.doc"
-						:required="documentRequired"
-						accept="image/*,application/pdf"
-						hint="Ex: Boleto, Comprovante, Certidão"
-						persistent-hint
-						multiple
-					>
-						<template #selection="{ fileNames }">
-							<span class="text-truncate">
-								{{ defineFileTitle(fileNames[0]) }}
-							</span>
-						</template>
-					</CustomInput>
-				</v-col>
-			</v-row>
-		</v-card>
-		<v-divider class="mt-2 mb-2" />
-		<v-card class="pt-2 card-pagamento" flat>
-			<CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
-			<v-row class="pa-2">
-				<v-col cols="12" md="4">
-					<CustomInput
-						append-inner-icon="mdi-chat-question-outline"
-						type="textarea"
-						:required="true"
-						:no-resize="false"
-						label="Motivo"
-						v-model="form.motivo"
-						hide-details
-					/>
-				</v-col>
-				<v-col cols="8">
-					<CustomInput
-						type="textarea"
-						:no-resize="false"
-						label="Observações"
-						v-model="form.dados_complementares"
-						hide-details
-					/>
-				</v-col>
-				<v-col cols="12">
-					<CustomInput
-						v-if="user.setor.id === 2"
-						append-inner-icon="mdi-briefcase-plus-outline"
-						type="autocomplete"
-						:required="true"
-						label="Projetos"
-						:items="projetos"
-						v-model="projeto_id"
-						itemValue="id"
-						itemTitle="name"
-						hide-details
-					/>
-				</v-col>
-			</v-row>
-		</v-card>
-		<v-divider class="mt-2 mb-2" />
-		<v-card class="pt-2 card-pagamento" flat>
-			<CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
-			<v-row class="pa-3">
-				<v-col>
-					<CustomInput
-						append-inner-icon="mdi-cash-clock"
-						type="select"
-						required
-						label="Forma de pagamento"
-						:items="pagamento_tipo"
-						v-model="form.tipo_id"
-						itemValue="id"
-						itemTitle="nome"
-						hide-details
-						:change="verifyPaymenteType()"
-					/>
-				</v-col>
-				<v-col v-if="form.tipo_id === 1">
-					<CustomInput
-						v-model="tipoChavePix"
-						append-inner-icon="mdi-key"
-						type="select"
-						required
-						:items="chavesPix"
-						itemTitle="nome"
-						itemValue="id"
-						label="Tipo de Chave"
-						/>
-				</v-col>
-				<v-col v-else>
-					<div class="mt-5">
-						<v-divider color="#118B9F"></v-divider>
-					</div>
-				</v-col>
-				<v-col>
-					<CustomInput
-						type="date"
-						:required="true"
-						label="Data de vencimento"
-						v-model="form.data_vencimento"
-						:messages="isExpired ? 'Esse prazo já expirou' : ''"
-						:min="minDate"
-					/>
-				</v-col>
-				<v-col>
-					<CustomInput
-						type="text"
-						mask="money"
-						required
-						label="Valor total"
-						v-model="form.valor_total"
-						hide-details
-					/>
-				</v-col>
-				
-			</v-row>
-			<v-row  class="pa-3 mt-n12">
-				<v-col>
-					<CustomInput
-						append-inner-icon="mdi-information-slab-circle-outline"
-						:disabled="!tipos.descricao"
-						type="text"
-						:label="!tipos.descricao ? 'Descrição' : tipos.descricao"
-						v-model="form.descricao"
-						:mask="maskDescription"
-						:required="tipos.obrigatorio"
-					/>
-				</v-col>
-			</v-row>
-		</v-card>
-		<div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
-			<v-btn color="red" class="ml-2" @click="reset">
-				Limpar
-				<v-icon size="small" icon="mdi-trash-can-outline" class="ml-1" />
-			</v-btn>
-
-			<v-btn color="green" class="custom-btn approve-btn" @click="sendForm"
-				>Solicitar <v-icon size="small" icon="mdi-currency-usd" class="ml-1" />
-			</v-btn>
-		</div>
-		</v-form>
-	</LayoutForm>
 </template>
 
 <script setup>
@@ -286,7 +284,6 @@ import {
 const { $toast } = useNuxtApp();
 
 // Dados reativos e estado inicial
-const layoutFormRef = ref(null);
 const registerAddress = ref(false);
 
 const form = ref(initFormState());
@@ -383,7 +380,7 @@ const clearFornecedor = () => {
 };
 
 watch(() => form.value.nf, async (value) => {
-	if (value || value.length > 0) {
+	if (value && value.length > 0) {
 		processNfFile(value[0]);
 	}
 }, { deep: true, immediate: false });
@@ -400,7 +397,6 @@ const minDate = computed(() => {
 });
 
 const verifyFornecedor = () => {
-	console.log(form.value)
 	if (fornecedores.value.some((obj) => obj.razao_social === form.value.fornecedor.nome)) {
 		fornecedorExistente.value = true;
 		const forn = fornecedores.value.find((obj) => obj.razao_social === form.value.fornecedor.nome);
@@ -587,33 +583,6 @@ async function validateForm() {
 	return formData;
 }
 
-const reset = () => {
-	form.value = {
-		fornecedor: {
-			id: null,
-			nome: null,
-			apelido: null,
-			documento: null,
-			tipo: null,
-		},
-		chave_nf: null,
-		numero_nf: null,
-		empresa_id: null,
-		nf: null,
-		doc: null,
-		tipo_id: null,
-		descricao: null,
-		motivo: null,
-		categoria_id: null,
-		dados_complementares: null,
-		valor_total: null,
-		data_vencimento: null,
-		projeto: null,
-		tipo_chave_pix: null,
-	};
-	formValidate.value.reset();
-};
-
 const pushData = async () => {
 	try {
 		const resultados = await Promise.all([
@@ -652,7 +621,6 @@ const getTiposChave = async () => {
 		if(!success) throw new Error(message)
 
 		chavesPix.value = data
-		console.log(chavesPix.value);
 
 	} catch (error) {
 		console.log(error.message)
@@ -660,9 +628,30 @@ const getTiposChave = async () => {
 	}
 }
 
+function getTiposFornecedor() {
+	return [
+		{ nome: 'Pessoa Jurídica', value: 'juridico' },
+		{ nome: 'Pessoa Física', value: 'fisico' },
+	];
+}
+
+
 await getTiposChave()
 
 await pushData();
+
+watch(() => categoriasSelecionadas.value, async () => {
+	await categoriaRef.value.click();
+	},{ immediate: true}
+);
+
+const reset = () => {
+	form.value = initFormState();
+    grupo.value = null;
+	form.value.valor_total = 0
+	form.value.doc = []
+	tipoChavePix.value = null
+};
 
 function initFormState() {
 	return {
@@ -675,7 +664,7 @@ function initFormState() {
 		motivo: null,
 		categoria_id: null,
 		dados_complementares: null,
-		valor_total: null,
+		valor_total: 0,
 		data_vencimento: null,
 		projeto: null,
 		chave_nf: null,
@@ -698,18 +687,6 @@ function useInitRefs() {
 		projeto: ref(null),
 	};
 }
-
-function getTiposFornecedor() {
-	return [
-		{ nome: 'Pessoa Jurídica', value: 'juridico' },
-		{ nome: 'Pessoa Física', value: 'fisico' },
-	];
-}
-
-watch(() => categoriasSelecionadas.value, async () => {
-	await categoriaRef.value.click();
-	},{ immediate: true}
-);
 </script>
 
 <style scoped>

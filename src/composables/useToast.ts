@@ -28,7 +28,6 @@ export default function useToast() {
 
   const info = (message: string) => {
     toast.info(message, options);
-    console.log(message);
     if (logOnConsole) console.log(message);
   }
   

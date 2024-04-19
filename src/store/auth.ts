@@ -17,14 +17,6 @@ export const useAuthStore = defineStore('auth', {
 			try {
 				// await this.checkAPI();
 
-				return {
-					success: true,
-					user: {
-						name: 'Usuário de Teste',
-						email: 'vgl@sieg-ad.com.br',
-					}						
-				}
-
 				const { data, success, message } = await useApi('/auth', {
 					method: 'POST',
 					body: {
