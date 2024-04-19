@@ -1,7 +1,7 @@
 <template>
 	<CustomHeader title="Solicitações de Pagamentos" />
 
-	<v-btn class="custom-btn" @click="router.push(`/novo/pagamento`)" color="#118B9F" flat>
+	<v-btn class="custom-btn" @click="router.push(`/novo/pagamento`)" color="#118B9F" flat >
 		<v-icon icon="mdi-plus" start />
 		<b>Novo Pagamento</b>
 	</v-btn>

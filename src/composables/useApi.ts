@@ -61,7 +61,8 @@ export const useApi = async <T>(path: string, options?: UseFetchOptions<T>): Pro
 		if (!response.success) console.error(path, response.message);
 
 		return response;
-	} catch (error) {
+	} 
+	catch (error) {
 		return {
 			success: false,
 			message: 'Erro na consulta com a api',
