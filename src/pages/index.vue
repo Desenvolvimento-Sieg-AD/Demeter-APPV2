@@ -1,150 +1,138 @@
 <template>
-	<CustomHeader title="Solicitações de Pagamentos" />
-
-	<v-btn class="custom-btn" @click="router.push(`/novo/pagamento`)" color="#118B9F" flat>
-		<v-icon icon="mdi-plus" start />
-		<b>Novo Pagamento</b>
-	</v-btn>
-
-	<LayoutForm>
-		<CustomTableSelect
-			:columns="columns"
-			:items="pagamentos"
-			:actions="actions"
-			:loading="false"
-			scrolling="standard"
-			allow-search
-			allowColumnResizing
-			choose-columns
-			allow-column-reordering
-			:allowed-page-sizes="[5, 15, 10, 25]"
-			:page-size="15"
-			pager
-		>
-			<template #item-categoria.nome="{ data: { data: item } }">
-				<div class="template">
-					{{ item.categoria.nome }}
-				</div>
-			</template>
-
-			<template #item-tipo="{ data: { data: item } }">
-				<div class="template">
-					{{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
-				</div>
-			</template>
-
-			<template #item-status="{ data: { data: item } }">
-				<div class="template">
-					<CustomText
-						:title="item.movimentacoes_pagamento[0].status_pagamento.nome"
-						class="ml-2"
-						:color="item.movimentacoes_pagamento[0].status_pagamento.cor"
-						size="14"
-						bold
-					/>
-				</div>
-			</template>
-
-			<template #item-documento="{ data: { data: item } }">
-				<div class="d-flex align-center justify-center text-center">
-					{{
-						item.fornecedor.tipo === 'juridico'
-							? maskCnpj(item.fornecedor.documento)
-							: maskCpf(item.fornecedor.documento)
-					}}
-				</div>
-			</template>
-
-			<template #item-anexo="{ data: { data: item } }">
-				<div class="template" v-if="item.status !== 'Recusado' && item.status !== 'Cancelado'">
-					<v-btn
-						flat
-						icon
-						v-if="item.anexos_pagamento?.find((ref) => ref.tipo_anexo_id == 3)"
-						@click="openFile(item, 3)"
-					>
-						<v-icon
-							color="success"
-							class="cursor-pointer"
-							icon="mdi-paperclip"
-							:disabled="item.status !== 'Recusado'"
+	<div>
+		<CustomHeader title="Solicitações de Pagamentos" />
+		<LayoutForm>
+			<CustomTableSelect
+				:columns="columns"
+				:items="pagamentos"
+				:actions="actions"
+				:loading="false"
+				scrolling="standard"
+				:noDataText="'Você não tem nenhuma solicitação de pagamento'"
+				allow-search
+				allowColumnResizing
+				choose-columns
+				allow-column-reordering
+				:allowed-page-sizes="[5, 15, 10, 25]"
+				:page-size="15"
+				enableAddButton
+				createTitle="NOVO PAGAMENTO"
+				createText="Ir para página de solicitação"
+				@add="router.push(`/novo/pagamento`);"
+				pager
+			>
+				<template #item-categoria.nome="{ data: { data: item } }">
+					<div class="template">
+						{{ item.categoria.nome }}
+					</div>
+				</template>
+				<template #item-tipo="{ data: { data: item } }">
+					<div class="template">
+						{{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
+					</div>
+				</template>
+				<template #item-status="{ data: { data: item } }">
+					<div class="template">
+						<CustomText
+							:title="item.movimentacoes_pagamento[0].status_pagamento.nome"
+							class="ml-2"
+							:color="item.movimentacoes_pagamento[0].status_pagamento.cor"
+							size="14"
+							bold
 						/>
-						<v-tooltip text="Abrir anexo" activator="parent" location="top" />
-					</v-btn>
-					<v-btn flat icon v-else>
-						<v-icon
-							disabled
-							color="#118B9F"
-							class="cursor-pointer"
-							@click="(enableModal.upload = true), (itemView = item), (type = 'NF')"
-							icon="mdi-paperclip-plus"
-						/>
-						<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
-					</v-btn>
-				</div>
-			</template>
-
-			<template #item-doc="{ data: { data: item } }">
-				<div class="template" v-if="item.status !== 'Recusado' && item.status !== 'Cancelado'">
-					<v-btn
-						flat
-						icon
-						v-if="item.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id == 4)"
-						@click="openFile(item, 4)"
-					>
-						<v-icon color="success" class="cursor-pointer" icon="mdi-paperclip" />
-						<v-tooltip text="Abrir anexo" activator="parent" location="top" />
-					</v-btn>
-					<v-btn flat icon v-else>
-						<v-icon
-							disabled
-							class="cursor-pointer"
-							color="#118B9F"
-							@click="(enableModal.upload = true), (itemView = item), (type = 'DOC')"
-							icon="mdi-paperclip-plus"
-						/>
-						<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
-					</v-btn>
-				</div>
-			</template>
-
-			<template #item-data="{ data: { data: item } }">
-				<div class="template">
-					{{ formatDate(item.data_vencimento) }}
-				</div>
-			</template>
-
-			<template #item-data_aprovacao="{ data: { data: item } }">
-				<div class="template">
-					{{ movimentacaoAprovado(item) }}
-				</div>
-			</template>
-
-			<template #item-valor_total="{ data: { data: item } }">
-				<div class="template">
-					{{ formatCurrency(item.valor_total) }}
-				</div>
-			</template>
-
-			<template #item-empresa.apelido="{ data: { data: item } }">
-				<div class="template">
-					{{ item.empresa.apelido }}
-					<v-tooltip :text="item.empresa.nome" activator="parent" location="bottom" />
-				</div>
-			</template>
-		</CustomTableSelect>
-	</LayoutForm>
-
-	<LazyModalPagamento v-model:enable="enableModal.view" :id="itemView.id" />
-
-	<LazyModalConfirmCancel
-		v-model:enable="enableModal.cancel"
-		v-model:message="justificativaCancelamento"
-		:item="itemView"
-		:actions="modalActions"
-	/>
-
-	<LazyModalUpload v-model:enable="enableModal.upload" :item="itemView" @update="pushData" :type="type" />
+					</div>
+				</template>
+				<template #item-documento="{ data: { data: item } }">
+					<div class="d-flex align-center justify-center text-center">
+						{{
+							item.fornecedor.tipo === 'juridico'
+								? maskCnpj(item.fornecedor.documento)
+								: maskCpf(item.fornecedor.documento)
+						}}
+					</div>
+				</template>
+				<template #item-anexo="{ data: { data: item } }">
+					<div class="template" v-if="item.status !== 'Recusado' && item.status !== 'Cancelado'">
+						<v-btn
+							flat
+							icon
+							variant="plain"
+							v-if="item.anexos_pagamento?.find((ref) => ref.tipo_anexo_id == 3)"
+							@click="openFile(item, 3)"
+						>
+							<v-icon
+								color="success"
+								class="cursor-pointer"
+								icon="mdi-paperclip"
+							/>
+							<v-tooltip text="Abrir anexo" activator="parent" location="top" />
+						</v-btn>
+						<v-btn flat icon variant="plain" v-else>
+							<v-icon
+								color="#118B9F"
+								class="cursor-pointer"
+								@click="(enableModal.upload = true), (itemView = item), (type = 'NF')"
+								icon="mdi-paperclip-plus"
+							/>
+							<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
+						</v-btn>
+					</div>
+				</template>
+				<template #item-doc="{ data: { data: item } }">
+					<div class="template" v-if="item.status !== 'Recusado' && item.status !== 'Cancelado'">
+		
+						<v-btn flat icon v-if="item.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id == 4)" variant="plain" >
+							<div v-if="item.anexos_pagamento?.length === 1">
+								<v-icon color="success" class="cursor-pointer" icon="mdi-paperclip" @click="openFile(item, 4)"/>
+								<v-tooltip text="Abrir anexo" activator="parent" location="top" />
+							</div>
+							<div v-if="item.anexos_pagamento?.length > 1">
+								<v-icon color="purple" icon="mdi-paperclip"/>
+								<v-tooltip activator="parent" location="top" :text="item.anexos_pagamento.map((i) => `${i.nome}  -  `)"/>
+							</div>
+						</v-btn>
+						<v-btn flat icon variant="plain" v-else>
+							<div >
+								<v-icon class="cursor-pointer" color="#118B9F"
+								@click="(enableModal.upload = true), (itemView = item), (type = 'DOC')" icon="mdi-paperclip-plus" />
+								<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
+							</div>
+						</v-btn>
+						{{ item.anexos_pagamento.length > 1 ? console.log(item, item.anexos_pagamento) : null}}
+					</div>
+				</template>
+				<template #item-data="{ data: { data: item } }">
+					<div class="template">
+						{{ formatDate(item.data_vencimento) }}
+					</div>
+				</template>
+				<template #item-data_aprovacao="{ data: { data: item } }">
+					<div class="template">
+						{{ movimentacaoAprovado(item) }}
+					</div>
+				</template>
+				<template #item-valor_total="{ data: { data: item } }">
+					<div class="template">
+						{{ formatCurrency(item.valor_total) }}
+					</div>
+				</template>
+				<template #item-empresa.apelido="{ data: { data: item } }">
+					<div class="template">
+						{{ item.empresa.apelido }}
+						<v-tooltip :text="item.empresa.nome" activator="parent" location="bottom" />
+					</div>
+				</template>
+			</CustomTableSelect>
+		</LayoutForm>
+		<LazyModalPagamento v-model:enable="enableModal.view" :id="itemView.id" />
+		<LazyModalConfirmCancel
+			v-model:enable="enableModal.cancel"
+			v-model:message="justificativaCancelamento"
+			:item="itemView"
+			:actions="modalActions"
+		/>
+		<LazyModalUpload v-model:enable="enableModal.upload" :item="itemView" @update="pushData" :type="type" />
+	</div>
 </template>
 
 <script setup>
@@ -246,25 +234,32 @@ const movimentacaoAprovado = (item) => {
 
 // Funções de Cancelamento de pagamento
 const paymentCancel = async (ids) => {
-	if (ids.length === 0) {
-		$toast.error('Selecione ao menos um pagamento');
-		loadingModal.value = false;
-		return;
-	}
-	if (!justificativaCancelamento.value) {
-		$toast.error('Informe a justificativa');
-		loadingModal.value = false;
-		return;
-	}
-	const { success } = await postStatus({ id: ids, status: 7, justificativa: justificativa.value });
-	if (success) {
-		enableModal.value = false;
+	try {
+
+		if(ids.length === 0) {
+			loadingModal.value = false;
+			return new Error('Selecione ao menos um pagamento');
+		}
+
+		if (!justificativaCancelamento.value) {
+			loadingModal.value = false;
+			return new Error('Informe a justificativa');
+		}
+
+		const { success, message } = await postStatus({ id: ids, status: 7, justificativa: justificativaCancelamento.value, cancelamento: true });
+
+		if(!success) throw new Error(message)
+
+		enableModal.cancel = false;
 		loadingModal.value = false;
 		$toast.success('Pagamento cancelado com sucesso');
 		await pushData();
-		justificativa.value = null;
+		justificativaCancelamento.value = null;
+
+	} catch (error) {
+		console.log(error.message);
+		$toast.error(error.message);
 	}
-	enableModal.cancel = false;
 
 };
 

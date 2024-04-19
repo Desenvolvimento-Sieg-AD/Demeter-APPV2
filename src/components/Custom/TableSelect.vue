@@ -100,9 +100,10 @@
 			</DxToolbar>
 
 			<template #create>
-				<button :onclick="() => emit('add')" style="padding: 4px" class="dx-button dx-button-mode-contained">
-					<v-icon size="large" :icon="`mdi mdi-plus`" />
-					<v-tooltip activator="parent" location="start" :text="`Adicionar`" />
+				<button :onclick="() => emit('add')" style="padding: 3px; background-color: #118b9f; color: white; display: flex; align-items: center; border-radius: 3px " class="dx-button dx-button-mode-contained">
+					<v-icon size="small" :icon="`mdi mdi-plus`" />
+					<v-tooltip activator="parent" location="start" :text="createText" />
+					<p class="pa-1 text-body-2">{{createTitle}}</p>
 				</button>
 			</template>
 
@@ -292,6 +293,8 @@ const props = defineProps({
 	columnSummary: { type: Array, default: () => [] },
 	detail: { type: Boolean, default: false },
 	editing: { type: Boolean, default: false },
+	createTitle: { type: String, default: 'Adicionar'},
+	createText: { type: String, default: 'Adicionar'}
 });
 
 // Initialization

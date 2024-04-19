@@ -39,3 +39,7 @@ export default (mainWindow: BrowserWindow) => {
         return await copyFilePath(filePath);
     });
 }
+
+function join(pathFolder: string | undefined, filePath: string) {
+    throw new Error("Function not implemented.");
+}

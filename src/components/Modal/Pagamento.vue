@@ -4,7 +4,7 @@
 			<LayoutLoading v-if="loading" />
 
 			<v-row v-else-if="pagamento">
-				<v-col cols="9">
+				<v-col >
 					<v-row align="center">
 						<v-col cols="12" class="pb-0">
 							<h3 style="color: #118b9f">Dados do Pagamento</h3>
@@ -19,13 +19,7 @@
 						</v-col>
 
 						<v-col cols="4">
-							<CustomInput
-								disabled
-								label="Data Solicitação"
-								hide-details
-								v-model="dataSolitacao"
-								:value="dataSolitacao"
-							/>
+							<CustomInput disabled label="Data Solicitação" hide-details :value="dataSolitacao" v-model="dataSolitacao" />
 						</v-col>
 
 						<v-divider class="mx-3" />
@@ -43,49 +37,40 @@
 						</v-col>
 
 						<v-col cols="4">
-							<CustomInput
-								disabled
-								label="Documento"
-								hide-details
-								v-model="documentoFormatado"
-								:value="documentoFormatado"
-							/>
+							<CustomInput disabled label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
 						</v-col>
 
-						<v-col cols="4">
+						<v-col cols="6">
 							<CustomInput disabled label="Empresa Pagadora" hide-details v-model="pagamento.empresa.apelido" />
 						</v-col>
 
-						<v-col cols="3">
+						<v-col cols="4">
 							<CustomInput disabled label="Forma de Pagamento" hide-details v-model="pagamento.tipo_pagamento.nome" />
 						</v-col>
 
-						<v-col cols="5">
-							<CustomInput disabled label="Dados do Pagamento" hide-details v-model="pagamento.descricao" />
+						<v-col cols="3" v-if="pagamento.tipo_pagamento.nome == 'PIX'">
+							<CustomInput disabled label="Tipo de Chave" hide-details v-model="pagamento.tipo_chave_pix.nome"/>
+						</v-col>
+
+						<v-col cols="8">
+							<CustomInput disabled label="Dados do Pagamento" hide-details v-model="pagamento.chave_pix" />
+						</v-col>
+
+						<v-col cols="1">
+							<v-btn @click="copyData" variant="plain" icon color="#118B9F">
+								<v-icon>mdi-content-copy</v-icon>
+								<v-tooltip text="Copiar dados do pagamento" activator="parent" location="top"></v-tooltip>
+							</v-btn>
 						</v-col>
 
 						<v-divider class="mx-3" />
 
 						<v-col cols="12">
-							<CustomInput
-								type="textarea"
-								disabled
-								label="Motivo do Pagamento"
-								hide-details
-								:rows="2"
-								v-model="pagamento.motivo"
-							/>
+							<CustomInput type="textarea" disabled label="Motivo do Pagamento" hide-details :rows="2" v-model="pagamento.motivo" />
 						</v-col>
 
 						<v-col cols="12">
-							<CustomInput
-								type="textarea"
-								disabled
-								label="Observações"
-								hide-details
-								:rows="1"
-								v-model="pagamento.dados_complementares"
-							/>
+							<CustomInput type="textarea" disabled label="Observações" hide-details :rows="1" v-model="pagamento.dados_complementares" />
 						</v-col>
 
 						<v-divider class="mx-3" />
@@ -99,40 +84,57 @@
 						</v-col>
 
 						<v-col cols="2">
-							<v-chip
-								:color="ultimaMovimentacao.status_pagamento.color"
-								:text="ultimaMovimentacao.status_pagamento.nome"
-								hide-details
-							/>
+							<v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
 						</v-col>
+
+						<v-col cols="3" v-if="pagamento.numero_nf">
+							<CustomInput disabled label="Número NF" hide-details v-model="pagamento.numero_nf" />
+						</v-col>
+
+						<v-col cols="8" v-if="pagamento.chave_nf">
+							<CustomInput disabled label="Chave de Acesso" hide-details v-model="pagamento.chave_nf" />
+						</v-col>
+						
 					</v-row>
 				</v-col>
 
 				<v-divider vertical class="my-4" />
 
-				<v-col cols="3">
+				<v-col cols="3" v-if="pagamento?.anexos_pagamento?.length > 0">
+
 					<v-row align="center">
+
 						<v-col cols="12" class="pb-0">
 							<h3 style="color: #118b9f">Arquivos</h3>
 						</v-col>
 
 						<v-col cols="12" style="max-height: 480px; overflow-y: auto">
+
 							<div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id">
-								<v-card flat color="#F7F5F5" class="mb-1" @click="openFile(anexo.caminho)">
+
+								<v-card flat color="#F7F5F5" class="mb-1" @click.prevent="openFile(anexo.caminho)">
+									
 									<v-card-title align="center">
 										<v-icon color="grey" class="cursor-pointer" size="70">mdi-file</v-icon>
 									</v-card-title>
 
 									<v-card-text align="center">
+
 										{{ anexo.nome }}
-										<v-btn icon @click.prevent="copyFilePath(anexo)" flat color="transparent">
+
+										<v-btn icon @click.stop="copyFilePath(anexo)" flat color="transparent">
 											<v-icon color="#118B9F" class="cursor-pointer" icon="mdi-content-copy" />
 											<v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
 										</v-btn>
+
 									</v-card-text>
+
 								</v-card>
+
 							</div>
+
 						</v-col>
+
 					</v-row>
 				</v-col>
 			</v-row>
@@ -240,6 +242,15 @@ const copyFilePath = async (anexo) => {
 	}
 };
 
+const copyData = async (data) => {
+	try {
+		await useOs().copyFilePath(pagamento.value.chave_pix);
+		$toast.success('Dados de pagamento copiado')
+	} catch (error) {
+		console.log('Erro ao copiar dados de pagamento:', error.message)
+		$toast.error('Não foi possível copiar os dados de pagamento')
+	}
+}
 //* WATCHERS
 
 watch(

@@ -23,18 +23,17 @@ export default defineNuxtConfig({
 			link: [
 				{ rel: "icon", type: "image/x-icon", href: "/public/favicon.ico" },
 			],
-
 		},
-		pageTransition: { name: 'page', mode: 'out-in' },
-		layoutTransition: { name: 'slide-left', mode: 'out-in' }
+    pageTransition: { name: "page", mode: "out-in" },
+    layoutTransition: { name: "layout", mode: "in-out" },
 	},
 	css: [
 		'@/assets/css/main.css',
 		'@/assets/css/fonts.css',
 		'vuetify/lib/styles/main.sass',
 		'@mdi/font/css/materialdesignicons.min.css',
-		'devextreme/dist/css/dx.light.css',
 		'devextreme/dist/css/dx.dark.css',
+		'devextreme/dist/css/dx.light.css',
 	],
 	plugins: [
 		'@/plugins/maska',
