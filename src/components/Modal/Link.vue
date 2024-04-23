@@ -1,5 +1,5 @@
 <template>
-	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="auto">
+	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="500">
 		<template #content>
 			<v-container class="txt-center">
 				<CustomText :title="message" class="ml-2" color="#118B9F" size="20" :bold="true" />

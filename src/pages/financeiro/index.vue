@@ -25,16 +25,19 @@
 						{{ item.usuario?.sigla }}
 					</div>
 				</template>
+
 				<template #item-categoria.nome="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ item.categoria.nome }}
 					</div>
 				</template>
+
 				<template #item-tipo="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
 					</div>
 				</template>
+
 				<template #item-status="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						<CustomText
@@ -46,6 +49,7 @@
 						/>
 					</div>
 				</template>
+
 				<template #item-documento="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{
@@ -55,6 +59,7 @@
 						}}
 					</div>
 				</template>
+
 				<template #item-anexo="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						<div v-if="item.anexos_pagamento?.find((ref) => ref.tipo_anexo_id == 3)">
@@ -74,6 +79,7 @@
 						</div>
 					</div>
 				</template>
+
 				<template #item-doc="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						<div v-if="item.anexos_pagamento?.find((ref) => ref.tipo_anexo_id == 4)">
@@ -93,21 +99,25 @@
 						</div>
 					</div>
 				</template>
+
 				<template #item-data="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ formatDate(item.data_vencimento) }}
 					</div>
 				</template>
+
 				<template #item-data_aprovacao="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ formatDate(item.movimentacoes_pagamento[0].data_inicio) }}
 					</div>
 				</template>
+
 				<template #item-valor_total="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ formatCurrency(item.valor_total) }}
 					</div>
 				</template>
+
 				<template #item-setor="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						<div
@@ -120,13 +130,16 @@
 						</div>
 					</div>
 				</template>
+
 				<template #item-empresa.apelido="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						<v-tooltip :text="item.empresa.nome" activator="parent" location="top" />
 						{{ item.empresa.apelido }}
 					</div>
 				</template>
+
 			</CustomTableSelect>
+
 			<v-row>
 				<v-col class="btn-container ga-2" cols="12">
 					<v-btn
@@ -143,15 +156,18 @@
 				</v-col>
 			</v-row>
 		</LayoutForm>
-		<LazyModalConfirmExport
+
+		<!-- <LazyModalConfirmExport
 			v-if="enableModalExport"
 			v-model:enable="enableModalExport"
 			message="Existem pagamentos ja exportados nesta seleção, deseja inclui-los na importação?"
 			:actions="modalActionsExport"
-		/>
+		/> -->
 		
 		<LazyModalPagamento v-model:enable="enableModal" :id="itemView.id" />
+
 		<LazyModalLink v-model:enable="enableModalLink" v-model:link="link" />
+
 		<ModalConfirmStatus
 			v-model:enable="enableModalConfirm"
 			:message="
@@ -162,6 +178,7 @@
 			:item="itemView"
 			:actions="modalActions"
 		/>
+
 		<LazyModalEditCount
 			v-if="editcount"
 			v-model:enable="editcount"
@@ -169,6 +186,7 @@
 			:id="itemView"
 			@update-success="pushData"
 		/>
+
 		<LazyModalEditCountAll
 			v-if="enableModalAllEdit"
 			v-model:enable="enableModalAllEdit"
@@ -176,6 +194,7 @@
 			:items="itemsSelects"
 			@update-success="pushData"
 		/>
+
 		<LazyModalConfirmAllStatus
 			v-if="enableModalAllConfirm"
 			v-model:enable="enableModalAllConfirm"
@@ -192,7 +211,6 @@
 </template>
 
 <script setup>
-import CustomStore from 'devextreme/data/custom_store';
 import { getPagamentoFinanceiro, postStatus, omie } from '@api';
 const acess = useRuntimeConfig();
 const caminho = acess.public.PAGAMENTO_PATH;
