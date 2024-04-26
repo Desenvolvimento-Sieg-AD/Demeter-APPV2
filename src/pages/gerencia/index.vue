@@ -12,42 +12,45 @@
 				allowColumnResizing
 				choose-columns
 				allow-column-reordering
+				:noDataText="'Nenhuma solicitação de pagamento para aprovação'"
 				@selectionChanged="handleSelectionChange"
 				selectionCheck
 				:allowed-page-sizes="[5, 10, 15, 25]"
 				:page-size="15"
 				pager
 			>
-				<template #item-usuario.sigla="{ data: { data: item } }">
+				<template #item-usuario="{ data: { data: item } }">
 					<div>
 						<v-tooltip :text="item.usuario.nome" activator="parent" location="top" />
 						{{ item.usuario.sigla }}
 					</div>
 				</template>
-				<template #item-categoria.nome="{ data: { data: item } }">
+
+				<template #item-categoria="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ item.categoria.nome }}
 					</div>
 				</template>
+
 				<template #item-tipo="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
 					</div>
 				</template>
+
 				<template #item-documento="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
-						{{
-							item.fornecedor.tipo === 'juridico'
-								? maskCnpj(item.fornecedor.documento)
-								: maskCpf(item.fornecedor.documento)
-						}}
+						{{ defineDocument(item.fornecedor.tipo, item.fornecedor.documento) }}
 					</div>
 				</template>
+
 				<template #item-anexo="{ data: { data: item } }">
+
 					<div class="d-flex align-center justify-center text-center">
-						<div v-if="item.anexos_pagamento.find((ref) => ref.tipo_anexo_id == 3)">
+
+						<div v-if="isNF(item.anexos_pagamento)">
 							<v-icon
-								@click="openFile(`${caminho}${item.anexos_pagamento.find((ref) => ref.tipo_anexo_id == 3).caminho}`)"
+								@click="openFiles(item.anexos_pagamento)"
 								color="success"
 								class="cursor-pointer"
 							>
@@ -56,7 +59,7 @@
 							<v-tooltip text="Abrir anexo" activator="parent" location="top" />
 						</div>
 						<div v-else>
-							<v-tooltip text="Anexo indísponivel" activator="parent" location="top" /><v-icon disabled color="gray"
+							<v-tooltip text="Sem anexo" activator="parent" location="top" /><v-icon disabled color="gray"
 								>mdi-paperclip</v-icon
 							>
 						</div>
@@ -64,52 +67,65 @@
 				</template>
 				<template #item-doc="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
-						<div v-if="item.anexos_pagamento.find((ref) => ref.tipo_anexo_id == 4)">
-							<v-icon
-								@click="openFile(`${caminho}${item.anexos_pagamento.find((ref) => ref.tipo_anexo_id == 4).caminho}`)"
-								color="success"
-								class="cursor-pointer"
-							>
-								mdi-paperclip</v-icon
-							>
+						<div v-if="isDOC(item.anexos_pagamento)">
+
+							<v-icon @click="openFiles(item.anexos_pagamento)" color="success" class="cursor-pointer">
+								mdi-paperclip
+							</v-icon>
+
 							<v-tooltip text="Abrir anexo" activator="parent" location="top" />
+
 						</div>
 						<div v-else>
-							<v-tooltip text="Anexo indísponivel" activator="parent" location="top" /><v-icon disabled color="gray"
-								>mdi-paperclip</v-icon
-							>
+
+							<v-icon disabled color="gray">
+								mdi-paperclip
+							</v-icon>
+
+							<v-tooltip text="Sem anexo" activator="parent" location="top" />
+							
 						</div>
 					</div>
 				</template>
+
 				<template #item-data="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ formatDate(item.data_vencimento) }}
 					</div>
 				</template>
+
 				<template #item-valor_total="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						{{ formatCurrency(item.valor_total) }}
 					</div>
 				</template>
+
 				<template #item-setor="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
-						<div
-							v-for="(set, index) in item.usuario.setores"
-							:key="index"
-							:class="index < item.usuario.setores.length - 1 ? 'mr-1' : ''"
-						>
+						<div v-for="(set, index) in item.usuario.setores" :key="index" :class="classSetor(item, index)">
+
 							<v-tooltip :text="set.nome" activator="parent" location="top" />
-							{{ set.sigla }}{{ index < item.usuario.setores.length - 1 ? ', ' : '' }}
+
+							{{defineNameSetor(set.sigla, item, index)}}
+
 						</div>
 					</div>
 				</template>
-				<template #item-empresa.apelido="{ data: { data: item } }">
+
+				<template #item-empresa="{ data: { data: item } }">
 					<div class="d-flex align-center justify-center text-center">
 						<v-tooltip :text="item.empresa.nome" activator="parent" location="top" />
 						{{ item.empresa.apelido }}
 					</div>
 				</template>
+				<template #item-created_at="{data: { data: item } }">
+					<div class="template">
+						{{ formatDate(item.created_at) }}
+					</div>
+				</template>
+
 			</CustomTableSelect>
+
 			<v-row>
 				<v-col cols="12" class="ga-2 btn-container">
 					<v-btn
@@ -123,39 +139,38 @@
 					</v-btn>
 				</v-col>
 			</v-row>
+
 		</LayoutForm>
-		<LazyModalPagamento v-model:enable="enableModal" :id="itemView.id" />
-		<ModalConfirmStatus
-			v-model:enable="enableModalConfirm"
-			message="Deseja realmente aprovar este pagamento?"
+
+		<LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" />
+
+		<LazyModalConfirmStatus
+			v-model:enable="enableModal.confirm"
 			:item="itemView"
 			:actions="modalActions"
+			message="Deseja realmente aprovar este pagamento?"
 		/>
+
 		<LazyModalReproveStatus
-			v-if="enableModalReprove"
-			v-model:enable="enableModalReprove"
-			v-model:justificativaAmbos="justificativa"
-			v-model:justificativaClientes="justificativaClientes"
-			v-model:justificativaFinanceiro="justificativaFinanceiro"
+			v-model:enable="enableModal.reprove"
+			v-model:justificativaAmbos="justificativa.ambos"
+			v-model:justificativaClientes="justificativa.clientes"
+			v-model:justificativaFinanceiro="justificativa.financeiro"
 			message="Deseja realmente reprovar este pagamento?"
 			:item="itemView"
 			:actions="modalReproveActions"
 			:confirm="confirm"
 			v-model:ambos="ambos"
 		/>
+
 		<LazyModalConfirmAllStatus
-			v-if="enableModalAllConfirm"
-			v-model:enable="enableModalAllConfirm"
-			v-model:justificativaAmbos="justificativa"
+			v-model:enable="enableModal.allConfirm"
 			v-model:ambos="ambos"
-			v-model:justificativaClientes="justificativaClientes"
-			v-model:justificativaFinanceiro="justificativaFinanceiro"
+			v-model:justificativaAmbos="justificativa.ambos"
+			v-model:justificativaClientes="justificativa.clientes"
+			v-model:justificativaFinanceiro="justificativa.financeiro"
 			:confirm="confirm"
-			:message="
-				confirm === 'delete'
-					? 'Deseja realmente reprovar todos os pagamentos?'
-					: 'Deseja realmente aprovar todos os pagamentos selecionados?'
-			"
+			:message="messageConfirmStatus()"
 			:actions="confirm === 'delete' ? modalActionsDesprovedAll : modalActionsAprovedAll"
 		/>
 	</div>
@@ -163,22 +178,29 @@
 
 <script setup>
 import { getPagamentoGerencia, postStatus } from '@api';
-const acess = useRuntimeConfig();
-const caminho = acess.public.PAGAMENTO_PATH;
-const colums = getColumns('gerencia');
-const enableModal = ref(false);
-const enableModalConfirm = ref(false);
-const enableModalReprove = ref(false);
-const enableModalAllConfirm = ref(false);
-const confirm = ref('delete');
+const paymentGerencia = await getPagamentoGerencia();
 const { $toast } = useNuxtApp();
+const access = useRuntimeConfig();
+const colums = getColumns('gerencia');
+const path = access.public.PAGAMENTO_PATH;
+
+const enableModal = reactive({
+	confirm: false,
+	reprove: false,
+	pagamento: false,
+	allConfirm: false,
+});
+
+const confirm = ref('delete');
 const itens = ref([]);
 const itemView = ref({});
 const idsSelect = ref([]);
-const justificativa = ref(null);
-const justificativaAmbos = ref(null);
-const justificativaClientes = ref(null);
-const justificativaFinanceiro = ref(null);
+
+const justificativa = reactive({
+	ambos: null,
+	clientes: null,
+	financeiro: null,
+});
 const ambos = ref(true);
 const loadingModal = ref(false);
 
@@ -190,16 +212,22 @@ const handleSelectionChange = (items) => {
 	idsSelect.value = ids;
 };
 
-const openFile = async (filePath) => {
-	const { success, message } = await useOs().openFile(filePath);
-	if (!success) $toast.error(message);
+const openFile = (filePath) => {
+	window.electronAPI.openFile(filePath).then((response) => {
+		if (!response.success) {
+			console.error('Erro ao abrir arquivo:', response.message);
+		}
+	});
 };
 
 const actions = ref([
 	{
 		icon: 'mdi-eye',
 		tooltip: 'Ver detalhes',
-		click: (ref) => ((itemView.value = ref), (enableModal.value = true)),
+		click: (item) => {
+			itemView.value = item;
+			enableModal.pagamento = true;
+		},
 		visible: true,
 		active: true,
 		type: 'padrao',
@@ -207,7 +235,10 @@ const actions = ref([
 	{
 		icon: 'mdi-check-bold',
 		tooltip: 'Aprovar',
-		click: (ref) => ((itemView.value = ref), (enableModalConfirm.value = true)),
+		click: (item) => {
+			itemView.value = item;
+			enableModal.confirm = true;
+		},
 		visible: true,
 		active: true,
 		type: 'success',
@@ -215,9 +246,9 @@ const actions = ref([
 	{
 		icon: 'mdi-close-thick',
 		tooltip: 'Recusar',
-		click: (ref) => {
-			itemView.value = ref;
-			enableModalReprove.value = true;
+		click: (item) => {
+			itemView.value = item;
+			enableModal.reprove = true;
 		},
 		visible: true,
 		active: true,
@@ -230,14 +261,17 @@ const modalActions = computed(() => [
 		icon: 'mdi-close',
 		title: 'Cancelar',
 		type: 'grey',
-		click: () => (enableModalConfirm.value = false),
+		click: () => enableModal.confirm = false
 	},
 	{
 		icon: 'mdi-check',
 		title: 'Aprovar',
 		type: 'success',
 		loading: loadingModal.value,
-		click: async () => ((loadingModal.value = true), paymenteAproved([itemView.value.id])),
+		click: async () => {
+			loadingModal.value = true;
+			approvePayment([itemView.value.id]);
+		}
 	},
 ]);
 
@@ -246,45 +280,55 @@ const modalReproveActions = computed(() => [
 		icon: 'mdi-close',
 		title: 'Cancelar',
 		type: 'grey',
-
-		click: () => (enableModalReprove.value = false),
+		click: () => enableModal.reprove = false,
 	},
 	{
 		icon: 'mdi-check',
 		title: 'Reprovar',
 		type: 'cancel',
 		loading: loadingModal.value,
-		click: () => ((loadingModal.value = true), paymentReprove([itemView.value.id])),
+		click: async () => {
+			loadingModal.value = true;
+			disapprovePayment([itemView.value.id]);
+		},
 	},
 ]);
+
 const modalActionsAprovedAll = computed(() => [
 	{
 		icon: 'mdi-close',
 		title: 'Cancelar',
 		type: 'grey',
-		click: () => (enableModalAllConfirm.value = false),
+		click: () => enableModal.allConfirm = false,
 	},
 	{
 		icon: 'mdi-check',
 		title: 'Aprovar',
 		type: 'success',
 		loading: loadingModal.value,
-		click: async () => ((loadingModal.value = true), paymenteAproved(idsSelect.value)),
+		click: async () => {
+			loadingModal.value = true;
+			approvePayment(idsSelect.value);
+		},
 	},
 ]);
+
 const modalActionsDesprovedAll = computed(() => [
 	{
 		icon: 'mdi-close',
 		title: 'Cancelar',
 		type: 'grey',
-		click: () => (enableModalAllConfirm.value = false),
+		click: () => enableModal.allConfirm = false,
 	},
 	{
 		icon: 'mdi-check',
 		title: 'Reprovar',
 		type: 'cancel',
 		loading: loadingModal.value,
-		click: async () => ((loadingModal.value = true), paymentReprove(idsSelect.value)),
+		click: async () => {
+			loadingModal.value = true;
+			disapprovePayment(idsSelect.value);
+		},
 	},
 ]);
 
@@ -294,7 +338,7 @@ const buttonsFooter = computed(() => [
 		disabled: !idsSelect.value.length,
 		onClick: () => {
 			confirm.value = 'delete';
-			enableModalAllConfirm.value = true;
+			enableModal.allConfirm = true;
 		},
 		color: 'red',
 	},
@@ -303,72 +347,127 @@ const buttonsFooter = computed(() => [
 		disabled: !idsSelect.value.length,
 		onClick: () => {
 			confirm.value = 'aproved';
-			enableModalAllConfirm.value = true;
+			enableModal.allConfirm = true;
 		},
 		color: 'success',
 	},
 ]);
 
-const paymenteAproved = async (ids) => {
+const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3);
+
+const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4);
+
+const openFiles = (anexos) => {
+	const statusAllowed = [3, 4]
+
+	const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.status_pagamento_id));
+	if (!anexo) return $toast.error('Anexo não encontrado');
+	openFile(`${path}${anexo.caminho}`);
+};
+
+const smallerIndex = (index, item) => index < item.length - 1;
+
+const classSetor = (item, index) => smallerIndex(index, item.usuario.setores) ? 'mr-2' : '';
+
+const defineDocument = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(documento) : maskCpf(documento));
+
+const defineNameSetor = (sigla, item, index) => smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla;
+
+const messageConfirmStatus = () => {
+	if (confirm.value === 'delete') return 'Deseja realmente reprovar todos os pagamentos selecionados?';
+	return 'Deseja realmente aprovar todos os pagamentos selecionados?';
+};
+
+const approvePayment = async (ids) => {
+
 	if (ids.length === 0) {
-		$toast.error('Selecione ao menos um pagamento');
 		loadingModal.value = false;
-		return;
+		return $toast.error('Selecione ao menos um pagamento');
 	}
-	const { success } = await postStatus({ id: ids, status: 3, justificativa: 'Aprovado', lote: ids.length > 1 });
-	if (success) {
-		enableModalConfirm.value = false;
-		enableModalAllConfirm.value = false;
+
+	try {
+
+		const { success, message } = await postStatus({ id: ids, status: 3, justificativa: 'Aprovado', lote: ids.length > 1 });
+
+		if(!success) throw new Error(message)
+
 		loadingModal.value = false;
+		enableModal.confirm = false;
+		enableModal.allConfirm = false;
 		$toast.success('Pagamento aprovado com sucesso');
-		itens.value = (await getPagamentoGerencia()).data;
+		itens.value = paymentGerencia.data;
+
+	} catch (error) {
+		console.log(error.message)
+		$toast.error(error.message)
+	}
+
+};
+
+const valiDisapprovePayment = () => {
+	if (idsSelect.value.length === 0) {
+		loadingModal.value = false;
+		return $toast.error('Selecione ao menos um pagamento');
+	}
+
+	if (ambos.value && !justificativa.ambos) {
+		loadingModal.value = false;
+		return $toast.error('Informe a justificativa');
+	}
+	if (!ambos.value && (!justificativa.clientes || !justificativa.financeiro)) {
+		loadingModal.value = false;
+		return $toast.error('Informe a justificativa');
 	}
 };
-const paymentReprove = async (ids) => {
-	if (ids.length === 0) {
-		$toast.error('Selecione ao menos um pagamento');
-		loadingModal.value = false;
-		return;
-	}
 
-	if (ambos.value && !justificativa.value) {
-		$toast.error('Informe a justificativa');
-		loadingModal.value = false;
-		return;
-	}
-	if (!ambos.value && (!justificativaClientes.value || !justificativaFinanceiro.value)) {
-		$toast.error('Informe a justificativa');
-		loadingModal.value = false;
-		return;
-	}
+const disapprovePayment = async (ids) => {
 
-	const { success } = await postStatus({
-		id: ids,
-		status: 4,
-		justificativa: justificativa.value,
-		justificativaCliente: justificativaClientes.value,
-		justificativaFinanceiro: justificativaFinanceiro.value,
-		ambos: ambos.value,
-		lote: ids.length > 1,
-	});
-	if (success) {
-		enableModalReprove.value = false;
-		enableModalAllConfirm.value = false;
+	valiDisapprovePayment();
+
+	try {
+
+		const payload = {
+			id: ids,
+			status: 4,
+			justificativa: ambos.value ? justificativa.ambos : null,
+			justificativaCliente: ambos.value ? null : justificativa.clientes,
+			justificativaFinanceiro: ambos.value ? null : justificativa.financeiro,
+			ambos: ambos.value,
+			lote: ids.length > 1,
+		};
+
+		const { success, message } = await postStatus(payload);
+		if(!success) throw new Error(message)
+
+		enableModal.reprove = false;
+		enableModal.allConfirm = false;
 		loadingModal.value = false;
 		$toast.success('Pagamento recusado com sucesso');
-		itens.value = (await getPagamentoGerencia()).data;
+		itens.value = paymentGerencia.data;
+
+	} catch (error) {
+		console.log(error.message)
+		$toast.error(error.message)
 	}
+
 };
 
 const pushData = async () => {
-	const { success, data } = await getPagamentoGerencia();
-	if (success) {
-		data.map((item) => {
-			item.setor = item.usuario.setores[0].sigla;
-		});
+	try {
+
+		const { success, message, data } = await getPagamentoGerencia();
+
+		if (!success) throw new Error(message) 
+
+		data.map((item) => item.setor = item.usuario.setores[0].sigla)
 
 		itens.value = data;
+
+	} catch (error) {
+		console.log(error.message)
+		$toast.error("Erro ao buscar pagamentos")
 	}
+	
 };
 </script>
 

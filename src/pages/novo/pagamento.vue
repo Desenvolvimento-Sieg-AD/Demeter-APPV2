@@ -1,203 +1,252 @@
 <template>
 	<div>
+
 		<CustomHeader title="Solicitação de Pagamento" />
+
 		<LayoutForm class="mb-12">
+
 			<v-form ref="formValidate">
-				<v-card class="card-pagamento " flat>
+
+				<v-card class="card-pagamento" flat>
+
 					<CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
 					<v-row class="pa-3">
+
 						<v-col cols="2" md="3">
 							<CustomInput
-								type="autocomplete"
-								:required="true"
-								label="Grupo do pedido"
-								:items="grupos"
-								v-model="grupo"
-								itemValue="id"
-								itemTitle="nome"
+								required
 								hide-details
+								itemValue="id"
+								v-model="grupo"
+								:items="grupos"
+								itemTitle="nome"
+								type="autocomplete"
+								label="Grupo do pedido"
 							/>
 						</v-col>
+
 						<v-col cols="4" md="3">
 							<CustomInput
+								required
+								hide-details
+								itemValue="id"
+								itemTitle="nome"
+								label="Categoria"
 								:disabled="!grupo"
 								ref="categoriaRef"
 								type="autocomplete"
-								required
-								label="Categoria"
-								:items="categoriasSelecionadas"
 								v-model="form.categoria_id"
-								itemValue="id"
-								itemTitle="nome"
-								hide-details
+								:items="selectedCategories"
 							/>
 						</v-col>
+
 						<v-col cols="12" md="6">
 							<CustomInput
-								append-inner-icon="mdi-file-upload-outline"
 								type="file"
-								label="Nota fiscal"
-								v-model="form.nf"
 								hide-details
-								:loading="loadingImport"
-								accept="image/*,application/pdf"
+								v-model="form.nf"
+								:loading="loadingProcessFile"
 								:disabled="!form.categoria_id"
+								label="Nota fiscal/Cupom fiscal"
+								accept="image/*,application/pdf"
+								append-inner-icon="mdi-file-upload-outline"
 							>
 								<template #selection="{ fileNames }">
 									<span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
 								</template>
+
 							</CustomInput>
 						</v-col>
+
 					</v-row>
 				</v-card>
+
 				<v-divider class="mt-2 mb-2" />
+
 				<v-card class="pt-2 card-pagamento" flat>
+
 					<CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
 					<v-row class="pa-3">
+
 						<v-col cols="12" md="3">
 							<CustomInput
+								required
+								type="text"
+								hide-details
+								:change="validDocument()"
+								:label="documentFornecedor"
+								v-model="form.fornecedor.documento"
+								appen-innerColor="#118B9F"
 								append-inner-icon="mdi-content-copy"
 								@click:append-inner="pasteFromClipboard"
-								type="text"
 								:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
-								required
-								:label="docFornecedor"
-								v-model="form.fornecedor.documento"
-								hide-details
-								:change="verifyDocumento()"
 							/>
 						</v-col>
+
 						<v-col cols="12" md="3">
 							<CustomInput
-								append-inner-icon="mdi-card-account-details-outline"
-								:disabled="fornecedorExistente"
+								required
+								hide-details
 								type="select"
-								:required="true"
+								itemTitle="nome"
+								itemValue="value"
 								label="Tipo fornecedor"
 								:items="tiposFornecedor"
 								v-model="form.fornecedor.tipo"
-								itemValue="value"
-								itemTitle="nome"
-								hide-details
+								:disabled="fornecedorExistente"
+								append-inner-icon="mdi-card-account-details-outline"
 							/>
 						</v-col>
+
 						<v-col cols="12" md="6">
 							<CustomInput
+								required
+								hideDetails
 								type="combobox"
-								append-inner-icon="mdi-shopping-outline"
-								:required="true"
 								label="Fornecedor"
 								:items="fornecedores"
-								v-model="form.fornecedor.nome"
 								itemValue="razao_social"
 								itemTitle="razao_social"
-								hideDetails
 								:onchange="verifyFornecedor()"
+								v-model="form.fornecedor.nome"
+								append-inner-icon="mdi-shopping-outline"
 							/>
 						</v-col>
+
 						<v-col cols="12" md="3">
-							<CustomInput type="text" label="Número NF" v-model="form.numero_nf" />
+							<CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" />
 						</v-col>
+
 						<v-col cols="12" md="9">
-							<CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :maxLength="50" />
+							<CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :maxLength="50" mask="number" />
 						</v-col>
+
 					</v-row>
 				</v-card>
 				<v-divider class="mt-2 mb-2" />
+
 				<v-card class="pt-2 card-pagamento" flat>
+
 					<CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
 					<v-row class="pa-3">
+
 						<v-col cols="12" md="6">
+
 							<CustomInput
-								append-inner-icon="mdi-domain"
-								type="select"
 								required
-								label="Empresa pagadora"
-								:items="empresas"
-								v-model="form.empresa_id"
+								type="select"
+								hide-details
 								itemValue="id"
 								itemTitle="nome"
-								hide-details
+								:items="empresas"
+								label="Empresa pagadora"
+								v-model="form.empresa_id"
+								append-inner-icon="mdi-domain"
 							/>
+
 						</v-col>
+
 						<v-col cols="12" md="6">
+
 							<CustomInput
-								append-inner-icon="mdi-file-upload-outline"
 								type="file"
+								persistent-hint
 								label="Documento"
 								v-model="form.doc"
 								:required="documentRequired"
 								accept="image/*,application/pdf"
 								hint="Ex: Boleto, Comprovante, Certidão"
-								persistent-hint
+								append-inner-icon="mdi-file-upload-outline"
 							>
 								<template #selection="{ fileNames }">
 									<span class="text-truncate">
 										{{ defineFileTitle(fileNames[0]) }}
 									</span>
 								</template>
+
 							</CustomInput>
 						</v-col>
+
 					</v-row>
+
 				</v-card>
+
 				<v-divider class="mt-2 mb-2" />
+
 				<v-card class="pt-2 card-pagamento" flat>
+
 					<CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
 					<v-row class="pa-2">
+
 						<v-col cols="12" md="4">
 							<CustomInput
-								append-inner-icon="mdi-chat-question-outline"
-								type="textarea"
-								:required="true"
-								:no-resize="false"
-								label="Motivo"
-								v-model="form.motivo"
+								required
 								hide-details
+								label="Motivo"
+								type="textarea"
+								:no-resize="false"
+								v-model="form.motivo"
+								append-inner-icon="mdi-chat-question-outline"
 							/>
 						</v-col>
+
 						<v-col cols="8">
 							<CustomInput
+								hide-details
 								type="textarea"
 								:no-resize="false"
 								label="Observações"
 								v-model="form.dados_complementares"
-								hide-details
 							/>
 						</v-col>
+
 						<v-col cols="12">
 							<CustomInput
 								v-if="user.setor.exibir_projetos"
-								append-inner-icon="mdi-briefcase-plus-outline"
-								type="autocomplete"
-								:required="true"
-								label="Projetos"
-								:items="projetos"
-								v-model="projeto_id"
-								itemValue="id"
-								itemTitle="name"
 								hide-details
+								itemValue="id"
+								label="Projetos"
+								:required="true"
+								:items="projetos"
+								itemTitle="name"
+								type="autocomplete"
+								v-model="projeto_id"
+								append-inner-icon="mdi-briefcase-plus-outline"
 							/>
 						</v-col>
+
 					</v-row>
+
 				</v-card>
+
 				<v-divider class="mt-2 mb-2" />
+
 				<v-card class="pt-2 card-pagamento" flat>
+
 					<CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
 					<v-row class="pa-3">
+
 						<v-col>
+
 							<CustomInput
 								append-inner-icon="mdi-cash-clock"
 								type="select"
 								required
 								label="Forma de pagamento"
-								:items="pagamento_tipo"
+								:items="paymentsType"
 								v-model="form.tipo_id"
 								itemValue="id"
 								itemTitle="nome"
 								hide-details
-								:change="verifyPaymenteType()"
+								:change="validPaymentType()"
 							/>
 						</v-col>
+
 						<v-col v-if="form.tipo_id === 1">
 							<CustomInput
 								v-model="tipoChavePix"
@@ -210,22 +259,28 @@
 								label="Tipo de Chave"
 								/>
 						</v-col>
+
 						<v-col v-else>
+
 							<div class="mt-5">
 								<v-divider color="#118B9F"></v-divider>
 							</div>
+
 						</v-col>
-						<v-col>
+
+						<v-col cols="2">
 							<CustomInput
 								type="date"
 								:required="true"
 								label="Data de vencimento"
 								v-model="form.data_vencimento"
-								:messages="isExpired ? 'Esse prazo já expirou' : ''"
+								:messages="messagesDate()"
 								:min="minDate"
+								:rules="[dateRules]"
 							/>
 						</v-col>
-						<v-col>
+
+						<v-col cols="2">
 							<CustomInput
 								type="text"
 								mask="money"
@@ -235,99 +290,159 @@
 								hide-details
 							/>
 						</v-col>
-		
+
+						<v-col cols="2">
+							<CustomInput
+								type="checkbox"
+								label="Urgência"
+								v-model="form.urgente"
+								hide-details
+								color="#118B9F"
+							/>
+						</v-col>
+
 					</v-row>
-					<v-row class="pa-3 mt-n12">
+
+					<v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
+
 						<v-col>
 							<CustomInput
 								:disabled="!tipos.descricao"
 								type="text"
-								:label="!tipos.descriTcao ? 'Descrição' : tipos.descricao"
-								v-model="form.descricao"
+								:label="!tipos.descricao ? 'Descrição' : tipos.descricao"
+								v-model="form.dados_bancarios.outhers"
 								:mask="maskDescription"
 								:required="tipos.obrigatorio"
 							/>
 						</v-col>
+					
 					</v-row>
+
+					<v-row class="pa-3 mt-n12" v-else>
+
+						<v-col>
+							<CustomInput
+								type="text"
+								mask="number"
+								label="Banco"
+								v-model="form.dados_bancarios.banco"
+								required
+							/>
+						</v-col>
+
+						<v-col>
+							<CustomInput
+								type="text"
+								mask="number"
+								label="Agência"
+								v-model="form.dados_bancarios.agencia"
+								required
+							/>
+						</v-col>
+
+						<v-col>
+							<CustomInput
+								type="text"
+								mask="number"
+								label="Conta"
+								v-model="form.dados_bancarios.conta"
+								required
+							/>
+						</v-col>
+
+						<v-col>
+							<CustomInput
+								type="text"
+								mask="number"
+								label="Dígito"
+								v-model="form.dados_bancarios.digito"
+								required
+							/>
+						</v-col>
+
+					</v-row>
+
+					<v-row v-if="form.urgente" class="pa-3 mt-n12">
+
+						<v-col>
+
+							<CustomInput
+								type="textarea"
+								:rows="1"
+								label="Justificativa da urgência"
+								v-model="form.justificativa_urgente"
+							/>
+
+						</v-col>
+
+					</v-row>
+
 				</v-card>
+
+
 				<div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
-					<v-btn color="red" class="ml-2" @click="reset">
-						Limpar
-						<v-icon size="small" icon="mdi-trash-can-outline" class="ml-1" />
-					</v-btn>
-					<v-btn color="green" class="custom-btn approve-btn" @click="sendForm"
-						>Solicitar <v-icon size="small" icon="mdi-currency-usd" class="ml-1" />
+					<v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()">
+						{{ action.title }}
+						<v-icon size="small" :icon="action.icon"/>
 					</v-btn>
 				</div>
+
 			</v-form>
 		</LayoutForm>
 	</div>
-
 </template>
 
 <script setup>
-// Importações e Configurações
+
 const dayjs = useDayjs();
-import { getFileContent } from '@api/conversor';
 
-import {
-	getFornecedor,
-	getEmpresa,
-	getPagamentoTipo,
-	getCategorias,
-	getGrupos,
-	postPagamento,
-	getProjects,
-	getTiposChavePix,
-	existNFEqual
-} from '@api';
 const { $toast } = useNuxtApp();
-
-// Dados reativos e estado inicial
-const registerAddress = ref(false);
+import { getFileContent } from '@api/conversor';
+import { getFornecedor, getEmpresa, getPagamentoTipo, getCategorias, getGrupos, postPagamento, getProjects, getTiposChavePix, existNFEqual } from '@api';
 
 const form = ref(initFormState());
-const {
-	fornecedores,
-	empresas,
-	grupos,
-	categorias,
-	fornecedorExistente,
-	grupo,
-	categoriasSelecionadas,
-	projetos,
-	projeto,
-} = useInitRefs();
+const tiposFornecedor = getTiposFornecedor();
+
+const { fornecedores, empresas, grupos, categorias, fornecedorExistente, grupo, selectedCategories, projetos, projeto } = useInitRefs();
 
 const formValidate = ref(null)
 
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 
-const tiposFornecedor = getTiposFornecedor();
-
-const categoriaRef = ref(null);
-
 const tipos = ref(null);
-
-const tipoChavePix = ref(null)
-const chavesPix = ref([])
-
-const importar = ref(false);
-
 const loading = ref(false);
-
-const loadingImport = ref(false);
-
-const pagamento_tipo = ref([]);
-
+const chavesPix = ref([])
 const projeto_id = ref(null);
+const categoriaRef = ref(null);
+const paymentsType = ref([]);
+const tipoChavePix = ref(null)
+const loadingProcessFile = ref(false);
 
-const modalConfirm = ref(null)
-
-const disabledChave = computed(() => {
+const disabledKey = computed(() => {
 	const chave = form.value.chave_nf?.toString() || '';
 	return chave.length > 44;
 });
+
+const documentRequired = computed(() => {
+	const type = paymentsType.value.find((tipo) => tipos.value?.id === tipo.id)
+	return type?.requer_documento
+})
+
+const maskDescription = computed(() => {
+	const tipo = chavesPix?.value.find((chave) => chave?.id === tipoChavePix.value)
+	return tipo?.mask
+})
+
+const isExpired = computed(() => {
+	return dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day'));
+});
+
+const minDate = computed(() => {
+    if (form.value.tipo_id === 5 || form.value.tipo_id === 6) return dayjs().subtract(30, 'day').format('YYYY-MM-DD');
+    return dayjs().format('YYYY-MM-DD');
+});
+
+const validDateToCard = computed(() => isExpired.value && (form.value.tipo_id !== 5 && form.value.tipo_id !== 6))
 
 const defineFileTitle = (fileName) => {
 	if (fileName.length > 20) {
@@ -336,81 +451,54 @@ const defineFileTitle = (fileName) => {
 	return fileName;
 };
 
-const isExpired = computed(() => {
-	return dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day'));
-});
-
-const processNfFile = async (file) => {
-	loadingImport.value = true;
-	clearFornecedor();
-	try {
-		const { nf, cpf_emitente, chave_acesso, cnpj_emitente, cnpj_tomador, nome_emitente, allIsNull } =
-			await getFileContent(file);
-
-		if (allIsNull) {
-			loadingImport.value = false;
-			return $toast.error('Não foi possível ler o arquivo', { autoClose: 2500 });
-		}
-
-		if (cpf_emitente) {
-			form.value.fornecedor.documento = cpf_emitente;
-			form.value.fornecedor.tipo = 'fisico';
-		}
-
-		form.value.chave_nf = chave_acesso ?? null;
-		form.value.numero_nf = nf ?? null;
-		form.value.fornecedor.documento = cnpj_emitente ?? null;
-		form.value.fornecedor.tipo = cnpj_emitente ? 'juridico' : null;
-
-		verifyDocumento();
-	} catch (error) {
-		console.log(error.message);
-		$toast.error(error.message);
-	}
-
-	loadingImport.value = false;
+const messagesDate = () => {
+	if (isExpired.value && (validDateToCard.value)) return 'Data de vencimento inválida';
+	return '';
 };
 
-const clearFornecedor = () => {
-	form.value.fornecedor.nome = null;
-	form.value.fornecedor.chave_nf = null;
-	form.value.fornecedor.numero_nf = null;
-	form.value.fornecedor.documento = null;
-	form.value.fornecedor.tipo = null;
+const actionsForm = [
+	{
+		title: 'Limpar',
+		icon: 'mdi-trash-can-outline',
+		color: 'red',
+		onClick: () => reset(),
+	},
+	{
+		title: 'Solicitar',
+		icon: 'mdi-currency-usd',
+		color: 'green',
+		onClick: () => sendForm(),
+	},
+];
+
+const dateRules = (v) => {
+    if (form.value.tipo_id === 5 || form.value.tipo_id === 6) {
+        return dayjs(v).isAfter(dayjs().subtract(30, 'day')) || 'Data inválida';
+    }
+    return true;
 };
-
-watch(() => form.value.nf, async (value) => {
-	if (value && value.length > 0) {
-		processNfFile(value[0]);
-	}
-}, { deep: true, immediate: false });
-
-watch(() => grupo.value, (value) => {
-	if (value) {
-		verifyGrupo();
-	}
-}, { deep: true, immediate: true });
-
-const minDate = computed(() => {
-    if (form.value.tipo_id === 5) return dayjs().subtract(30, 'day').format('YYYY-MM-DD');
-    return dayjs().format('YYYY-MM-DD');
-});
 
 const verifyFornecedor = () => {
-	if (fornecedores.value.some((obj) => obj.razao_social === form.value.fornecedor.nome)) {
+
+	fornecedorExistente.value = false;
+	const existFornecedor = fornecedores.value.some((fornecedor) => fornecedor.razao_social === form.value.fornecedor.nome) 
+
+	if (existFornecedor) {
+
 		fornecedorExistente.value = true;
-		const forn = fornecedores.value.find((obj) => obj.razao_social === form.value.fornecedor.nome);
-		form.value.fornecedor.tipo = forn.tipo;
-		form.value.fornecedor.apelido = forn.nome_fantasia;
-		form.value.fornecedor.id = forn.id;
-		if (forn.tipo === 'fisico') {
-			form.value.fornecedor.documento = maskCpf(forn.documento);
-		} else {
-			form.value.fornecedor.documento = maskCnpj(forn.documento);
-		}
-	} else {
-		fornecedorExistente.value = false;
-	}
+
+		const fornecedor = fornecedores.value.find((fornecedor) => fornecedor.razao_social === form.value.fornecedor.nome);
+
+		form.value.fornecedor.id = fornecedor.id;
+		form.value.fornecedor.tipo = fornecedor.tipo;
+		form.value.fornecedor.apelido = fornecedor.nome_fantasia;
+
+		form.value.fornecedor.documento = maskCnpj(fornecedor.documento);
+
+		if (fornecedor.tipo === 'fisico') form.value.fornecedor.documento = maskCpf(fornecedor.documento);
+
+	} 
+
 };
 
 const pasteFromClipboard = async () => {
@@ -422,25 +510,16 @@ const pasteFromClipboard = async () => {
 	}
 };
 
-const verifyPaymenteType = () => {
-	if (pagamento_tipo.value.some((obj) => obj.id === form.value.tipo_id)) {
-		tipos.value = pagamento_tipo.value.find((obj) => obj.id === form.value.tipo_id);
-	} else {
-		tipos.value = false;
-	}
+const validPaymentType = () => {
+
+	tipos.value = false;
+
+	const type = paymentsType.value.find((type) => type.id === form.value.tipo_id);
+
+	if (type) tipos.value = type;
 };
 
-const documentRequired = computed(() => {
-	const type = pagamento_tipo.value.find((tipo) => tipos.value?.id === tipo.id)
-	return type?.requer_documento
-})
-
-const maskDescription = computed(() => {
-	const tipo = chavesPix?.value.find((chave) => chave?.id === tipoChavePix.value)
-	return tipo?.mask
-})
-
-const docFornecedor = computed(() => {
+const documentFornecedor = computed(() => {
 	const tipo = form.value.fornecedor?.tipo;
 
 	if (!tipo || tipo == 'juridico') return 'CNPJ';
@@ -448,99 +527,45 @@ const docFornecedor = computed(() => {
 	else return 'CNPJ';
 })
 
-const verifyGrupo = async () => {
+const validGroup = async () => {
 	if (grupo.value) {
-		categoriasSelecionadas.value = categorias.value.filter((obj) => obj.grupo_id === grupo.value);
+		selectedCategories.value = categorias.value.filter((categoria) => categoria.grupo_id === grupo.value);
 		form.value.categoria_id = '';
-
 	}
 };
 
-const verifyDocumento = () => {
+const validDocument = () => {
 	if (!form.value.fornecedor.documento) {
 		form.value.fornecedor.tipo = null;
 		return;
 	}
-	const doc = form.value.fornecedor.documento.replace(/\D/g, '');
+	const documento = form.value.fornecedor.documento.replace(/\D/g, '');
+	const find = fornecedores.value.find((fornecedor) => fornecedor.documento === documento);
 
-	const search = fornecedores.value.find((obj) => obj.documento === doc);
-	if (search) {
-		form.value.fornecedor.nome = search.razao_social;
-		form.value.fornecedor.apelido = search.nome_fantasia;
-		form.value.fornecedor.id = search.id;
-	} else {
-		form.value.fornecedor.nome = null;
-		form.value.fornecedor.apelido = null;
-		form.value.fornecedor.id = null;
-	}
+	form.value.fornecedor.nome = null;
+	form.value.fornecedor.apelido = null;
+	form.value.fornecedor.id = null;
 
-	if(validaCNPJ(form.value.fornecedor.documento)){
-		form.value.fornecedor.tipo = 'juridico'
-	} else if(validaCPF(form.value.fornecedor.documento)){
-		form.value.fornecedor.tipo = 'fisico'
-	} else {
-		form.value.fornecedor.tipo = null
-	}
+	if (find) {
+		form.value.fornecedor.id = find.id;
+		form.value.fornecedor.nome = find.razao_social;
+		form.value.fornecedor.apelido = find.nome_fantasia;
+	} 
+
+	if(validCNPJ(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'juridico'
+	else if (validCPF(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'fisico'
+	else form.value.fornecedor.tipo = null
 
 };
 
-const sendForm = async () => {
-	loading.value = true;
+function buildFormData() {
 
-	try {
-
-		const { valid } = await formValidate.value.validate()
-		if(!valid) throw new Error('Preencha os campos obrigatórios')
-
-		if (isExpired.value) {
-			$toast.error('Data de vencimento inválida');
-			loading.value = false;
-			return;
-		}
-
-		const formData = buildFormData();
-		const { success, message } = await postPagamento(formData);
-
-		if (!success) throw new Error(message);
-
-		$toast.success(message);
-		reset();
-		await pushData();
-	} catch (error) {
-		console.error(error.message);
-		$toast.error(error.message);
-	}
-	loading.value = false;
-};
-
-async function validateForm() {
-	const { valid } = await layoutFormRef.value.validateForm();
-	if (!valid) {
-		return false;
-	}
-
-	const {
-		fornecedor: { tipo, documento },
-	} = form.value;
-
-	if (tipo === 'fisico' && !validaCPF(documento)) {
-		$toast.error('CPF inválido.');
-		return false;
-	}
-	if (tipo === 'juridico' && !validaCNPJ(documento)) {
-		$toast.error('CNPJ inválido.');
-		return false;
-	}
-	return true;
-}
-
- function buildFormData() {
 	const formData = new FormData();
+
 	const {
 		fornecedor,
 		empresa_id,
 		tipo_id,
-		descricao,
 		motivo,
 		categoria_id,
 		dados_complementares,
@@ -548,32 +573,34 @@ async function validateForm() {
 		data_vencimento,
 		nf,
 		doc,
-		projeto,
 		numero_nf,
 		chave_nf,
+		urgente,
+		dados_bancarios
 	} = form.value;
 
+	formData.append('motivo', motivo);
+	formData.append('tipo_id', tipo_id);
+	formData.append('urgente', urgente);
+	formData.append('chave_nf', chave_nf);
+	formData.append('numero_nf', numero_nf);
+	formData.append('empresa_id', empresa_id);
+	formData.append('projeto_id', projeto_id.value);
+	formData.append('valor_total', valor_total);
+	formData.append('categoria_id', categoria_id);
 	formData.append('fornecedor_id', fornecedor.id);
+	formData.append('tipo_chave_pix', tipoChavePix.value )
+	formData.append('fornecedor_tipo', fornecedor.tipo);
+	formData.append('dados_bancarios', JSON.stringify(dados_bancarios));
+	formData.append('data_vencimento', data_vencimento);
 	formData.append('fornecedor_nome', fornecedor.nome);
 	formData.append('fornecedor_apelido', fornecedor.apelido);
 	formData.append('fornecedor_documento', fornecedor.documento);
-	formData.append('fornecedor_tipo', fornecedor.tipo);
-	formData.append('empresa_id', empresa_id);
-	formData.append('tipo_id', tipo_id);
-	formData.append('descricao', descricao);
-	formData.append('motivo', motivo);
-	formData.append('categoria_id', categoria_id);
 	formData.append('dados_complementares', dados_complementares);
-	formData.append('valor_total', valor_total);
-	formData.append('data_vencimento', data_vencimento);
-	formData.append('projeto_id', projeto_id.value);
-	formData.append('numero_nf', numero_nf);
-	formData.append('chave_nf', chave_nf);
-	formData.append('tipo_chave_pix', tipoChavePix.value )
+	formData.append('justificativa_urgente', form.value.justificativa_urgente)
 
-	if (nf && nf.length > 0) {
-		formData.append('nf', nf[0]);
-	}
+	if (nf && nf.length > 0) formData.append('nf', nf[0]);
+	
 	if (doc && doc.length > 0) {
 		for (let i = 0; i < doc.length; i++) {
         	formData.append('doc', doc[i]);
@@ -583,32 +610,62 @@ async function validateForm() {
 	return formData;
 }
 
+const sendForm = async () => {
+	loading.value = true;
+	try {
+
+		const { valid } = await formValidate.value.validate()
+		if(!valid) throw new Error('Preencha os campos obrigatórios')
+
+		if (validDateToCard.value) {
+			loading.value = false;
+			return $toast.error('Data de vencimento inválida');
+		}
+
+		const formData = buildFormData();
+		const { success, message } = await postPagamento(formData);
+
+		if (!success) throw new Error(message);
+
+		$toast.success(message);
+
+		loading.value = false;
+		await pushData();
+		reset();
+
+	} catch (error) {
+		console.error(error.message);
+		$toast.error(error.message);
+	} 
+};
+
 const pushData = async () => {
 	try {
-		const resultados = await Promise.all([
+
+		const [fornecedor, grupo, categoria, empresa, pagamento, projeto] = await Promise.all([
 			getFornecedor(),
 			getGrupos(),
 			getCategorias(),
 			getEmpresa(),
 			getPagamentoTipo(),
 			getProjects(),
-		]);
+		]);;
 
-		const [fornecedor, grupo, categoria, empresa, pagamento, projeto] = resultados;
-
-		if (fornecedor.success) fornecedores.value = fornecedor.data;
 		if (grupo.success) grupos.value = grupo.data;
-		if (categoria.success) categorias.value = categoria.data;
 		if (empresa.success) empresas.value = empresa.data;
 		if (projeto.success) projetos.value = projeto.data;
+		if (categoria.success) categorias.value = categoria.data;
+		if (fornecedor.success) fornecedores.value = fornecedor.data;
+
 		if (pagamento.success) {
 			const pagamentos = pagamento.data;
 			const priorizados = pagamentos.filter((p) => p.nome === 'PIX' || p.nome === 'Boleto');
 			const restantes = pagamentos
 				.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto')
 				.sort((a, b) => a.nome.localeCompare(b.nome));
-			pagamento_tipo.value = [...priorizados, ...restantes];
+			paymentsType.value = [...priorizados, ...restantes];
 		}
+		
 	} catch (error) {
 		console.error('Erro ao buscar dados:', error);
 	}
@@ -628,6 +685,10 @@ const getTiposChave = async () => {
 	}
 }
 
+await getTiposChave()
+
+await pushData();
+
 function getTiposFornecedor() {
 	return [
 		{ nome: 'Pessoa Jurídica', value: 'juridico' },
@@ -635,15 +696,42 @@ function getTiposFornecedor() {
 	];
 }
 
+// * Função para processar o arquivo de NF
 
-await getTiposChave()
+const processNfFile = async (file) => {
+	loadingProcessFile.value = true;
+	clearFornecedor();
+	try {
+		const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file);
 
-await pushData();
+		if (allIsNull) {
+			loadingProcessFile.value = false;
+			return $toast.error('Não foi possível ler o arquivo', { autoClose: 2500 });
+		}
 
-watch(() => categoriasSelecionadas.value, async () => {
-	await categoriaRef.value.click();
-	},{ immediate: true}
-);
+		if (cpf_emitente) {
+			form.value.fornecedor.documento = cpf_emitente;
+			form.value.fornecedor.tipo = 'fisico';
+		}
+
+		form.value.chave_nf = chave_acesso ?? null;
+		form.value.numero_nf = nf ?? null;
+		form.value.fornecedor.documento = cnpj_emitente ?? null;
+		form.value.fornecedor.tipo = cnpj_emitente ? 'juridico' : null;
+
+		form.value.valor_total = parseFloat(valor_total);
+
+		validDocument();
+
+	} catch (error) {
+		console.log(error.message);
+		$toast.error(error.message);
+	}
+
+	loadingProcessFile.value = false;
+};
+
+// * Função para limpar o formulário
 
 const reset = () => {
 	form.value = initFormState();
@@ -651,6 +739,7 @@ const reset = () => {
 	form.value.valor_total = 0
 	form.value.doc = []
 	tipoChavePix.value = null
+	projeto_id.value = null
 };
 
 function initFormState() {
@@ -660,7 +749,6 @@ function initFormState() {
 		nf: [],
 		doc: [],
 		tipo_id: null,
-		descricao: null,
 		motivo: null,
 		categoria_id: null,
 		dados_complementares: null,
@@ -670,6 +758,15 @@ function initFormState() {
 		chave_nf: null,
 		numero_nf: null,
 		tipo_chave_pix: null,
+		urgente: false,
+		justificativa_urgente: null,
+		dados_bancarios: {
+			banco: null,
+			agencia: null,
+			conta: null,
+			digito: null,
+			outhers: null
+		}
 	};
 }
 
@@ -682,11 +779,46 @@ function useInitRefs() {
 		pagamentoTipo: ref([]),
 		fornecedorExistente: ref(false),
 		grupo: ref(null),
-		categoriasSelecionadas: ref([]),
+		selectedCategories: ref([]),
 		projetos: ref([]),
 		projeto: ref(null),
 	};
 }
+
+const clearFornecedor = () => {
+	form.value.fornecedor.tipo = null;
+	form.value.fornecedor.nome = null;
+	form.value.fornecedor.chave_nf = null;
+	form.value.fornecedor.numero_nf = null;
+	form.value.fornecedor.documento = null;
+};
+
+// * Watchers
+
+// watch(() => selectedCategories.value, async () => {
+// 	await categoriaRef.value.click();
+// 	},{ immediate: true}
+// );
+
+watch(() => form.value.tipo_id, async (nv, oV) => {
+	if(nv !== oV){
+		tipoChavePix.value = null
+		form.value.descricao = null
+	}
+},{ immediate: true});
+
+watch(() => form.value.nf, async (value) => {
+	if (value && value.length > 0) {
+		processNfFile(value[0]);
+	}
+}, { deep: true, immediate: false });
+
+watch(() => grupo.value, (value) => {
+	if (value) {
+		validGroup();
+	}
+}, { deep: true, immediate: true });
+
 </script>
 
 <style scoped>
@@ -701,5 +833,16 @@ function useInitRefs() {
 }
 .ajust {
 	max-width: 1400px !important;
+}
+
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

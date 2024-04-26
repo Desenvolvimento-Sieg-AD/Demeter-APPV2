@@ -20,7 +20,6 @@
 					v-show="item.setores.includes('ALL') || item.setores.some((setor) => setor === user?.tipo?.sigla)"
 					:value="getItemValue(item)"
 					:to="item.to"
-					color="#118b9f"
 					style="color: #118b9f"
 					:prepend-icon="item.icon"
 				>
@@ -31,9 +30,7 @@
 
 				<v-list-group v-else :value="getItemValue(item)" fluid>
 					<template #activator="{ props }">
-						<v-list-item v-bind="props" :value="item.active" color="primary">
-							<v-icon :icon="item.icon" />
-
+						<v-list-item v-bind="props" :value="item.active" :prepend-icon="item.icon" style="color: #118b9f">
 							<template #title>
 								<span class="sidebar-item">{{ item.title }}</span>
 							</template>
@@ -48,7 +45,8 @@
 							:to="sub.to"
 							exact
 							variant="text"
-							color="primary"
+							color="#118b9f"
+							class="ml-5"
 						>
 							<template #prepend>
 								<v-icon :color="sub.color" :icon="sub.icon" />
@@ -100,7 +98,10 @@ const login = async () => {
 const menuOptions = ref([
 	{ title: 'Pagamentos', icon: 'mdi-cash-check', to: '/', setores: ['ALL'] },
 	{ title: 'Novo pagamento', icon: 'mdi-cash-plus', to: '/novo/pagamento', setores: ['ALL'] },
-	{ title: 'Financeiro', icon: 'mdi-account-cash-outline', to: '/financeiro', setores: ['FIN', 'GER', 'ADM'] },
+	{ title: 'Financeiro', icon: 'mdi-account-cash-outline', to: '/financeiro', setores: ['FIN', 'GER', 'ADM'], tabs: [
+       { title: 'Pendentes', icon: 'mdi-account-clock-outline', to: '/financeiro/pendentes', color: 'red' },
+	   { title: 'Aprovadas', icon: 'mdi-account-check-outline', to: '/financeiro/aprovadas', color: 'green' }]
+	},
 	{ title: 'Gerência', icon: 'mdi-account-tie-outline', to: '/gerencia', setores: ['GER'] },
 	{ title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['GER'] },
 ]);
@@ -134,5 +135,6 @@ watch(() => route.path, (value) => {
 <style>
 .sidebar-item {
 	font-size: 15px;
+	color: #118b9f;
 }
 </style>

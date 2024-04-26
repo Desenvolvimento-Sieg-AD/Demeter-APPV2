@@ -1,5 +1,5 @@
 <template>
-	<span :style="style">
+	<span :style="style" >
 		<slot>
 			{{ title }}
 		</slot>
