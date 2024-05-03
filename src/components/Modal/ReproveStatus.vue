@@ -49,7 +49,7 @@
 									:rows="2"
 									type="textarea"
 									label="Justificativa Solicitante"
-									v-model="justiSolicitante"
+									v-model="justificativaSolicitante"
 									hide-details
 									required
 								>
@@ -62,7 +62,7 @@
 									:rows="2"
 									type="textarea"
 									label="Justificativa financeiro"
-									v-model="justiFinanceiro"
+									v-model="justificativaFinanceiro"
 									hide-details
 									required
 								>
@@ -89,13 +89,15 @@ const props = defineProps({
 	ambos: { type: Boolean, default: false },
 	item: { type: Object, required: true },
 	justificativa: { type: String, required: true },
+	justificativaSolicitante: { type: String, default: '' },
+	justificativaFinanceiro: { type: String, default: '' },
 });
 
 const justi = ref('');
 
 //* EMITS
 
-const emit = defineEmits('close', 'update:justificativa', 'update:ambos');
+const emit = defineEmits('close', 'update:justificativaSolicitante', 'update:justificativaFinanceiro', 'update:ambos');
 
 //* COMPUTED
 
@@ -106,42 +108,21 @@ const enableValue = computed({
 	set: (value) => emit('update:enable', value),
 });
 
-const justiSolicitante = ref('');
-const justiFinanceiro = ref('');
-const justificativaAmbos = ref('');
-
-const justificativaValue = computed({
+const justificativaAmbos = computed({
 	get: () => props.justificativa,
-	set: (value) => emit('update:justificativa', value),
+	set: (value) => emit('update:justificativaAmbos', value),
 });
 
-watch(
-	() => justiFinanceiro.value,
-	(newValue) => {
-		emit('update:justificativaFinanceiro', newValue);
-	}
-);
+const justificativaSolicitante = computed({
+	get: () => props.justificativaSolicitante,
+	set: (value) => emit('update:justificativaSolicitante', value),
+});
 
-watch(
-	() => justiSolicitante.value,
-	(newValue) => {
-		emit('update:justificativaClientes', newValue);
-	}
-);
+const justificativaFinanceiro = computed({
+	get: () => props.justificativaFinanceiro,
+	set: (value) => emit('update:justificativaFinanceiro', value),
+});
 
-watch(
-	() => justificativaAmbos.value,
-	(newValue) => {
-		emit('update:justificativaAmbos', newValue);
-	}
-);
-
-watch(
-	() => ambos.value,
-	(newValue) => {
-		emit('update:ambos', newValue);
-	}
-);
 </script>
 
 <style scoped>

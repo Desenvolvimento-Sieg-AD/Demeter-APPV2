@@ -81,7 +81,7 @@
 <script setup>
 //* IMPORTS
 
-import { getEmpresa, getConta, updatePagamento, getGrupos, getCategoriasByGrupo, findOnePayment } from '@api';
+import { getEmpresa, getConta, updatePagamento, getGrupos, getCategoriasByGrupo, getOnePayment } from '@api';
 const { $toast } = useNuxtApp();
 
 //* PROPS
@@ -141,7 +141,7 @@ const actions = computed(() => [
 
 const getPayment = async () => {
 	try {
-		const { success, message, data } = await findOnePayment(props.id);
+		const { success, message, data } = await getOnePayment(props.id, 'financeiroPendentes');
 
 		if (!success) throw new Error(message);
 
@@ -230,15 +230,11 @@ watch(
 	{ deep: true, immediate: true }
 );
 
-watch(
-	() => form.empresa_id,
-	(v) => {
-		if (v !== payment.value.empresa.id) {
-			form.conta_id = null;
-		}
-	},
-	{ deep: true, immediate: true }
-);
+watch(() => form.empresa_id, (v) => {
+	if (v !== payment.value.empresa.id) {
+		form.conta_id = null;
+	}
+},{ deep: true, immediate: true });
 </script>
 
 <style scoped>

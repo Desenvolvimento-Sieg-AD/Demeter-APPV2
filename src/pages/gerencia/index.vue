@@ -142,43 +142,32 @@
 
 		</LayoutForm>
 
-		<LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" />
+		<LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="pushData()"/>
 
 		<LazyModalConfirmStatus
 			v-model:enable="enableModal.confirm"
+			v-model:permiteEditar="permiteEditar"
+			v-model:justificativa="justificativa"
 			:item="itemView"
-			:actions="modalActions"
-			message="Deseja realmente aprovar este pagamento?"
-		/>
-
-		<LazyModalReproveStatus
-			v-model:enable="enableModal.reprove"
-			v-model:justificativaAmbos="justificativa.ambos"
-			v-model:justificativaClientes="justificativa.clientes"
-			v-model:justificativaFinanceiro="justificativa.financeiro"
-			message="Deseja realmente reprovar este pagamento?"
-			:item="itemView"
-			:actions="modalReproveActions"
+			:actions="modalActionsConfirm"
+			:message="messageConfirmStatus()"
 			:confirm="confirm"
-			v-model:ambos="ambos"
+			:page="'gerencia'"
 		/>
-
+		
 		<LazyModalConfirmAllStatus
 			v-model:enable="enableModal.allConfirm"
-			v-model:ambos="ambos"
-			v-model:justificativaAmbos="justificativa.ambos"
-			v-model:justificativaClientes="justificativa.clientes"
-			v-model:justificativaFinanceiro="justificativa.financeiro"
+			v-model:justificativa="justificativa"
 			:confirm="confirm"
-			:message="messageConfirmStatus()"
-			:actions="confirm === 'delete' ? modalActionsDesprovedAll : modalActionsAprovedAll"
+			:message="messageConfirmStatusAll()"
+			:actions="modalActionsConfirmAll"
 		/>
 	</div>
 </template>
 
 <script setup>
-import { getPagamentoGerencia, postStatus } from '@api';
-const paymentGerencia = await getPagamentoGerencia();
+import { getPagamentoByScope, postStatus } from '@api';
+const paymentGerencia = await getPagamentoByScope('gerencia');
 const { $toast } = useNuxtApp();
 const access = useRuntimeConfig();
 const colums = getColumns('gerencia');
@@ -195,14 +184,11 @@ const confirm = ref('delete');
 const itens = ref([]);
 const itemView = ref({});
 const idsSelect = ref([]);
-
-const justificativa = reactive({
-	ambos: null,
-	clientes: null,
-	financeiro: null,
-});
 const ambos = ref(true);
 const loadingModal = ref(false);
+const permiteEditar = ref(false);
+
+const justificativa = ref(null)
 
 onMounted(async () => {
 	await pushData();
@@ -233,30 +219,32 @@ const actions = ref([
 		type: 'padrao',
 	},
 	{
+		icon: 'mdi-close-thick',
+		tooltip: 'Recusar',
+		click: (item) => {
+			itemView.value = item;
+			confirm.value = 'disapprove';
+			enableModal.confirm = true;
+		},
+		visible: true,
+		active: true,
+		type: 'cancel',
+	},
+	{
 		icon: 'mdi-check-bold',
 		tooltip: 'Aprovar',
 		click: (item) => {
 			itemView.value = item;
+			confirm.value = 'approve';
 			enableModal.confirm = true;
 		},
 		visible: true,
 		active: true,
 		type: 'success',
 	},
-	{
-		icon: 'mdi-close-thick',
-		tooltip: 'Recusar',
-		click: (item) => {
-			itemView.value = item;
-			enableModal.reprove = true;
-		},
-		visible: true,
-		active: true,
-		type: 'cancel',
-	},
 ]);
 
-const modalActions = computed(() => [
+const modalActionsConfirm = computed(() => [
 	{
 		icon: 'mdi-close',
 		title: 'Cancelar',
@@ -265,36 +253,17 @@ const modalActions = computed(() => [
 	},
 	{
 		icon: 'mdi-check',
-		title: 'Aprovar',
+		title: confirm.value === 'approve' ? 'Aprovar' : 'Reprovar',
 		type: 'success',
 		loading: loadingModal.value,
 		click: async () => {
-			loadingModal.value = true;
-			approvePayment([itemView.value.id]);
+			if (confirm.value === 'approve') await sendStatus(4, [itemView.value.id]);
+			else await sendStatus(9, [itemView.value.id]);
 		}
 	},
 ]);
 
-const modalReproveActions = computed(() => [
-	{
-		icon: 'mdi-close',
-		title: 'Cancelar',
-		type: 'grey',
-		click: () => enableModal.reprove = false,
-	},
-	{
-		icon: 'mdi-check',
-		title: 'Reprovar',
-		type: 'cancel',
-		loading: loadingModal.value,
-		click: async () => {
-			loadingModal.value = true;
-			disapprovePayment([itemView.value.id]);
-		},
-	},
-]);
-
-const modalActionsAprovedAll = computed(() => [
+const modalActionsConfirmAll = computed(() => [
 	{
 		icon: 'mdi-close',
 		title: 'Cancelar',
@@ -303,31 +272,12 @@ const modalActionsAprovedAll = computed(() => [
 	},
 	{
 		icon: 'mdi-check',
-		title: 'Aprovar',
+		title: confirm.value === 'approve' ? 'Aprovar' : 'Reprovar',
 		type: 'success',
 		loading: loadingModal.value,
 		click: async () => {
-			loadingModal.value = true;
-			approvePayment(idsSelect.value);
-		},
-	},
-]);
-
-const modalActionsDesprovedAll = computed(() => [
-	{
-		icon: 'mdi-close',
-		title: 'Cancelar',
-		type: 'grey',
-		click: () => enableModal.allConfirm = false,
-	},
-	{
-		icon: 'mdi-check',
-		title: 'Reprovar',
-		type: 'cancel',
-		loading: loadingModal.value,
-		click: async () => {
-			loadingModal.value = true;
-			disapprovePayment(idsSelect.value);
+			const status_id = confirm.value === 'approve' ? 4 : 9;
+			sendStatus(status_id, idsSelect.value);
 		},
 	},
 ]);
@@ -337,7 +287,7 @@ const buttonsFooter = computed(() => [
 		title: 'Reprovar',
 		disabled: !idsSelect.value.length,
 		onClick: () => {
-			confirm.value = 'delete';
+			confirm.value = 'disapprove';
 			enableModal.allConfirm = true;
 		},
 		color: 'red',
@@ -346,7 +296,7 @@ const buttonsFooter = computed(() => [
 		title: 'Aprovar',
 		disabled: !idsSelect.value.length,
 		onClick: () => {
-			confirm.value = 'aproved';
+			confirm.value = 'approve';
 			enableModal.allConfirm = true;
 		},
 		color: 'success',
@@ -374,12 +324,34 @@ const defineDocument = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(docu
 const defineNameSetor = (sigla, item, index) => smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla;
 
 const messageConfirmStatus = () => {
+	if (confirm.value === 'approve') return 'Deseja realmente aprovar esse pagamento?';
+	return 'Deseja realmente reprovar esse pagamento?';
+};
+
+const messageConfirmStatusAll = () => {
 	if (confirm.value === 'delete') return 'Deseja realmente reprovar todos os pagamentos selecionados?';
 	return 'Deseja realmente aprovar todos os pagamentos selecionados?';
 };
 
-const approvePayment = async (ids) => {
+const sendStatus = async (status, id) => {
+	try {
+		if(status === 9 && !justificativa.value) throw new Error('Justificativa é obrigatória para prosseguir!');
+		loadingModal.value = true;
 
+		const { success, message } = await postStatus({ id, status, justificativa: justificativa.value, permite_editar: permiteEditar.value });
+		if (!success) throw new Error(message);
+		loadingModal.value = false;
+		enableModal.confirm = false;
+		enableModal.allConfirm = false;
+		$toast.success('Status alterado com sucesso');
+		await pushData();
+	} catch (error) {
+		console.log(error.message);
+		$toast.error(error.message);
+	}
+}
+
+const approvePayment = async (ids) => {
 	if (ids.length === 0) {
 		loadingModal.value = false;
 		return $toast.error('Selecione ao menos um pagamento');
@@ -401,7 +373,6 @@ const approvePayment = async (ids) => {
 		console.log(error.message)
 		$toast.error(error.message)
 	}
-
 };
 
 const valiDisapprovePayment = () => {
@@ -455,7 +426,7 @@ const disapprovePayment = async (ids) => {
 const pushData = async () => {
 	try {
 
-		const { success, message, data } = await getPagamentoGerencia();
+		const { success, message, data } = await getPagamentoByScope('gerencia');
 
 		if (!success) throw new Error(message) 
 
@@ -472,6 +443,7 @@ const pushData = async () => {
 </script>
 
 <style scoped>
+
 .btn-container {
 	display: flex;
 	justify-content: flex-end;

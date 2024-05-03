@@ -126,7 +126,7 @@ watch(() => route.path, (value) => {
 		selectedOption.value = [`item-${match[1]}-subitem-${match[2]}`];
 		timer = setTimeout(() => {
 			if (drawer.value) activeOption.value = [];
-		}, 2000);
+		}, 1200);
 	},
 	{ deep: true, immediate: true }
 );

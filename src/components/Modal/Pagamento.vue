@@ -3,141 +3,133 @@
 		<template #content>
 			<LayoutLoading v-if="loading" />
 
-			<v-row v-else-if="pagamento">
-				<v-col >
-					<v-row align="center">
-						<v-col cols="12" class="pb-0">
-							<h3 style="color: #118b9f">Dados do Pagamento</h3>
-						</v-col>
+			<v-col v-else-if="pagamento">
 
-						<v-col cols="6">
-							<CustomInput disabled label="Solicitante" hide-details v-model="pagamento.usuario.nome" />
-						</v-col>
+				<v-row align="center" class="px-3">
+					<v-col cols="9" class="d-flex align-center justify-start pb-0">
+						<h3 style="color: #118b9f">Dados do Pagamento</h3>
+					</v-col>
+					<v-col cols="3" class="d-flex align-center justify-end pb-0">
+						<v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
+						<v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1"/>
+					</v-col>
+				</v-row>
 
-						<v-col cols="2">
-							<CustomInput disabled label="Setor" hide-details v-model="pagamento.usuario.setores[0].sigla" />
-						</v-col>
+				<v-row align="center">
 
-						<v-col cols="4">
-							<CustomInput disabled label="Data Solicitação" hide-details :value="dataSolitacao" v-model="dataSolitacao" />
-						</v-col>
+					<v-col cols="6">
+						<CustomInput disabled label="Solicitante" hide-details v-model="pagamento.usuario.nome" />
+					</v-col>
 
-						<v-divider class="mx-3" />
+					<v-col cols="2">
+						<CustomInput disabled label="Setor" hide-details v-model="pagamento.usuario.setores[0].sigla" />
+					</v-col>
 
-						<v-col cols="6">
-							<CustomInput disabled label="Grupo" hide-details v-model="pagamento.categoria.grupo.nome" />
-						</v-col>
+					<v-col cols="4">
+						<CustomInput disabled label="Data Solicitação" hide-details :value="dataSolitacao" v-model="dataSolitacao" />
+					</v-col>
 
-						<v-col cols="6">
-							<CustomInput disabled label="Categoria" hide-details v-model="pagamento.categoria.nome" />
-						</v-col>
+					<v-divider class="mx-3" />
 
-						<v-col cols="8">
-							<CustomInput disabled label="Fornecedor" hide-details v-model="pagamento.fornecedor.razao_social" />
-						</v-col>
+					<v-col cols="6">
+						<CustomInput disabled label="Grupo" hide-details v-model="pagamento.categoria.grupo.nome" />
+					</v-col>
 
-						<v-col cols="4">
-							<CustomInput disabled label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
-						</v-col>
+					<v-col cols="6">
+						<CustomInput disabled label="Categoria" hide-details v-model="pagamento.categoria.nome" />
+					</v-col>
 
-						<v-col cols="6">
-							<CustomInput disabled label="Empresa Pagadora" hide-details v-model="pagamento.empresa.apelido" />
-						</v-col>
+					<v-col cols="8">
+						<CustomInput disabled label="Fornecedor" hide-details v-model="pagamento.fornecedor.razao_social" />
+					</v-col>
 
-						<v-col cols="4">
-							<CustomInput disabled label="Forma de Pagamento" hide-details v-model="pagamento.tipo_pagamento.nome" />
-						</v-col>
+					<v-col cols="4">
+						<CustomInput disabled label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
+					</v-col>
 
-						<v-col cols="3" v-if="pagamento.tipo_pagamento.nome == 'PIX'">
-							<CustomInput disabled label="Tipo de Chave" hide-details v-model="pagamento.tipo_chave_pix.nome"/>
-						</v-col>
+					<v-col cols="9">
+						<CustomInput disabled label="Empresa Pagadora" hide-details v-model="pagamento.empresa.apelido" />
+					</v-col>
 
-						<v-col cols="8">
-							<CustomInput disabled label="Dados do Pagamento" hide-details v-model="pagamento.chave_pix" />
-						</v-col>
+					<v-col cols="3">
+						<CustomInput disabled label="Número NF" hide-details v-model="pagamento.numero_nf" />
+					</v-col>
 
-						<v-col cols="1">
-							<v-btn @click="copyData" variant="plain" icon color="#118B9F">
-								<v-icon>mdi-content-copy</v-icon>
-								<v-tooltip text="Copiar dados do pagamento" activator="parent" location="top"></v-tooltip>
-							</v-btn>
-						</v-col>
+					<v-col cols="12">
+						<CustomInput disabled label="Chave de Acesso" hide-details v-model="chave_nf" />
+					</v-col>
 
-						<v-divider class="mx-3" />
+					<v-col cols="4">
+						<CustomInput disabled label="Valor total" hide-details mask="money" v-model="pagamento.valor_total" />
+					</v-col>
 
-						<v-col cols="12">
-							<CustomInput type="textarea" disabled label="Motivo do Pagamento" hide-details :rows="2" v-model="pagamento.motivo" />
-						</v-col>
+					<v-col cols="4">
+						<CustomInput disabled label="Vencimento" hide-details v-model="dataVencimento" :value="dataVencimento" />
+					</v-col>
 
-						<v-col cols="12">
-							<CustomInput type="textarea" disabled label="Observações" hide-details :rows="1" v-model="pagamento.dados_complementares" />
-						</v-col>
+					<v-col cols="4">
+						<CustomInput disabled label="Forma de Pagamento" hide-details v-model="pagamento.tipo_pagamento.nome" />
+					</v-col>
 
-						<v-divider class="mx-3" />
+					<v-col v-if="pagamento.tipo_pagamento.nome === 'PIX'">
+    					<CustomInput disabled label="Tipo de Chave" hide-details v-model="pagamento.tipo_chave_pix.nome"/>
+					</v-col>
 
-						<v-col cols="4">
-							<CustomInput disabled label="Valor total" hide-details mask="money" v-model="pagamento.valor_total" />
-						</v-col>
+					<v-col cols="4" v-if="isTED">
+						<CustomInput disabled label="Banco" hide-details v-model="dados_bancarios.banco" />
+					</v-col>
 
-						<v-col cols="4">
-							<CustomInput disabled label="Vencimento" hide-details v-model="dataVencimento" :value="dataVencimento" />
-						</v-col>
+					<v-col cols="4" v-if="isTED">
+						<CustomInput disabled label="Agência" hide-details v-model="dados_bancarios.agencia" />
+					</v-col>
 
-						<v-col cols="2">
-							<v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
-						</v-col>
+					<v-col cols="4" v-if="isTED">
+						<CustomInput disabled label="Conta" hide-details v-model="dados_conta" />
+					</v-col>
 
-						<v-col cols="3" v-if="pagamento.numero_nf">
-							<CustomInput disabled label="Número NF" hide-details v-model="pagamento.numero_nf" />
-						</v-col>
+					<v-col v-else>
+						<CustomInput disabled :label="labelDataPayment" hide-details v-model="outhers" />
+					</v-col>
 
-						<v-col cols="8" v-if="pagamento.chave_nf">
-							<CustomInput disabled label="Chave de Acesso" hide-details v-model="pagamento.chave_nf" />
-						</v-col>
-						
+					<v-divider class="mx-3" />
+
+					<v-col cols="12">
+						<CustomInput type="textarea" disabled label="Motivo do Pagamento" hide-details :rows="2" v-model="pagamento.motivo" />
+					</v-col>
+
+					<v-col cols="12">
+						<CustomInput type="textarea" disabled label="Observações" hide-details :rows="2" v-model="pagamento.dados_complementares" />
+					</v-col>
+
+					<v-col v-if="pagamento.urgente">
+						<CustomInput type="textarea" disabled label="Justificativa Urgência" hide-details :rows="2" v-model="pagamento.justificativa_urgente" />
+					</v-col>
+
+				</v-row>
+
+				<v-divider class="my-5" v-if="pagamento?.anexos_pagamento?.length > 0" />
+
+				<v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
+					<v-col cols="12">
+						<h3 style="color: #118b9f">Arquivos</h3>
+					</v-col>
+					<v-row class="d-flex flex-wrap mr-2" no-gutters>
+						<div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id" class="d-flex align-center mb-2 mr-2">
+							<v-card flat color="#F7F5F5" @click="openFile(anexo.caminho)" class="d-flex flex-row align-center mr-2" width="450px">
+								<v-icon color="#118b9f" class="ml-2 mr-2">mdi-file-document</v-icon>
+								<v-card-text>
+									{{ anexo.nome }}
+								</v-card-text>
+								<v-btn icon @click.stop="copyFilePath(anexo)" flat color="transparent" class="ml-auto">
+									<v-icon color="#118B9F" class="cursor-pointer">mdi-content-copy</v-icon>
+									<v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
+								</v-btn>
+							</v-card>
+						</div>
 					</v-row>
-				</v-col>
+				</v-row>
 
-				<v-divider vertical class="my-4" />
-
-				<v-col cols="3" v-if="pagamento?.anexos_pagamento?.length > 0">
-
-					<v-row align="center">
-
-						<v-col cols="12" class="pb-0">
-							<h3 style="color: #118b9f">Arquivos</h3>
-						</v-col>
-
-						<v-col cols="12" style="max-height: 480px; overflow-y: auto">
-
-							<div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id">
-
-								<v-card flat color="#F7F5F5" class="mb-1" @click.prevent="openFile(anexo.caminho)">
-									
-									<v-card-title align="center">
-										<v-icon color="grey" class="cursor-pointer" size="70">mdi-file</v-icon>
-									</v-card-title>
-
-									<v-card-text align="center">
-
-										{{ anexo.nome }}
-
-										<v-btn icon @click.stop="copyFilePath(anexo)" flat color="transparent">
-											<v-icon color="#118B9F" class="cursor-pointer" icon="mdi-content-copy" />
-											<v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
-										</v-btn>
-
-									</v-card-text>
-
-								</v-card>
-
-							</div>
-
-						</v-col>
-
-					</v-row>
-				</v-col>
-			</v-row>
+			</v-col>
 		</template>
 	</Modal>
 </template>
@@ -145,27 +137,44 @@
 <script setup>
 //* IMPORTS
 
-import { getPagamentoById } from '@api/pagamento';
+import { getPagamentoById, updatePagamento } from '@api/pagamento';
 const { $toast } = useNuxtApp();
 const dayjs = useDayjs();
-const acess = useRuntimeConfig();
+const access = useRuntimeConfig();
 
 //* PROPS
 
 const props = defineProps({
-	enable: { type: Boolean, default: false },
 	id: { type: Number, required: true },
+	enable: { type: Boolean, default: false },
+	allowEdit: { type: Boolean, default: true },
+	pagamento: { type: Object, default: null },
 });
 
 //* EMITS
 
-const emit = defineEmits(['update:enable']);
+const emit = defineEmits(['update:enable', 'getPagamento']);
 
 //* DATA
 
-const caminho = acess.public.PAGAMENTO_PATH;
+const caminho = access.public.PAGAMENTO_PATH;
 const pagamento = ref(null);
 const loading = ref(false);
+const urgente = ref(null)
+const dados_bancarios = ref(null)
+const dados_conta = ref(null)
+const outhers = ref(null)
+const chave_nf = ref(null)
+
+const isTED = computed(() => pagamento.value.tipo_pagamento.nome === 'TED');
+
+const labelDataPayment = computed(() => {
+	if (pagamento.value.tipo_pagamento.nome === 'PIX') return 'Chave PIX';
+	if (pagamento.value.tipo_pagamento.nome === 'Boleto') return 'Código de Barras';
+	if (pagamento.value.tipo_pagamento.nome === 'Cartão de crédito') return 'Número do Cartão';
+	if (pagamento.value.tipo_pagamento.nome === 'Cartão de débito') return 'Número do Cartão';
+	else return 'Dados do Pagamento';
+});
 
 //* COMPUTED
 
@@ -196,28 +205,62 @@ const documentoFormatado = computed(() => {
 });
 
 const actions = computed(() => [
-	{
+	{	title: 'Fechar',
 		icon: 'mdi-close',
-		title: 'Fechar',
-		type: 'red',
-		click: () => (enableValue.value = false),
+		tooltip: 'Fechar',
+		type: 'cancel',
+		click: () => enableValue.value = false,
 	},
-]);
+
+])
 
 //* METHODS
 
 const getPagamento = async () => {
 	try {
-		if (!props.id) throw new Error('ID não informado');
 		loading.value = true;
 
-		const { data } = await getPagamentoById(props.id);
+		const { success, message, data } = await getPagamentoById(props.id);
+		
+		if(!success) throw new Error(message);
+
 		pagamento.value = data;
+
+		dados_bancarios.value = JSON.parse(pagamento?.value.dados_bancarios)
+		
+		dados_conta.value = `${dados_bancarios?.value?.conta} - ${dados_bancarios?.value?.digito}`
+
+		outhers.value = dados_bancarios?.value?.outhers
+
+		urgente.value = pagamento.value.urgente ? 'Sim' : 'Não';
+
+		chave_nf.value = pagamento.value.chave_nf ?? 'Não informado'
+
+		loading.value = false;
 
 		loading.value = false;
 	} 
 	catch (error) {
-		$toast.error(error.message);
+		console.error('Erro ao buscar pagamento:', error.message);
+		$toast.error('Erro ao buscar pagamento');
+	}
+};
+
+const saveUpdatePagamento = async () => {
+	try {
+		const { success, message } = await updatePagamento(pagamento.value.id, pagamento.value);
+
+		if (!success) throw new Error(message);
+
+		$toast.success('Pagamento atualizado com sucesso');
+
+		enableValue.value = false;
+
+		emit('getPagamento');
+
+	} catch (error) {
+		console.error('Erro ao atualizar pagamento:', error.message);
+		$toast.error('Erro ao atualizar pagamento');
 	}
 };
 
@@ -251,12 +294,10 @@ const copyData = async (data) => {
 		$toast.error('Não foi possível copiar os dados de pagamento')
 	}
 }
+
 //* WATCHERS
 
-watch(
-	() => props.enable,
-	(value) => {
-		if (value) getPagamento();
-	}
-);
+watch(() => props.enable, (value) => {
+	if (value) getPagamento();
+});
 </script>

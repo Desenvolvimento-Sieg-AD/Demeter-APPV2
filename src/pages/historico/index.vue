@@ -148,7 +148,7 @@
 
 <script setup>
 
-import { getPagamento } from '@api';
+import { getPagamentoByScope } from '@api';
 
 const access = useRuntimeConfig();
 const path = access.public.PAGAMENTO_PATH;
@@ -194,7 +194,7 @@ const defineNameSetor = (sigla, item, index) => smallerIndex(index, item.usuario
 
 const pushData = async () => {
 	try {
-		const { success, message, data } = await getPagamento()
+		const { success, message, data } = await getPagamentoByScope('geral')
 
 		if(!success) throw new Error(message)
 

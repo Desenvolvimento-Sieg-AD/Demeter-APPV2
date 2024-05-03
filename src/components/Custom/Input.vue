@@ -51,6 +51,36 @@
 		:suffix="suffix"
 		:prefix="prefix"
 		:readonly="readonly"
+		:maxLength="maxLength"
+		:class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
+		@update:modalValue="onChange"
+		@focus="onFocus"
+		@blur="onBlur"
+	/>
+
+	<v-text-field
+		v-else-if="type == 'text' && mask == 'boleto'"
+		v-model="enableValue"
+		ref="customInput"
+		v-maska="maskaBoleto"
+		:density="density"
+		:hide-details="hideDetails"
+		:label="label"
+		:variant="variant"
+		:rules="[fieldRules]"
+		:prepend-icon="prepend"
+		:prepend-inner-icon="prependInner"
+		:append-icon="append"
+		:append-inner-icon="appendInner"
+		:disabled="disabled"
+		:rounded="rounded"
+		:clearable="clearable"
+		:color="color"
+		:bg-color="backgroundColor"
+		:loading="loading"
+		:suffix="suffix"
+		:prefix="prefix"
+		:readonly="readonly"
 		:class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
 		@update:modalValue="onChange"
 		@focus="onFocus"
@@ -372,7 +402,6 @@
 		:suffix="suffix"
 		:prefix="prefix"
 		:readonly="readonly"
-		:counter="counter"
 		:rows="rows"
 		:maxLength="maxLength"
 		:auto-grow="autogrow"
@@ -789,10 +818,12 @@ const fieldRules = (v) => {
 			if (typeof rule === 'function') arr.push(rule(v));
 		});
 	}
-	if (props.type === 'textarea') arr.push(textAreaRule(v));
+	// if (props.type === 'textarea') arr.push(textAreaRule(v));
 
 	return arr.find((v) => v) || true;
 };
+
+const maskaBoleto = '#'.repeat(47);
 
 const requiredRule = (v) => (v instanceof Array && v.length == 0 ? 'Campo obrigatório' : !!v || 'Campo obrigatório');
 const textAreaRule = (v) => (v || '').length <= props.counter || `Máximo de ${props.counter} caracteres`;

@@ -9,7 +9,7 @@
 					choose-columns
 					selectionCheck
 					:page-size="15"
-					:loading="false"
+					:loading="loadingTable"
 					:columns="colums"
 					:actions="actions"
 					allowColumnResizing
@@ -48,6 +48,14 @@
 								:bold="true"
 							/>
 						</div>
+					</template>
+					
+					<template #item-urgente="{ data: { data: item } }">
+							<v-chip :color="item.urgente ? 'red' : 'gray'">
+								<p class="font-weight-bold">
+									{{ item.urgente ? 'Sim' : 'Não'}}
+								</p>
+							</v-chip>
 					</template>
 
 					<template #item-documento="{ data: { data: item } }">
@@ -160,41 +168,27 @@
 				</v-row>
 			</LayoutForm>
 
-			<LazyModalConfirmExport
-				v-model:enable="enableModal.export"
-				:loading="loadingModal"
-				:actions="modalActionsExport"
-				message="Existem pagamentos ja exportados nesta seleção, deseja inclui-los na importação?"
-			/>
-
-			<LazyModalConfirmExportToClient
-				v-model:enable="enableModal.exportToClient"
-				:clients="clients"
-				@update:selectClient="exportClient"/>
-			
 			<LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
-
-			<LazyModalLink v-model:enable="enableModal.link" v-model:link="link" />
 
 			<LazyModalConfirmStatus
 				v-model:enable="enableModal.confirm"
-				:message="messageConfirmStatus()"
+				v-model:justificativa="justificativa"
+				:confirm="confirm"
+				:message="messageConfirmStatus"
 				:item="viewPayment"
-				:actions="modalActions"
+				:actions="actionsModalConfirm"
 			/>
 
 			<LazyModalEditCount
 				v-if="enableModal.editCount"
 				v-model:enable="enableModal.editCount"
-				message="Editar pagamento"
-				:id="viewPayment"
+				:id="viewPayment.id"
 				@update-success="pushData"
 			/>
 
 			<LazyModalEditCountAll
 				v-if="enableModal.allEdit"
 				v-model:enable="enableModal.allEdit"
-				message="Editar contas de pagamento:"
 				:items="itemsSelects"
 				@update-success="pushData"
 			/>
@@ -203,7 +197,6 @@
 				v-if="enableModal.allConfirm"
 				v-model:enable="enableModal.allConfirm"
 				v-model:justificativa="justificativa"
-				:confirm="confirm"
 				:message="messageConfirmAllStatus"
 				:actions="modalActionsAprovedAll"
 			/>
@@ -212,19 +205,25 @@
 </template>
 
 <script setup>
+
+// * IMPORT
+
 import CustomStore from 'devextreme/data/custom_store';
-import { getPagamentoFinanceiro, postStatus, omie } from '@api';
+import { getPagamentoByScope, postStatus, omie } from '@api';
 const { $toast } = useNuxtApp();
 const colums = getColumns('financeiro');
 const access = useRuntimeConfig();
 const path = access.public.PAGAMENTO_PATH;
 
+// * DATA
+
 const confirm = ref('exportar');
 const itens = ref([]);
 const viewPayment = ref({});
 const itemsSelects = ref([]);
-const justificativa = ref('');
+const justificativa = ref(null);
 const loadingModal = ref(false);
+const loadingTable = ref(false);
 const clients = ref([]);
 const link = ref('');
 
@@ -238,6 +237,143 @@ const enableModal = reactive({
 	allConfirm: false,
 	exportToClient: false,
 });
+
+// * COMPUTED && MODALS ACTIONS
+
+const actionsButton = computed(() => [
+	{
+		title: 'Editar',
+		color: 'primary',
+		icon: 'mdi-pencil',
+		disabled: !itemsSelects.value.length,
+		onClick: () => {
+			viewPayment.value = itemsSelects.value;
+			enableModal.allEdit = true;
+		},
+	},
+	{
+		title: 'Reprovar',
+		color: 'red',
+		disabled: !itemsSelects.value.length,
+		icon: 'mdi-close',
+		onClick: () => {
+			confirm.value = 'disapprove';
+			enableModal.allConfirm = true;
+			
+		},
+	},
+	{
+		title: 'Aprovar',
+		color: 'success',
+		icon: 'mdi-check',
+		disabled: !itemsSelects.value.length,
+		onClick: () => {
+			confirm.value = 'approve';
+			enableModal.allConfirm = true;
+		},
+	},
+]);
+
+const actions = computed(() => [
+	{
+		icon: 'mdi-eye',
+		tooltip: 'Ver detalhes',
+		click: (item) => {
+			viewPayment.value = item;
+			enableModal.pagamento = true;
+		},
+		active: true,
+		type: 'info',
+	},
+	{
+		icon: 'mdi-pencil',
+		tooltip: 'Editar',
+		click: (item) => {
+			viewPayment.value = item;
+			enableModal.editCount = true;
+		},
+	},
+	{
+		icon: 'mdi-close',
+		tooltip: 'Reprovar',
+		click: async (item) => {
+			viewPayment.value = item;
+			enableModal.confirm = true;
+			confirm.value = 'disapprove';
+		},
+		active: true,
+		disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
+		type: 'cancel',
+	},
+	{
+		icon: 'mdi-check',
+		tooltip: 'Aprovar',
+		disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
+		click: (item) => {
+			viewPayment.value = item;
+			enableModal.confirm = true;
+			confirm.value = 'approve';
+		},
+		active: true,
+		type: 'success',
+	},
+
+]);
+
+const actionsModalConfirm = computed(() => [
+	{
+		icon: 'mdi-close',
+		title: 'Cancelar',
+		type: 'grey',
+		click: () => enableModal.confirm = false,
+	},
+	{
+		icon: 'mdi-check',
+		title: confirm.value === 'approve' ? 'Aprovar' : 'Reprovar',
+		type: 'success',
+		loading: loadingModal.value,
+		click: async () => {
+			if(confirm.value === 'approve') await sendStatus(3, [viewPayment.value.id]);
+			else await sendStatus(8, [viewPayment.value.id]);
+		}
+	},
+]);
+
+const modalActionsAprovedAll = computed(() => [
+	{
+		icon: 'mdi-close',
+		title: 'Cancelar',
+		type: 'grey',
+		click: () => enableModal.allConfirm = false,
+	},
+	{
+		icon: 'mdi-check',
+		title: confirm.value === 'approve' ? 'Aprovar' : 'Recusar',
+		type: 'success',
+		loading: loadingModal.value,
+		click: async () => await validBeforeSend()
+	},
+]);
+
+const messageConfirmStatus = computed(() => {
+	if (confirm.value === 'approve') return 'Deseja realmente aprovar essa solicitação de pagamento?';
+	return 'Deseja realmente reprovar essa solicitação de pagamento?';
+})
+
+const messageConfirmAllStatus = computed(() => {
+	if(confirm.value === 'approve') return 'Deseja realmente aprovar todas as solicitações de pagamentos selecionadas?'
+	return 'Deseja realmente reprovar todas as solicitações de pagamentos selecionadas?'
+})
+
+// * METHODS
+
+const openFile = (filePath) => {
+	window.electronAPI.openFile(filePath).then((response) => {
+		if (!response.success) {
+			console.error('Erro ao abrir arquivo:', response.message);
+		}
+	});
+};
 
 const openFiles = (anexos) => {
 	const statusAllowed = [3, 4]
@@ -261,262 +397,42 @@ const defineNameSetor = (sigla, item, index) => smallerIndex(index, item.usuario
 
 const handleSelectionChange = (items) => itemsSelects.value = items;
 
-const messageConfirmStatus = () => {
-	if (confirm.value === 'exportar') return 'Deseja realmente exportar a solicitação de pagamento?';
-	return 'Deseja realmente pagar a solicitação de pagamento?';
+const validBeforeSend = async () => {
+	const status_id = confirm.value === 'approve' ? 3 : 8;
+
+	const lista_id = itemsSelects.value.map((item) => item.id)
+
+	await sendStatus(status_id, lista_id)
 };
 
-const messageConfirmAllStatus = () => {
-	if(confirm.value === 'exportar') return 'Deseja realmente exportar todas as solicitações de pagamentos selecionadas?'
-	return 'Deseja realmente pagar todas as solicitações de pagamentos selecionadas?'
-}
-
-const openFile = (filePath) => {
-	window.electronAPI.openFile(filePath).then((response) => {
-		if (!response.success) {
-			console.error('Erro ao abrir arquivo:', response.message);
-		}
-	});
-};
-
-const validExport = async () => {
-    confirm.value = 'exportar';
-    const hasPaymentStatusExport = itemsSelects.value.some(item => item.movimentacoes_pagamento[0].status_pagamento.id === 5);
-
-    if (hasPaymentStatusExport) {
-        clients.value = itemsSelects.value.map(item => item?.empresa);
-    } else {
-        const clientsSelects = new Set(itemsSelects.value.map(item => JSON.stringify(item?.empresa)));
-        clients.value = Array.from(clientsSelects).map(jsonItem => JSON.parse(jsonItem));
-    }
-
-    enableModal.exportToClient = true;
-}
-
-const validEdit = async () => {
-	confirm.value = 'editar';
-
-	const items = itemsSelects.value.filter((ref) => ref.movimentacoes_pagamento[0].status_pagamento.id === 3);
-
-	if (items.length == 1) {
-		enableModal.editCount = true;
-		viewPayment.value = itemsSelects.value[0];
-	}
-};
-
-// * MODALS ACTIONS
-
-const actionsButton = computed(() => [
-	{
-		title: 'Exportar',
-		color: '#118B9F',
-		icon: 'mdi-file-excel',
-		disabled: !itemsSelects.value.length,
-		onClick: () => validExport(),
-	},
-	{
-		title: 'Editar',
-		color: 'blue',
-		disabled: !itemsSelects.value.length,
-		icon: 'mdi-pencil',
-		onClick: () => validEdit(),
-	},
-	{
-		title: 'Pagar',
-		color: '#008000',
-		icon: 'mdi-currency-usd',
-		disabled: !itemsSelects.value.length,
-		onClick: () => {
-			confirm.value = 'pagar';
-			enableModal.allConfirm = true;
-		},
-	},
-]);
-
-const actions = computed(() => [
-	{
-		icon: 'mdi-eye',
-		tooltip: 'Ver detalhes',
-		click: (item) => {
-			viewPayment.value = item;
-			enableModal.pagamento = true;
-		},
-		active: true,
-		type: 'padrao',
-		name: 'ver',
-	},
-	{
-		icon: 'mdi-pencil',
-		tooltip: 'Editar',
-		click: (ref) => {
-			viewPayment.value = ref?.id;
-			enableModal.editCount = true;
-		},
-		active: true,
-		type: 'padrao',
-		name: 'editar',
-	},
-	{
-		icon: 'mdi-currency-usd',
-		tooltip: 'Pagar',
-		click: async (item) => {
-			confirm.value = 'pagar';
-			viewPayment.value = item;
-			enableModal.confirm = true;
-		},
-		active: true,
-		type: 'success',
-		name: 'pagar',
-	},
-	{
-		icon: 'mdi-file-excel',
-		tooltip: 'Exportar',
-		click: async (item) => {
-			confirm.value = 'exportar';
-			viewPayment.value = item;
-			enableModal.confirm = true;
-		},
-		visible: true,
-		active: true,
-		type: 'excel',
-		name: 'exportar',
-	},
-]);
-
-const modalActions = computed(() => [
-	{
-		icon: 'mdi-close',
-		title: 'Cancelar',
-		type: 'grey',
-		click: () => enableModal.confirm = false,
-	},
-	{
-		icon: 'mdi-check',
-		title: confirm.value === 'exportar' ? 'Exportar' : 'Pagar',
-		type: 'success',
-		loading: loadingModal.value,
-		click: async () => {
-			if(confirm.value === 'exportar') await sendExport([viewPayment.value]);
-			else await sendPayment([viewPayment.value]);
-		}
-	},
-]);
-
-const modalActionsExport = computed(() => [
-	{
-		icon: 'mdi-close',
-		title: 'Nao incluir',
-		type: 'grey',
-		click: async () => {
-			enableModal.export = false;
-			const itemsApproved = itemsSelects.value.filter((item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3);
-			await sendExport(itemsApproved);
-		},
-	},
-	{
-		icon: 'mdi-check',
-		title: 'Incluir',
-		type: 'success',
-		click: async () => {
-			enableModal.export = false;
-			await sendExport(itemsSelects.value);
-		}
-	},
-]);
-
-const modalActionsAprovedAll = computed(() => [
-	{
-		icon: 'mdi-close',
-		title: 'Cancelar',
-		type: 'grey',
-		click: () => enableModal.allConfirm = false,
-	},
-	{
-		icon: 'mdi-check',
-		title: confirm.value === 'exportar' ? 'Exportar' : 'Pagar',
-		type: 'success',
-		loading: loadingModal.value,
-		click: async () => {
-
-			const status_id = confirm.value === 'exportar' ? 3 : 5;
-
-			const lista = itemsSelects.value.filter((item) =>
-				item.movimentacoes_pagamento.map((mov) => mov.status_pagamento.id === status_id)
-			);
-
-			if (status_id === 3) await sendExport(lista);
-			else await sendPayment(lista);
-		},
-	},
-]);
-
-const exportClient = async (empresa) => {
-	const payments = itemsSelects.value.filter((item) => item.empresa.id === empresa)
-	await sendExport(payments);
-};
-
-const sendPayment = async (payments) => {
-	
-	if (payments.length === 0) return $toast.error('Selecione ao menos uma solicitação para pagamento!');
-	
-	loadingModal.value = true;
-
+const sendStatus = async (status, id) => {
 	try {
+		if(status === 8 && !justificativa.value) throw new Error('Justificativa é obrigatória para prosseguir!');
 
-        const ids = payments.map(payment => payment.id);
+		loadingModal.value = true;
 
-        const { success, message } = await postStatus({ id: ids, status: 6, justificativa: 'Pago' });
-        
+		const justificativaValue = confirm.value === 'disapprove' ? justificativa.value : 'Aprovado pelo Financeiro';
+
+		const { success, message } = await postStatus({ id, status, justificativa: justificativaValue });
+
 		if (!success) throw new Error(message);
 
-        $toast.success('Pagamento aprovado com sucesso');
-		await pushData();
+		$toast.success('Status alterado com sucesso');
 		loadingModal.value = false;
-        enableModal.confirm = false;
-        enableModal.allConfirm = false;
-        
-    } catch (error) {
-		console.error(error.message);
-        $toast.error(error.message);
-    } 
-};
-
-const sendExport = async (payments) => {
-	loadingModal.value = true;
-
-	try {
-		const paymentsToExport = payments.map((payment) => ({
-			pagamento_id: payment.id,
-			sigla: payment.usuario.setores[0].sigla,
-		}));
-
-		const { success, message, data } = await omie(paymentsToExport);
-
-		console.log(success, message, data)
-		
-		if(!success) throw new Error('Erro ao exportar:', message);
-
-		$toast.success('Exportação realizada com sucesso');
-
-
-		enableModal.link = true;
-		link.value = data;
-        loadingModal.value = false;
-
 		enableModal.confirm = false;
 		enableModal.allConfirm = false;
-		loadingModal.value = false;
 		await pushData();
 
 	} catch (error) {
-		console.log(error.message);
+		console.error(error.message);
 		$toast.error(error.message);
 	}
-	
-}
+};
+
 const pushData = async () => {
+	loadingTable.value = true;
 	try {
-		const { success, message, data } = await getPagamentoFinanceiro();
+		const { success, message, data } = await getPagamentoByScope('financeiroPendentes');
 		if(!success) throw new Error(message);
 
 		data.map((item) => {
@@ -527,9 +443,12 @@ const pushData = async () => {
 
 		itens.value = data;
 
+		loadingTable.value = false;
+
 	} catch (error) {	
 		console.error(error.message);
 		$toast.error('Erro ao buscar dados');
+		loadingTable.value = false;
 	}
 };
 

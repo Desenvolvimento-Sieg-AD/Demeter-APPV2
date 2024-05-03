@@ -281,24 +281,11 @@
 						</v-col>
 
 						<v-col cols="2">
-							<CustomInput
-								type="text"
-								mask="money"
-								required
-								label="Valor total"
-								v-model="form.valor_total"
-								hide-details
-							/>
+							<CustomInput type="text" mask="money" required label="Valor total" v-model="form.valor_total" hide-details />
 						</v-col>
 
 						<v-col cols="2">
-							<CustomInput
-								type="checkbox"
-								label="Urgência"
-								v-model="form.urgente"
-								hide-details
-								color="#118B9F"
-							/>
+							<CustomInput type="checkbox" label="Urgência" v-model="form.urgente" hide-details color="#118B9F" />
 						</v-col>
 
 					</v-row>
@@ -311,53 +298,31 @@
 								type="text"
 								:label="!tipos.descricao ? 'Descrição' : tipos.descricao"
 								v-model="form.dados_bancarios.outhers"
-								:mask="maskDescription"
+								:mask="form.tipo_id === 1 ? maskDescriptionPIX : maskDescriptionOuthers"
+								appen-innerColor="#118B9F"
+								append-inner-icon="mdi-content-copy"
+								@click:append-inner="pasteFromClipBoardDadosBancarios"
 								:required="tipos.obrigatorio"
 							/>
 						</v-col>
-					
 					</v-row>
 
 					<v-row class="pa-3 mt-n12" v-else>
 
 						<v-col>
-							<CustomInput
-								type="text"
-								mask="number"
-								label="Banco"
-								v-model="form.dados_bancarios.banco"
-								required
-							/>
+							<CustomInput type="text" mask="number" label="Banco" v-model="form.dados_bancarios.banco" required :maxLength="3"/>
 						</v-col>
 
 						<v-col>
-							<CustomInput
-								type="text"
-								mask="number"
-								label="Agência"
-								v-model="form.dados_bancarios.agencia"
-								required
-							/>
+							<CustomInput type="text" mask="number" label="Agência" v-model="form.dados_bancarios.agencia" required :maxLength="4" />
 						</v-col>
 
 						<v-col>
-							<CustomInput
-								type="text"
-								mask="number"
-								label="Conta"
-								v-model="form.dados_bancarios.conta"
-								required
-							/>
+							<CustomInput type="text" mask="number" label="Conta" v-model="form.dados_bancarios.conta" required />
 						</v-col>
 
 						<v-col>
-							<CustomInput
-								type="text"
-								mask="number"
-								label="Dígito"
-								v-model="form.dados_bancarios.digito"
-								required
-							/>
+							<CustomInput type="text" mask="number" label="Dígito" v-model="form.dados_bancarios.digito" required :maxLength="1"/>
 						</v-col>
 
 					</v-row>
@@ -365,20 +330,12 @@
 					<v-row v-if="form.urgente" class="pa-3 mt-n12">
 
 						<v-col>
-
-							<CustomInput
-								type="textarea"
-								:rows="1"
-								label="Justificativa da urgência"
-								v-model="form.justificativa_urgente"
-							/>
-
+							<CustomInput type="textarea" :required="form.urgente" :rows="1" label="Justificativa da urgência" v-model="form.justificativa_urgente" />
 						</v-col>
 
 					</v-row>
 
 				</v-card>
-
 
 				<div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
 					<v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()">
@@ -398,7 +355,10 @@ const dayjs = useDayjs();
 
 const { $toast } = useNuxtApp();
 import { getFileContent } from '@api/conversor';
-import { getFornecedor, getEmpresa, getPagamentoTipo, getCategorias, getGrupos, postPagamento, getProjects, getTiposChavePix, existNFEqual } from '@api';
+import { getFornecedor, getEmpresa, getPagamentoTipo, getCategorias, getGrupos, postPagamento, getProjects, getTiposChavePix, existNFEqual, getOnePayment, updatePagamento } from '@api';
+
+const router = useRouter()
+const route = useRoute();
 
 const form = ref(initFormState());
 const tiposFornecedor = getTiposFornecedor();
@@ -423,13 +383,20 @@ const disabledKey = computed(() => {
 	return chave.length > 44;
 });
 
+const routeId = computed(() => route?.query?.id)
+
 const documentRequired = computed(() => {
 	const type = paymentsType.value.find((tipo) => tipos.value?.id === tipo.id)
 	return type?.requer_documento
 })
 
-const maskDescription = computed(() => {
+const maskDescriptionPIX = computed(() => {
 	const tipo = chavesPix?.value.find((chave) => chave?.id === tipoChavePix.value)
+	return tipo?.mask
+})
+
+const maskDescriptionOuthers = computed(() => {
+	const tipo = paymentsType.value.find((tipo) => tipo.id === form.value.tipo_id)
 	return tipo?.mask
 })
 
@@ -464,10 +431,13 @@ const actionsForm = [
 		onClick: () => reset(),
 	},
 	{
-		title: 'Solicitar',
+		title: routeId.value ? 'Atualizar' : 'Salvar',
 		icon: 'mdi-currency-usd',
 		color: 'green',
-		onClick: () => sendForm(),
+		onClick: () => {
+			if(routeId.value) updatePayment(Number(routeId.value), form.value)
+			else sendForm()
+		},
 	},
 ];
 
@@ -510,6 +480,15 @@ const pasteFromClipboard = async () => {
 	}
 };
 
+const pasteFromClipBoardDadosBancarios = async () => {
+	try {
+		const text = await navigator.clipboard.readText();
+		form.value.dados_bancarios.outhers = text;
+	} catch (error) {
+		console.error('Erro ao acessar a área de transferência:', error);
+	}
+};
+
 const validPaymentType = () => {
 
 	tipos.value = false;
@@ -530,6 +509,7 @@ const documentFornecedor = computed(() => {
 const validGroup = async () => {
 	if (grupo.value) {
 		selectedCategories.value = categorias.value.filter((categoria) => categoria.grupo_id === grupo.value);
+		if(route?.query?.id) return
 		form.value.categoria_id = '';
 	}
 };
@@ -552,8 +532,8 @@ const validDocument = () => {
 		form.value.fornecedor.apelido = find.nome_fantasia;
 	} 
 
-	if(validCNPJ(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'juridico'
-	else if (validCPF(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'fisico'
+	if(validaCNPJ(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'juridico'
+	else if (validaCPF(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'fisico'
 	else form.value.fornecedor.tipo = null
 
 };
@@ -639,9 +619,29 @@ const sendForm = async () => {
 	} 
 };
 
+const updatePayment = async (id, data) => {
+	try {
+		console.log(data.fornecedor_id)
+		console.log(form.value.fornecedor.id)
+
+		data.fornecedor_id = form.value.fornecedor.id
+		data.dados_bancarios = JSON.stringify(data.dados_bancarios)
+
+		const { success, message } = await updatePagamento(id, form.value)
+
+		if(!success) throw new Error(message)
+
+		$toast.success(message)
+		setTimeout(() => router.push('/financeiro/aprovadas'), 750)
+
+	} catch (error) {
+		console.log('Erro ao atualizar pagamento', error.message)
+		$toast.error('Erro ao atualizar pagamento')
+	}
+}
+
 const pushData = async () => {
 	try {
-
 		const [fornecedor, grupo, categoria, empresa, pagamento, projeto] = await Promise.all([
 			getFornecedor(),
 			getGrupos(),
@@ -670,6 +670,45 @@ const pushData = async () => {
 		console.error('Erro ao buscar dados:', error);
 	}
 };
+
+const getPagamento = async (id) => {
+    try {
+        const { success, data } = await getOnePayment(id, 'geral');
+
+        if (!success) throw new Error('Erro ao buscar pagamento');
+
+        form.value = data;
+
+        grupo.value = data.categoria.grupo.id;
+        form.value.categoria_id = data.categoria_id;
+        projeto_id.value = data.projeto_id;
+        tipoChavePix.value = data.tipo_chave_pix_id;
+        form.value.data_vencimento = dayjs(data.data_vencimento).format('YYYY-MM-DD');
+
+        const dados_bancarios = JSON.parse(data.dados_bancarios);
+
+        if (form.value.tipo_id === 1) {
+            const chave_pix = dados_bancarios.chave_pix.replace(/[\D]/g, '');
+            dados_bancarios.outhers = chave_pix;
+        }
+
+        if (form.value.tipo_id === 3) {
+            dados_bancarios.banco = dados_bancarios.banco;
+            dados_bancarios.agencia = dados_bancarios.agencia;
+            dados_bancarios.conta = dados_bancarios.conta;
+            dados_bancarios.digito = dados_bancarios.digito;
+        }
+
+        form.value.dados_bancarios = dados_bancarios;
+
+		console.log('Dados do pagamento:', form.value);
+
+    } catch (error) {
+        console.error(error.message);
+        $toast.error(error.message);
+    }
+};
+
 
 const getTiposChave = async () => {
 	try {
@@ -793,6 +832,13 @@ const clearFornecedor = () => {
 	form.value.fornecedor.documento = null;
 };
 
+onMounted(async () => {
+	if(routeId.value) {
+		await pushData()
+		await getPagamento(routeId.value)
+	}
+});
+
 // * Watchers
 
 // watch(() => selectedCategories.value, async () => {
@@ -802,6 +848,7 @@ const clearFornecedor = () => {
 
 watch(() => form.value.tipo_id, async (nv, oV) => {
 	if(nv !== oV){
+		if(route?.query?.id) return
 		tipoChavePix.value = null
 		form.value.descricao = null
 	}

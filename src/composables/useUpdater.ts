@@ -22,7 +22,6 @@ export default function useUpdater() {
   if (alreadyInitialized.value) {
     alreadyInitialized.value = true
     electron.ipcRenderer.on('updater:statusChanged', (_event, args) => {
-      console.log('updater:statusChanged', args)
       currentStatus.value = args[0]
       progress.value = args[1]
       console.warn({ currentStatus: currentStatus.value })

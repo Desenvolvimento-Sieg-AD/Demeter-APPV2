@@ -19,7 +19,7 @@
 					enableAddButton
 					createTitle="NOVO PAGAMENTO"
 					createText="Ir para página de solicitação"
-					@add="router.push(`/solicitar_pagamento`);"
+					@add="router.push(`/novo/pagamento`);"
 					pager
 				>
 					<template #item-categoria="{ data: { data: item } }">
@@ -36,13 +36,13 @@
 					
 					<template #item-status="{ data: { data: item } }">
 						<div class="template">
-							<CustomText
-								:title="item.movimentacoes_pagamento[0].status_pagamento.nome"
-								class="ml-2"
-								:color="item.movimentacoes_pagamento[0].status_pagamento.cor"
-								size="14"
-								bold
-							/>
+
+							<v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
+								<p class="font-weight-bold">
+									{{ item.movimentacoes_pagamento[0].status_pagamento.label }}
+								</p>
+							</v-chip>
+							
 						</div>
 					</template>
 
@@ -153,15 +153,20 @@
 
 			</LayoutForm>
 
-			<LazyModalPagamento v-model:enable="enableModal.view" :id="viewPayment.id" />
+			<LazyModalPagamento 
+				v-model:enable="enableModal.pagamento"
+				:id="pagamento.id"
+				:allowEdit="allowEdit" 
+				@getPagamento="pushData()"
+			/>
 
 			<LazyModalConfirmCancel
 				v-model:enable="enableModal.cancel"
 				v-model:justificativa="justificativa"
-				:item="viewPayment"
+				:item="pagamento"
 				:actions="modalActions"
 			/>
-			<LazyModalUpload v-model:enable="enableModal.upload" :item="viewPayment" @update="pushData" :type="typeUpload" />
+			<LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="pushData" :type="typeUpload" />
 	</div>
 </template>
 
@@ -169,7 +174,7 @@
 
 //* IMPORTS
 
-import { getPagamentoPorUsuario, postStatus } from '@api';
+import { getPagamentoByScope, postStatus } from '@api';
 const { $toast } = useNuxtApp();
 const router = useRouter();
 const access = useRuntimeConfig();
@@ -178,31 +183,29 @@ const columns = getColumns('usuario');
 //* DATA
 
 const path = access.public.PAGAMENTO_PATH;
-// const nick = (await window.electron.invoke('get-username')).toUpperCase();
-// const title = `Solicitações de pagamento - ${nick}`;
 
 const loading = ref(false);
+const allowEdit = ref(true);
+const pagamento = ref({});
 const pagamentos = ref([]);
 const typeUpload = ref(null);
-const viewPayment = ref({});
 const justificativa = ref(null);
 
 const enableModal = reactive({
-	view: false,
 	cancel: false,
 	upload: false,
+	pagamento: false,
 });
 
 // * ACTIONS
 
-const actions = [
+const actions = computed(() => [
 	{
 		icon: 'mdi-eye',
 		tooltip: 'Ver detalhes',
 		click: (item) => {
-			console.log(item)
-			viewPayment.value = item;
-			enableModal.view = true;
+			pagamento.value = item;
+			enableModal.pagamento = true;
 		},
 		visible: true,
 		active: true,
@@ -212,13 +215,22 @@ const actions = [
 		icon: 'mdi-cancel',
 		tooltip: 'Cancelar',
 		click: (item) => {
-			viewPayment.value = item;
+			pagamento.value = item;
 			enableModal.cancel = true;
 		},
-		disabled: (item) => !(item.movimentacoes_pagamento[0].status_pagamento.nome === 'Pendente'),
+		disabled: (item) => !(item.movimentacoes_pagamento[0].status_pagamento.label === 'Pendente'),
 		type: 'cancel',
 	},
-]
+	{
+		icon: 'mdi-pencil',
+		tooltip: 'Editar',
+		disabled: () => true,
+		click: (item) => {
+			pagamento.value = item;
+			enableModal.pagamento = true;
+		}
+	}
+])
 
 const modalActions = [
 	{
@@ -236,7 +248,7 @@ const modalActions = [
 		loading: loading.value,
 		click: () => {
 			loading.value = true;
-			cancelPayment([viewPayment.value.id]);
+			cancelPayment([pagamento.value.id]);
 		},
 	},
 ]
@@ -272,14 +284,12 @@ const documentByType = (tipo, documento) => tipo === 'juridico' ? maskCnpj(docum
 const isNotStatusAllowed = (status) => status !== 'Recusado' && status !== 'Cancelado';
 
 const uploadFile = (item, tipo) => {
-	viewPayment.value = item;
+	pagamento.value = item;
 	type.value = tipo;
 	enableModal.upload = true;
 };
 
 const cancelPayment = async (ids) => {
-
-	if (ids.length === 0) return $toast.error('Selecione ao menos um pagamento');
 
 	if (!justificativa.value) return $toast.error('Informe a justificativa');
 
@@ -292,26 +302,25 @@ const cancelPayment = async (ids) => {
 
 		loading.value = false;
 		enableModal.cancel = false;
-
 		$toast.success('Pagamento cancelado com sucesso');
 		await pushData();
-		justificativa.value = null;
 
 	} catch (error) {
 		console.log(error.message)
 		$toast.error(error.message);
 	}
+	justificativa.value = null;
 
 };
 
 const pushData = async () => {
 
-	const { success, data } = await getPagamentoPorUsuario();
+	const { success, data } = await getPagamentoByScope('usuario');
 
 	if (success) {
 
 		data.map((item) => {
-			item.status = item.movimentacoes_pagamento[0].status_pagamento.nome;
+			item.status = item.movimentacoes_pagamento[0].status_pagamento.label;
 			item.lote = item.movimentacoes_pagamento.at().lote;
 		});
 

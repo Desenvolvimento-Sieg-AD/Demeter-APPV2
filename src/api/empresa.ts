@@ -17,3 +17,16 @@ export async function getConta() {
 		return { success: false, message: error, data: null };
 	}
 }
+
+export async function getClientByPayment(){
+	try {
+		const { success, message, data } = await useApi(`/empresa/clientByPayment`);
+
+		if (!success) throw new Error(message)
+
+		return { success, message, data }
+
+	} catch (error) {
+		return { success: false, message: error}
+	}
+}

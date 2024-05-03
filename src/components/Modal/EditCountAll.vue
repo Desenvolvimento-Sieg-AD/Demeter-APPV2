@@ -2,7 +2,7 @@
 	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="600px">
 		<template #content>
 			<v-container class="txt-center">
-				<CustomText :title="message" class="ml-2" color="#118B9F" size="20" :bold="true" />
+				<CustomText title="Editar contas pagadoras dos pagamentos selecionados" class="ml-2" color="#118B9F" size="20" :bold="true" />
 				<br />
 
 				<div class="w-full d-flex mt-2">
@@ -28,7 +28,7 @@
 							:items="contaSelecionada"
 							v-model="conta_id"
 							itemValue="id"
-							itemTitle="numero"
+							itemTitle="descricao"
 							hide-details
 						/>
 					</v-col>
@@ -104,7 +104,9 @@ const verifyConta = () => {
 };
 
 const alter = async () => {
+	
 	const ids = props.items.map((item) => item.id);
+	console.log(ids)
 
 	loading.value = true;
 	const cont = conta_id.value.id ?? conta_id.value;

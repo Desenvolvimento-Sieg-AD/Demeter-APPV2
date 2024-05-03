@@ -36,11 +36,12 @@ const props = defineProps({
 	title: { type: String, default: 'Cancelar Pagamento' },
 	actions: { type: Array, default: () => [] },
 	item: { type: Object, required: true },
+    justificativa: { type: String, default: '' }
 });
 
 //* EMITS
 
-const emit = defineEmits('close');
+const emit = defineEmits(['close', 'update:justificativa']);
 
 //* COMPUTED
 
@@ -50,15 +51,11 @@ const enableValue = computed({
 });
 
 const updateMessage = computed({
-    get: () => props.message,
-    set: (value) => emit('update:message', value)
+    get: () => props.jusuficativa,
+    set: (value) => emit('update:justificativa', value)
 })
 
 const date = dayjs(props.item.data_vencimento).format('DD/MM/YYYY')
-
-watch(() => props.enable, (value) => {
-    if(!value) updateMessage.value = null
-})
 
 </script>
 

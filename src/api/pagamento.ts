@@ -16,7 +16,6 @@ interface StatusManage {
 	lote: boolean
 	cancelamento: boolean
 }
-  
 
 export async function getPagamentoTipo() {
   try {
@@ -28,9 +27,10 @@ export async function getPagamentoTipo() {
   }
 }
 
-export async function getPagamentoPorUsuario() {
+export async function getPagamentoByScope(scope: string) {
   try {
-    const { success, message, data } = await useApi(`/pagamento/usuario/usuarioScope`)
+
+    const { success, message, data } = await useApi(`/pagamento/scope/${scope}`)
     if (!success) throw new Error(message)
     return { success, message, data }
   } catch (error) {
@@ -48,9 +48,9 @@ export async function getProjects() {
   }
 }
 
-export async function getPagamento() {
+export async function getOnePayment(id: number, scope: string) {
   try {
-    const { success, message, data } = await useApi(`/pagamento/scope/geralScope`)
+    const { success, message, data } = await useApi(`/pagamento/${scope}/${id}`)
     if (!success) throw new Error(message)
 
     return { success, message, data }
@@ -59,34 +59,15 @@ export async function getPagamento() {
   }
 }
 
-export async function findOnePayment(id: number) {
+export async function getPagamentoByClient(client_id: number){
   try {
-    const { success, message, data } = await useApi(`/pagamento/financeiroScope/${id}`)
-    if (!success) throw new Error(message)
 
-    return { success, message, data }
-  } catch (error) {
-    return { success: false, message: error, data: null }
-  }
-}
+      const { success, message, data } = await useApi(`/pagamento/cliente/${client_id}`)
 
-export async function getPagamentoGerencia() {
-  try {
-    const { success, message, data } = await useApi(`/pagamento/scope/gerenciaScope`)
-    if (!success) throw new Error(message)
+      if (!success) throw new Error(message)
 
-    return { success, message, data }
-  } catch (error) {
-    return { success: false, message: error, data: null }
-  }
-}
+      return { success, message, data }
 
-export async function getPagamentoFinanceiro() {
-  try {
-    const { success, message, data } = await useApi(`/pagamento/scope/financeiroScope`)
-
-    if (!success) throw new Error(message)
-    return { success, message, data }
   } catch (error) {
     return { success: false, message: error, data: null }
   }
@@ -104,6 +85,22 @@ export async function postPagamento(formData: FormData) {
 
     if (!success) throw new Error(message)
     return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error, data: null }
+  }
+}
+
+export async function sendPaymentsToOmie(payment_id: number) {
+  try {
+
+      const { success, message, data } = await useApi(`/pagamento/omie`, {
+        method: 'POST',
+        body: {payment_id}
+      })
+  
+      if (!success) throw new Error(message)
+      return { success, message, data }
+   
   } catch (error) {
     return { success: false, message: error, data: null }
   }
