@@ -4,21 +4,11 @@
         
         <v-form ref="form">
 
-            <v-card class="card-box" flat>
-
-                <v-row no-gutters class="row-text">
-				    <CustomText title="Cliente" color="#118B9F" size="20" :bold="true" />
-                </v-row>
-                
-                <v-row no-gutters class="row-input-header">
-                    <v-col cols="5">
-                        <CustomInput label="Selecione o cliente" type="autocomplete" v-model="selectedClient" :items="clients" itemValue="id" itemTitle="apelido" variant="solo-filled" />
-                    </v-col>
-                    <v-col class="text-header mb-5">
-                        <CustomText :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
-                    </v-col>
-                </v-row>
-
+            <v-card class="card-box d-flex align-center" flat>
+                <v-col cols="4">
+                    <CustomText class="mb-4" title="Cliente" color="#118B9F" size="20" :bold="true" />
+                    <CustomInput label="Selecione o cliente" type="autocomplete" v-model="selectedClient" :items="clients" itemValue="id" itemTitle="apelido" variant="solo-filled" />
+                </v-col >
             </v-card>
 
             <LayoutLoading v-if="loadingPayments" />
@@ -32,6 +22,7 @@
                             Pagar
                             <v-tooltip text="Pagar os pagamentos que foram enviados com sucesso" activator="parent" location="top"></v-tooltip>
                         </v-btn>
+                        <CustomText class="mr-5" v-if="countPayments > 0" :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
                         <v-chip color="#F68A1A" text="Pagamentos aprovados pela gerência"></v-chip>
                     </div>
 
@@ -216,10 +207,11 @@ const getPaymentByClient = async () => {
 }
 
 const sendOmie = async () => {
-    loading.value = true;
 
-    let errorCount = 0;
-    let successCount = 0;
+    if(countPayments.value === 0) return $toast.error('Selecione ao menos um pagamento');
+
+    let errorCount = 0, successCount = 0;
+
     const paymentsToSend = payments.value.filter(payment => payment.selectedOmie);
 
     for await (const payment of paymentsToSend) {
