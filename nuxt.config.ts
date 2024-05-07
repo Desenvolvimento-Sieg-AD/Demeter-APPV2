@@ -60,6 +60,7 @@ export default defineNuxtConfig({
 	runtimeConfig: {
 		public: {
 			apiURL: API_URL,
+			PAGAMENTO_PATH: process.env.NUXT_PAGAMENTO_PATH,
 		},
 	},
 	vuetify: {

@@ -158,8 +158,11 @@ export async function postStatus(status: StatusManage) {
 export async function updatePagamento(id: Number, payload: PagamentoUpdate) {
   try {
     const { success, message, data } = await useApi(`/pagamento/${id}`, {
-      method: 'POST',
-      body: payload
+      method: 'PUT',
+      body: payload,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     })
 
     if (!success) throw new Error(message)

@@ -10,7 +10,7 @@
                     <CustomInput label="Valor Total" mask="money" v-model="item.valor_total" disabled/>
                 </v-col>
                 <v-col cols="4">
-                    <CustomInput label="Data de Vencimento" v-model="date" disabled/>
+                    <CustomInput label="Data de Vencimento" v-model="item.data_vencimento" disabled/>
                 </v-col>
                 <v-col class="mt-n7">
                     <CustomInput label="Motivo" v-model="item.motivo" :rows="2" disabled type="textarea"/>
@@ -51,11 +51,9 @@ const enableValue = computed({
 });
 
 const updateMessage = computed({
-    get: () => props.jusuficativa,
+    get: () => props.justificativa,
     set: (value) => emit('update:justificativa', value)
 })
-
-const date = dayjs(props.item.data_vencimento).format('DD/MM/YYYY')
 
 </script>
 

@@ -553,6 +553,11 @@
 		<template #selection="{ fileNames, index }" v-if="$slots.selection">
 			<slot name="selection" v-bind="{ fileNames, index }"> </slot>
 		</template>
+
+		<template #message="{ message }" v-if="$slots.message">
+			<slot name="message" v-bind="{ message }"> </slot>
+		</template>
+
 	</v-file-input>
 
 	<v-combobox

@@ -11,55 +11,8 @@
 
 					<CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
-					<v-row class="pa-3">
+					<ModalPagamentoCategoria v-model:form="form" />
 
-						<v-col cols="2" md="3">
-							<CustomInput
-								required
-								hide-details
-								itemValue="id"
-								v-model="grupo"
-								:items="grupos"
-								itemTitle="nome"
-								type="autocomplete"
-								label="Grupo do pedido"
-							/>
-						</v-col>
-
-						<v-col cols="4" md="3">
-							<CustomInput
-								required
-								hide-details
-								itemValue="id"
-								itemTitle="nome"
-								label="Categoria"
-								:disabled="!grupo"
-								ref="categoriaRef"
-								type="autocomplete"
-								v-model="form.categoria_id"
-								:items="selectedCategories"
-							/>
-						</v-col>
-
-						<v-col cols="12" md="6">
-							<CustomInput
-								type="file"
-								hide-details
-								v-model="form.nf"
-								:loading="loadingProcessFile"
-								:disabled="!form.categoria_id"
-								label="Nota fiscal/Cupom fiscal"
-								accept="image/*,application/pdf"
-								append-inner-icon="mdi-file-upload-outline"
-							>
-								<template #selection="{ fileNames }">
-									<span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
-								</template>
-
-							</CustomInput>
-						</v-col>
-
-					</v-row>
 				</v-card>
 
 				<v-divider class="mt-2 mb-2" />
@@ -68,62 +21,8 @@
 
 					<CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
-					<v-row class="pa-3">
+					<ModalPagamentoFornecedor v-model:form="form"  />
 
-						<v-col cols="12" md="3">
-							<CustomInput
-								required
-								type="text"
-								hide-details
-								:change="validDocument()"
-								:label="documentFornecedor"
-								v-model="form.fornecedor.documento"
-								appen-innerColor="#118B9F"
-								append-inner-icon="mdi-content-copy"
-								@click:append-inner="pasteFromClipboard"
-								:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
-							/>
-						</v-col>
-
-						<v-col cols="12" md="3">
-							<CustomInput
-								required
-								hide-details
-								type="select"
-								itemTitle="nome"
-								itemValue="value"
-								label="Tipo fornecedor"
-								:items="tiposFornecedor"
-								v-model="form.fornecedor.tipo"
-								:disabled="fornecedorExistente"
-								append-inner-icon="mdi-card-account-details-outline"
-							/>
-						</v-col>
-
-						<v-col cols="12" md="6">
-							<CustomInput
-								required
-								hideDetails
-								type="combobox"
-								label="Fornecedor"
-								:items="fornecedores"
-								itemValue="razao_social"
-								itemTitle="razao_social"
-								:onchange="verifyFornecedor()"
-								v-model="form.fornecedor.nome"
-								append-inner-icon="mdi-shopping-outline"
-							/>
-						</v-col>
-
-						<v-col cols="12" md="3">
-							<CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" />
-						</v-col>
-
-						<v-col cols="12" md="9">
-							<CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :maxLength="50" mask="number" />
-						</v-col>
-
-					</v-row>
 				</v-card>
 				<v-divider class="mt-2 mb-2" />
 
@@ -131,46 +30,7 @@
 
 					<CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
-					<v-row class="pa-3">
-
-						<v-col cols="12" md="6">
-
-							<CustomInput
-								required
-								type="select"
-								hide-details
-								itemValue="id"
-								itemTitle="nome"
-								:items="empresas"
-								label="Empresa pagadora"
-								v-model="form.empresa_id"
-								append-inner-icon="mdi-domain"
-							/>
-
-						</v-col>
-
-						<v-col cols="12" md="6">
-
-							<CustomInput
-								type="file"
-								persistent-hint
-								label="Documento"
-								v-model="form.doc"
-								:required="documentRequired"
-								accept="image/*,application/pdf"
-								hint="Ex: Boleto, Comprovante, Certidão"
-								append-inner-icon="mdi-file-upload-outline"
-							>
-								<template #selection="{ fileNames }">
-									<span class="text-truncate">
-										{{ defineFileTitle(fileNames[0]) }}
-									</span>
-								</template>
-
-							</CustomInput>
-						</v-col>
-
-					</v-row>
+					<ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
 
 				</v-card>
 
@@ -180,46 +40,7 @@
 
 					<CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
-					<v-row class="pa-2">
-
-						<v-col cols="12" md="4">
-							<CustomInput
-								required
-								hide-details
-								label="Motivo"
-								type="textarea"
-								:no-resize="false"
-								v-model="form.motivo"
-								append-inner-icon="mdi-chat-question-outline"
-							/>
-						</v-col>
-
-						<v-col cols="8">
-							<CustomInput
-								hide-details
-								type="textarea"
-								:no-resize="false"
-								label="Observações"
-								v-model="form.dados_complementares"
-							/>
-						</v-col>
-
-						<v-col cols="12">
-							<CustomInput
-								v-if="user.setor.exibir_projetos"
-								hide-details
-								itemValue="id"
-								label="Projetos"
-								:required="true"
-								:items="projetos"
-								itemTitle="name"
-								type="autocomplete"
-								v-model="projeto_id"
-								append-inner-icon="mdi-briefcase-plus-outline"
-							/>
-						</v-col>
-
-					</v-row>
+					<ModalPagamentoObservacoes v-model:form="form" :user="user" />
 
 				</v-card>
 
@@ -229,111 +50,7 @@
 
 					<CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
-					<v-row class="pa-3">
-
-						<v-col>
-
-							<CustomInput
-								append-inner-icon="mdi-cash-clock"
-								type="select"
-								required
-								label="Forma de pagamento"
-								:items="paymentsType"
-								v-model="form.tipo_id"
-								itemValue="id"
-								itemTitle="nome"
-								hide-details
-								:change="validPaymentType()"
-							/>
-						</v-col>
-
-						<v-col v-if="form.tipo_id === 1">
-							<CustomInput
-								v-model="tipoChavePix"
-								append-inner-icon="mdi-key"
-								type="select"
-								required
-								:items="chavesPix"
-								itemTitle="nome"
-								itemValue="id"
-								label="Tipo de Chave"
-								/>
-						</v-col>
-
-						<v-col v-else>
-
-							<div class="mt-5">
-								<v-divider color="#118B9F"></v-divider>
-							</div>
-
-						</v-col>
-
-						<v-col cols="2">
-							<CustomInput
-								type="date"
-								:required="true"
-								label="Data de vencimento"
-								v-model="form.data_vencimento"
-								:messages="messagesDate()"
-								:min="minDate"
-								:rules="[dateRules]"
-							/>
-						</v-col>
-
-						<v-col cols="2">
-							<CustomInput type="text" mask="money" required label="Valor total" v-model="form.valor_total" hide-details />
-						</v-col>
-
-						<v-col cols="2">
-							<CustomInput type="checkbox" label="Urgência" v-model="form.urgente" hide-details color="#118B9F" />
-						</v-col>
-
-					</v-row>
-
-					<v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
-
-						<v-col>
-							<CustomInput
-								:disabled="!tipos.descricao"
-								type="text"
-								:label="!tipos.descricao ? 'Descrição' : tipos.descricao"
-								v-model="form.dados_bancarios.outhers"
-								:mask="form.tipo_id === 1 ? maskDescriptionPIX : maskDescriptionOuthers"
-								appen-innerColor="#118B9F"
-								append-inner-icon="mdi-content-copy"
-								@click:append-inner="pasteFromClipBoardDadosBancarios"
-								:required="tipos.obrigatorio"
-							/>
-						</v-col>
-					</v-row>
-
-					<v-row class="pa-3 mt-n12" v-else>
-
-						<v-col>
-							<CustomInput type="text" mask="number" label="Banco" v-model="form.dados_bancarios.banco" required :maxLength="3"/>
-						</v-col>
-
-						<v-col>
-							<CustomInput type="text" mask="number" label="Agência" v-model="form.dados_bancarios.agencia" required :maxLength="4" />
-						</v-col>
-
-						<v-col>
-							<CustomInput type="text" mask="number" label="Conta" v-model="form.dados_bancarios.conta" required />
-						</v-col>
-
-						<v-col>
-							<CustomInput type="text" mask="number" label="Dígito" v-model="form.dados_bancarios.digito" required :maxLength="1"/>
-						</v-col>
-
-					</v-row>
-
-					<v-row v-if="form.urgente" class="pa-3 mt-n12">
-
-						<v-col>
-							<CustomInput type="textarea" :required="form.urgente" :rows="1" label="Justificativa da urgência" v-model="form.justificativa_urgente" />
-						</v-col>
-
-					</v-row>
+					<ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
 
 				</v-card>
 
@@ -351,77 +68,40 @@
 
 <script setup>
 
-const dayjs = useDayjs();
+// * IMPORTS
+
+import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api';
 
 const { $toast } = useNuxtApp();
-import { getFileContent } from '@api/conversor';
-import { getFornecedor, getEmpresa, getPagamentoTipo, getCategorias, getGrupos, postPagamento, getProjects, getTiposChavePix, existNFEqual, getOnePayment, updatePagamento } from '@api';
 
-const router = useRouter()
-const route = useRoute();
-
-const form = ref(initFormState());
-const tiposFornecedor = getTiposFornecedor();
-
-const { fornecedores, empresas, grupos, categorias, fornecedorExistente, grupo, selectedCategories, projetos, projeto } = useInitRefs();
-
-const formValidate = ref(null)
-
+const dayjs = useDayjs();
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 
-const tipos = ref(null);
-const loading = ref(false);
-const chavesPix = ref([])
-const projeto_id = ref(null);
-const categoriaRef = ref(null);
-const paymentsType = ref([]);
-const tipoChavePix = ref(null)
-const loadingProcessFile = ref(false);
+const route = useRoute();
+const router = useRouter()
+const form = ref(initFormState());
 
-const disabledKey = computed(() => {
-	const chave = form.value.chave_nf?.toString() || '';
-	return chave.length > 44;
-});
+const access = useRuntimeConfig();
+const path = access.public.PAGAMENTO_PATH;
+
+//* DATA
+
+const loading = ref(false);
+const paymentsType = ref([]);
+const formValidate = ref(null)
+
+// * COMPUTEDS
 
 const routeId = computed(() => route?.query?.id)
 
 const documentRequired = computed(() => {
-	const type = paymentsType.value.find((tipo) => tipos.value?.id === tipo.id)
+	const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
 	return type?.requer_documento
 })
 
-const maskDescriptionPIX = computed(() => {
-	const tipo = chavesPix?.value.find((chave) => chave?.id === tipoChavePix.value)
-	return tipo?.mask
-})
-
-const maskDescriptionOuthers = computed(() => {
-	const tipo = paymentsType.value.find((tipo) => tipo.id === form.value.tipo_id)
-	return tipo?.mask
-})
-
-const isExpired = computed(() => {
-	return dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day'));
-});
-
-const minDate = computed(() => {
-    if (form.value.tipo_id === 5 || form.value.tipo_id === 6) return dayjs().subtract(30, 'day').format('YYYY-MM-DD');
-    return dayjs().format('YYYY-MM-DD');
-});
+const isExpired = computed(() => dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')));
 
 const validDateToCard = computed(() => isExpired.value && (form.value.tipo_id !== 5 && form.value.tipo_id !== 6))
-
-const defineFileTitle = (fileName) => {
-	if (fileName.length > 20) {
-		return fileName.replace(/.\w+$/g, '');
-	}
-	return fileName;
-};
-
-const messagesDate = () => {
-	if (isExpired.value && (validDateToCard.value)) return 'Data de vencimento inválida';
-	return '';
-};
 
 const actionsForm = [
 	{
@@ -441,145 +121,38 @@ const actionsForm = [
 	},
 ];
 
-const dateRules = (v) => {
-    if (form.value.tipo_id === 5 || form.value.tipo_id === 6) {
-        return dayjs(v).isAfter(dayjs().subtract(30, 'day')) || 'Data inválida';
-    }
-    return true;
-};
-
-const verifyFornecedor = () => {
-
-	fornecedorExistente.value = false;
-	const existFornecedor = fornecedores.value.some((fornecedor) => fornecedor.razao_social === form.value.fornecedor.nome) 
-
-	if (existFornecedor) {
-
-		fornecedorExistente.value = true;
-
-		const fornecedor = fornecedores.value.find((fornecedor) => fornecedor.razao_social === form.value.fornecedor.nome);
-
-		form.value.fornecedor.id = fornecedor.id;
-		form.value.fornecedor.tipo = fornecedor.tipo;
-		form.value.fornecedor.apelido = fornecedor.nome_fantasia;
-
-		form.value.fornecedor.documento = maskCnpj(fornecedor.documento);
-
-		if (fornecedor.tipo === 'fisico') form.value.fornecedor.documento = maskCpf(fornecedor.documento);
-
-	} 
-
-};
-
-const pasteFromClipboard = async () => {
-	try {
-		const text = await navigator.clipboard.readText();
-		form.value.fornecedor.documento = text;
-	} catch (error) {
-		console.error('Erro ao acessar a área de transferência:', error);
-	}
-};
-
-const pasteFromClipBoardDadosBancarios = async () => {
-	try {
-		const text = await navigator.clipboard.readText();
-		form.value.dados_bancarios.outhers = text;
-	} catch (error) {
-		console.error('Erro ao acessar a área de transferência:', error);
-	}
-};
-
-const validPaymentType = () => {
-
-	tipos.value = false;
-
-	const type = paymentsType.value.find((type) => type.id === form.value.tipo_id);
-
-	if (type) tipos.value = type;
-};
-
-const documentFornecedor = computed(() => {
-	const tipo = form.value.fornecedor?.tipo;
-
-	if (!tipo || tipo == 'juridico') return 'CNPJ';
-	else if (tipo == 'fisico') return 'CPF';
-	else return 'CNPJ';
-})
-
-const validGroup = async () => {
-	if (grupo.value) {
-		selectedCategories.value = categorias.value.filter((categoria) => categoria.grupo_id === grupo.value);
-		if(route?.query?.id) return
-		form.value.categoria_id = '';
-	}
-};
-
-const validDocument = () => {
-	if (!form.value.fornecedor.documento) {
-		form.value.fornecedor.tipo = null;
-		return;
-	}
-	const documento = form.value.fornecedor.documento.replace(/\D/g, '');
-	const find = fornecedores.value.find((fornecedor) => fornecedor.documento === documento);
-
-	form.value.fornecedor.nome = null;
-	form.value.fornecedor.apelido = null;
-	form.value.fornecedor.id = null;
-
-	if (find) {
-		form.value.fornecedor.id = find.id;
-		form.value.fornecedor.nome = find.razao_social;
-		form.value.fornecedor.apelido = find.nome_fantasia;
-	} 
-
-	if(validaCNPJ(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'juridico'
-	else if (validaCPF(form.value.fornecedor.documento)) form.value.fornecedor.tipo = 'fisico'
-	else form.value.fornecedor.tipo = null
-
-};
+// * METHODS
 
 function buildFormData() {
 
-	const formData = new FormData();
+	const formData = new FormData({
+		acceptCharset: 'utf-8',
+	});
 
-	const {
-		fornecedor,
-		empresa_id,
-		tipo_id,
-		motivo,
-		categoria_id,
-		dados_complementares,
-		valor_total,
-		data_vencimento,
-		nf,
-		doc,
-		numero_nf,
-		chave_nf,
-		urgente,
-		dados_bancarios
-	} = form.value;
+	const doc = form.value.doc ? [form.value.doc] : null;
 
-	formData.append('motivo', motivo);
-	formData.append('tipo_id', tipo_id);
-	formData.append('urgente', urgente);
-	formData.append('chave_nf', chave_nf);
-	formData.append('numero_nf', numero_nf);
-	formData.append('empresa_id', empresa_id);
-	formData.append('projeto_id', projeto_id.value);
-	formData.append('valor_total', valor_total);
-	formData.append('categoria_id', categoria_id);
-	formData.append('fornecedor_id', fornecedor.id);
-	formData.append('tipo_chave_pix', tipoChavePix.value )
-	formData.append('fornecedor_tipo', fornecedor.tipo);
-	formData.append('dados_bancarios', JSON.stringify(dados_bancarios));
-	formData.append('data_vencimento', data_vencimento);
-	formData.append('fornecedor_nome', fornecedor.nome);
-	formData.append('fornecedor_apelido', fornecedor.apelido);
-	formData.append('fornecedor_documento', fornecedor.documento);
-	formData.append('dados_complementares', dados_complementares);
+	console.log(doc)
+	formData.append('motivo', form.value.motivo);
+	formData.append('tipo_id', form.value.tipo_id);
+	formData.append('urgente', form.value.urgente);
+	formData.append('chave_nf', form.value.chave_nf);
+	formData.append('numero_nf', form.value.numero_nf);
+	formData.append('empresa_id', form.value.empresa_id);
+	formData.append('projeto_id', form.value.projeto_id);
+	formData.append('valor_total', form.value.valor_total);
+	formData.append('categoria_id', form.value.categoria_id);
+	formData.append('fornecedor_id', form.value.fornecedor.id);
+	formData.append('tipo_chave_pix', form.value.tipo_chave_pix )
+	formData.append('fornecedor_tipo', form.value.fornecedor.tipo);
+	formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios));
+	formData.append('data_vencimento', form.value.data_vencimento);
+	formData.append('fornecedor_nome', form.value.fornecedor.nome);
+	formData.append('fornecedor_apelido', form.value.fornecedor.apelido);
+	formData.append('fornecedor_documento', form.value.fornecedor.documento);
+	formData.append('dados_complementares', form.value.dados_complementares);
 	formData.append('justificativa_urgente', form.value.justificativa_urgente)
 
-	if (nf && nf.length > 0) formData.append('nf', nf[0]);
+	if (form.value.nf && form.value.nf.length > 0) formData.append('nf', form.value.nf[0]);
 	
 	if (doc && doc.length > 0) {
 		for (let i = 0; i < doc.length; i++) {
@@ -590,11 +163,13 @@ function buildFormData() {
 	return formData;
 }
 
+
 const sendForm = async () => {
 	loading.value = true;
 	try {
 
 		const { valid } = await formValidate.value.validate()
+
 		if(!valid) throw new Error('Preencha os campos obrigatórios')
 
 		if (validDateToCard.value) {
@@ -610,7 +185,7 @@ const sendForm = async () => {
 		$toast.success(message);
 
 		loading.value = false;
-		await pushData();
+		await definePaymentImportant();
 		reset();
 
 	} catch (error) {
@@ -621,17 +196,15 @@ const sendForm = async () => {
 
 const updatePayment = async (id, data) => {
 	try {
-		console.log(data.fornecedor_id)
-		console.log(form.value.fornecedor.id)
 
-		data.fornecedor_id = form.value.fornecedor.id
-		data.dados_bancarios = JSON.stringify(data.dados_bancarios)
+		const payload = buildFormData()
 
-		const { success, message } = await updatePagamento(id, form.value)
+		const { success, message } = await updatePagamento(id, payload)
 
 		if(!success) throw new Error(message)
 
 		$toast.success(message)
+
 		setTimeout(() => router.push('/financeiro/aprovadas'), 750)
 
 	} catch (error) {
@@ -640,145 +213,90 @@ const updatePayment = async (id, data) => {
 	}
 }
 
-const pushData = async () => {
+const definePaymentImportant = async () => {
 	try {
-		const [fornecedor, grupo, categoria, empresa, pagamento, projeto] = await Promise.all([
-			getFornecedor(),
-			getGrupos(),
-			getCategorias(),
-			getEmpresa(),
-			getPagamentoTipo(),
-			getProjects(),
-		]);;
+		const { data: pagamentos, success, message } = await getPagamentoTipo();
 
-		if (grupo.success) grupos.value = grupo.data;
-		if (empresa.success) empresas.value = empresa.data;
-		if (projeto.success) projetos.value = projeto.data;
-		if (categoria.success) categorias.value = categoria.data;
-		if (fornecedor.success) fornecedores.value = fornecedor.data;
-
-		if (pagamento.success) {
-			const pagamentos = pagamento.data;
-			const priorizados = pagamentos.filter((p) => p.nome === 'PIX' || p.nome === 'Boleto');
-			const restantes = pagamentos
-				.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto')
-				.sort((a, b) => a.nome.localeCompare(b.nome));
-			paymentsType.value = [...priorizados, ...restantes];
-		}
+		if(!success) throw new Error(message);
 		
+		const priorizados = pagamentos.filter((p) => p.nome === 'PIX' || p.nome === 'Boleto');
+		const restantes = pagamentos.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto').sort((a, b) => a.nome.localeCompare(b.nome));
+		paymentsType.value = [...priorizados, ...restantes];
+
 	} catch (error) {
-		console.error('Erro ao buscar dados:', error);
+		console.log('Erro ao buscar tipos de pagamento', error.message)
+		$toast.error('Erro ao buscar tipos de pagamento')
 	}
-};
+}
+
+await definePaymentImportant();
+
+function createFileFromAnexo(anexo) {
+    if (!anexo) return { file: null, folder: null };
+    const folder = `${path}${anexo.caminho}`;
+	const file = new File([folder], anexo.nome, { type: anexo.tipo_arquivo.mime });
+    return { file, folder }
+}
+
+function formatPaymentData(data) {
+
+	const fileDOC = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 4);
+	const fileNF = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 3);
+
+	const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC);
+	const { file: nf, folder: pathNF }  = createFileFromAnexo(fileNF);
+
+    form.value = {
+		nf,
+		doc,
+		pathNF,
+		...data,
+		pathDoc,
+        projeto_id: data.projeto_id,
+		categoria_id: data.categoria.id,
+		grupo_id: data.categoria.grupo.id,
+        tipo_chave_pix: data.tipo_chave_pix_id,
+        dados_bancarios: formatBankingData(data),
+        data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD'),
+    };
+}
+
+function formatBankingData(data) {
+    const dadosBancarios = JSON.parse(data.dados_bancarios);
+    switch (form.value.tipo_id) {
+        case 1: 
+            dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '');
+            break;
+        case 3: 
+            const { banco, agencia, conta, digito } = dadosBancarios;
+            return { banco, agencia, conta, digito, ...dadosBancarios };
+        default:
+            return dadosBancarios;
+    }
+}
 
 const getPagamento = async (id) => {
     try {
-        const { success, data } = await getOnePayment(id, 'geral');
+        const { success, data, message } = await getOnePayment(id, 'geral');
 
-        if (!success) throw new Error('Erro ao buscar pagamento');
+        if (!success)  throw new Error(message);
 
-        form.value = data;
-
-        grupo.value = data.categoria.grupo.id;
-        form.value.categoria_id = data.categoria_id;
-        projeto_id.value = data.projeto_id;
-        tipoChavePix.value = data.tipo_chave_pix_id;
-        form.value.data_vencimento = dayjs(data.data_vencimento).format('YYYY-MM-DD');
-
-        const dados_bancarios = JSON.parse(data.dados_bancarios);
-
-        if (form.value.tipo_id === 1) {
-            const chave_pix = dados_bancarios.chave_pix.replace(/[\D]/g, '');
-            dados_bancarios.outhers = chave_pix;
-        }
-
-        if (form.value.tipo_id === 3) {
-            dados_bancarios.banco = dados_bancarios.banco;
-            dados_bancarios.agencia = dados_bancarios.agencia;
-            dados_bancarios.conta = dados_bancarios.conta;
-            dados_bancarios.digito = dados_bancarios.digito;
-        }
-
-        form.value.dados_bancarios = dados_bancarios;
-
-		console.log('Dados do pagamento:', form.value);
+        formatPaymentData(data);
 
     } catch (error) {
-        console.error(error.message);
-        $toast.error(error.message);
+        console.error('Erro ao buscar pagamento:', error.message);
+        $toast.error('Erro ao buscar pagamento');
     }
-};
-
-
-const getTiposChave = async () => {
-	try {
-		const { success, message, data } = await getTiposChavePix()
-
-		if(!success) throw new Error(message)
-
-		chavesPix.value = data
-
-	} catch (error) {
-		console.log(error.message)
-		$toast.error(error.message)
-	}
-}
-
-await getTiposChave()
-
-await pushData();
-
-function getTiposFornecedor() {
-	return [
-		{ nome: 'Pessoa Jurídica', value: 'juridico' },
-		{ nome: 'Pessoa Física', value: 'fisico' },
-	];
-}
-
-// * Função para processar o arquivo de NF
-
-const processNfFile = async (file) => {
-	loadingProcessFile.value = true;
-	clearFornecedor();
-	try {
-		const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file);
-
-		if (allIsNull) {
-			loadingProcessFile.value = false;
-			return $toast.error('Não foi possível ler o arquivo', { autoClose: 2500 });
-		}
-
-		if (cpf_emitente) {
-			form.value.fornecedor.documento = cpf_emitente;
-			form.value.fornecedor.tipo = 'fisico';
-		}
-
-		form.value.chave_nf = chave_acesso ?? null;
-		form.value.numero_nf = nf ?? null;
-		form.value.fornecedor.documento = cnpj_emitente ?? null;
-		form.value.fornecedor.tipo = cnpj_emitente ? 'juridico' : null;
-
-		form.value.valor_total = parseFloat(valor_total);
-
-		validDocument();
-
-	} catch (error) {
-		console.log(error.message);
-		$toast.error(error.message);
-	}
-
-	loadingProcessFile.value = false;
 };
 
 // * Função para limpar o formulário
 
 const reset = () => {
 	form.value = initFormState();
-    grupo.value = null;
 	form.value.valor_total = 0
 	form.value.doc = []
-	tipoChavePix.value = null
-	projeto_id.value = null
+	form.value.tipo_chave_pix = null
+	form.value.projeto_id = null
 };
 
 function initFormState() {
@@ -794,6 +312,7 @@ function initFormState() {
 		valor_total: 0,
 		data_vencimento: null,
 		projeto: null,
+		projeto_id: null,
 		chave_nf: null,
 		numero_nf: null,
 		tipo_chave_pix: null,
@@ -809,62 +328,13 @@ function initFormState() {
 	};
 }
 
-function useInitRefs() {
-	return {
-		fornecedores: ref([]),
-		empresas: ref([]),
-		grupos: ref([]),
-		categorias: ref([]),
-		pagamentoTipo: ref([]),
-		fornecedorExistente: ref(false),
-		grupo: ref(null),
-		selectedCategories: ref([]),
-		projetos: ref([]),
-		projeto: ref(null),
-	};
-}
-
-const clearFornecedor = () => {
-	form.value.fornecedor.tipo = null;
-	form.value.fornecedor.nome = null;
-	form.value.fornecedor.chave_nf = null;
-	form.value.fornecedor.numero_nf = null;
-	form.value.fornecedor.documento = null;
-};
+// * Lifecycle
 
 onMounted(async () => {
-	if(routeId.value) {
-		await pushData()
-		await getPagamento(routeId.value)
-	}
+	if(routeId.value) await Promise.all([ await definePaymentImportant(), await getPagamento(routeId.value) ])
 });
 
 // * Watchers
-
-// watch(() => selectedCategories.value, async () => {
-// 	await categoriaRef.value.click();
-// 	},{ immediate: true}
-// );
-
-watch(() => form.value.tipo_id, async (nv, oV) => {
-	if(nv !== oV){
-		if(route?.query?.id) return
-		tipoChavePix.value = null
-		form.value.descricao = null
-	}
-},{ immediate: true});
-
-watch(() => form.value.nf, async (value) => {
-	if (value && value.length > 0) {
-		processNfFile(value[0]);
-	}
-}, { deep: true, immediate: false });
-
-watch(() => grupo.value, (value) => {
-	if (value) {
-		validGroup();
-	}
-}, { deep: true, immediate: true });
 
 </script>
 
@@ -882,14 +352,4 @@ watch(() => grupo.value, (value) => {
 	max-width: 1400px !important;
 }
 
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
 </style>

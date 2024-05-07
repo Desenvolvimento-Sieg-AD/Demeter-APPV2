@@ -269,7 +269,7 @@ const openFile = (item, tipo_anexo) => {
 };
 
 const movimentacaoAprovado = (item) => {
-	const findAprovado = item.movimentacoes_pagamento.find((mov) => mov.status_pagamento.nome === 'Aprovado');
+	const findAprovado = item.movimentacoes_pagamento.find((mov) => mov.status_pagamento.id >= 4 ); // ? APROVADO
 	return findAprovado ? formatDate(findAprovado.data_inicio) : 'Em análise';
 };
 

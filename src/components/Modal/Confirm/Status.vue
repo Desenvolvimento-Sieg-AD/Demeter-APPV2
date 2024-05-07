@@ -23,6 +23,7 @@
 						<CustomInput type="textarea" :rows="2" v-model="item.motivo" disabled hide-details label="Motivo do Pagamento"/>
 					</v-col>
 				</v-row>
+
 				<v-row justify="center" v-if="confirm === 'disapprove'">
 					<v-col cols="12">
 						<CustomInput
@@ -38,6 +39,7 @@
 							/>
 						</v-col>
 				</v-row>
+
 				<v-row v-if="page === 'gerencia' && confirm === 'disapprove'">
 					<v-col cols="12">
 						<CustomInput
@@ -49,6 +51,7 @@
 						/>
 					</v-col>
 				</v-row>
+				
 			</div>
 		</template>
 	</LazyModal>

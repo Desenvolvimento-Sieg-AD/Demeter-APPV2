@@ -22,7 +22,9 @@ export const useApi = async <T>(path: string, options?: UseFetchOptions<T>): Pro
 
 	let headers = {};
 	if (options?.body instanceof FormData) {
-		headers = { ...defaultHeaders };
+		headers = { 
+			...defaultHeaders,
+		};
 	} else {
 		headers = {
 			'Content-Type': 'application/json',
