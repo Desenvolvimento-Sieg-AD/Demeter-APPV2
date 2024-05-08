@@ -2,8 +2,6 @@ import type { UseFetchOptions } from 'nuxt/app';
 
 import { useAuthStore } from '../store/auth';
 
-import { useRouter } from 'vue-router';
-const router = useRouter();
 
 interface ApiResponse {
 	success: boolean;
@@ -11,7 +9,8 @@ interface ApiResponse {
 	message: string;
 }
 
-export const useApi = async <T>(path: string, options?: UseFetchOptions<T>): Promise<ApiResponse> => {
+export const useApi = async <T>(path: string, options?: any): Promise<ApiResponse> => {
+
 	const {
 		public: { apiURL: baseURL },
 	} = useRuntimeConfig();
@@ -36,26 +35,28 @@ export const useApi = async <T>(path: string, options?: UseFetchOptions<T>): Pro
 		baseURL: baseURL as string,
 		key: path.toString(),
 		watch: false,
+		lazy: true,
 		headers,
 		onResponse(_ctx) {},
 		onResponseError(_ctx) {},
 	};
 	const params = { ...defaults, ...options, headers: headers, query: options?.query };
 
+	const { logUserOut } = useAuthStore();
 	try {
-		const { logUserOut } = useAuthStore();
 
-		const {
-			data: { value },
-			error,
-		} = await useFetch(path, params);
+		const data = await $fetch(path, {
+			baseURL: baseURL,
+			headers,
+			...options?.method && {
+				method: options.method
+			},
+			...options?.body && {
+				body: options.body
+			},
+		});
 
-		const response: ApiResponse = value as unknown as ApiResponse;
-
-		if (error?.value?.statusCode === 401) {
-			await logUserOut(router);
-			return { success: false, message: 'Unauthorized', data: null };
-		}
+		const response: ApiResponse = data as unknown as ApiResponse;
 
 		if (!response.hasOwnProperty('success'))
 			return { success: false, message: 'Erro na consulta com a api', data: null };
@@ -65,6 +66,10 @@ export const useApi = async <T>(path: string, options?: UseFetchOptions<T>): Pro
 		return response;
 	} 
 	catch (error) {
+		if (error?.value?.statusCode === 401) {
+			await logUserOut();
+			return { success: false, message: 'Unauthorized', data: null };
+		}
 		return {
 			success: false,
 			message: 'Erro na consulta com a api',

@@ -4,7 +4,7 @@ import { resolve } from 'path';
 
 export default defineNuxtConfig({
 	devtools: {
-		enabled: true,
+		enabled: false,
 	},
 	typescript: {
 		shim: false,
@@ -65,6 +65,7 @@ export default defineNuxtConfig({
 	},
 	vuetify: {
 		vuetifyOptions: {
+			labComponents: ['VTimePicker'],
 		  theme: {
 			defaultTheme: 'light',
 			themes: {

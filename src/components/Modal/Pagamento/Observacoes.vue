@@ -8,7 +8,9 @@
 				hide-details
 				label="Motivo"
 				type="textarea"
-				:no-resize="false"
+				no-resize
+				:rows="3"
+				:counter="false"
 				v-model="formValue.motivo"
 				append-inner-icon="mdi-chat-question-outline"
 			/>
@@ -18,7 +20,9 @@
 			<CustomInput
 				hide-details
 				type="textarea"
-				:no-resize="false"
+				no-resize
+				:rows="3"
+				:counter="false"
 				label="Observações"
 				v-model="formValue.dados_complementares"
 			/>
@@ -26,7 +30,6 @@
 
 		<v-col cols="12">
 			<CustomInput
-				v-if="user.setor.exibir_projetos"
 				hide-details
 				itemValue="id"
 				label="Projetos"

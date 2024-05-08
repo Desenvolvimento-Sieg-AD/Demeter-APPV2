@@ -6,7 +6,6 @@
 					style="max-height: 88vh; overflow-y: auto; background-color: white; border-radius: 15px"
 					class="backgroundimg"
 				>
-					<v-card-title v-if="title" class="mb-4"> </v-card-title>
 					<v-card-text class="card-box">
 						<slot />
 					</v-card-text>
@@ -20,7 +19,6 @@
 const props = defineProps({
 	actionButtons: { type: Array, default: [] },
 	submit: { type: Function, default: () => {} },
-	title: { type: String, default: null },
 	titleColor: { type: String, default: '#118B9F' },
 	titleSize: { type: String, default: '24' },
 	titleBold: { type: Boolean, default: true },

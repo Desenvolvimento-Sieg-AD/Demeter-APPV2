@@ -145,7 +145,7 @@ const access = useRuntimeConfig();
 //* PROPS
 
 const props = defineProps({
-	id: { type: Number, required: true },
+	id: { type: Number },
 	enable: { type: Boolean, default: false },
 	allowEdit: { type: Boolean, default: true },
 	pagamento: { type: Object, default: null },

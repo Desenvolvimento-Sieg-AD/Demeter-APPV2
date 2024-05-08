@@ -125,9 +125,7 @@ const actionsForm = [
 
 function buildFormData() {
 
-	const formData = new FormData({
-		acceptCharset: 'utf-8',
-	});
+	const formData = new FormData();
 
 	const doc = form.value.doc ? [form.value.doc] : null;
 
@@ -293,7 +291,7 @@ const getPagamento = async (id) => {
 
 const reset = () => {
 	form.value = initFormState();
-	form.value.valor_total = 0
+	form.value.valor_total = null
 	form.value.doc = []
 	form.value.tipo_chave_pix = null
 	form.value.projeto_id = null
@@ -309,7 +307,7 @@ function initFormState() {
 		motivo: null,
 		categoria_id: null,
 		dados_complementares: null,
-		valor_total: 0,
+		valor_total: null,
 		data_vencimento: null,
 		projeto: null,
 		projeto_id: null,

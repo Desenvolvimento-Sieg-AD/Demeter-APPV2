@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia';
 
-import type { Router } from 'vue-router';
-
 export const useAuthStore = defineStore('auth', {
 	state: () => ({
 		authenticated: localStorage.getItem('token') ? true : false,
@@ -50,7 +48,8 @@ export const useAuthStore = defineStore('auth', {
 			}
 		},
 
-		async logUserOut(router: Router) {
+		async logUserOut() {
+			const router = useRouter();
 			localStorage.clear();
 
 			this.user = null;

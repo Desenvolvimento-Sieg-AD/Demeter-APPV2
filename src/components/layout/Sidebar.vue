@@ -8,7 +8,7 @@
 		permanent
 		@mouseleave="activeOption = []"
 	>
-		<div class="px-2 pt-3 d-flex w-full justify-center">
+		<div class="px-2 pt-3 d-flex w-full justify-center" style="height: 85px">
 			<v-img src="../../img/SIEG.png" height="auto" max-width="80px" />
 		</div>
 

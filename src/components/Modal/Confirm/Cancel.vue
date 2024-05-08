@@ -35,7 +35,7 @@ const props = defineProps({
 	message: { type: String, default: '' },
 	title: { type: String, default: 'Cancelar Pagamento' },
 	actions: { type: Array, default: () => [] },
-	item: { type: Object, required: true },
+	item: { type: Object },
     justificativa: { type: String, default: '' }
 });
 

@@ -10,7 +10,6 @@
 				:change="validDocument()"
 				:label="documentFornecedor"
 				v-model="formValue.fornecedor.documento"
-				appen-innerColor="#118B9F"
 				append-inner-icon="mdi-content-copy"
 				@click:append-inner="pasteFromClipboard"
 				:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
@@ -48,11 +47,22 @@
 		</v-col>
 
 		<v-col cols="12" md="3">
-			<CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" />
+			<CustomInput
+				type="text"
+				label="Número NF/Cupom"
+				v-model="form.numero_nf"
+				mask="numero-nf"
+			/>
 		</v-col>
 
 		<v-col cols="12" md="9">
-			<CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :maxLength="50" mask="number" />
+			<CustomInput
+				type="text"
+				label="Chave de Acesso"
+				v-model="form.chave_nf"
+				:max="48"
+				mask="number"
+			/>
 		</v-col>
 
 	</v-row>
