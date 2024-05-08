@@ -187,7 +187,7 @@ const columns = getColumns('usuario');
 //* DATA
 
 const path = access.public.PAGAMENTO_PATH;
-
+const title = ref('Pagamentos')
 const loading = ref(false);
 const allowEdit = ref(true);
 const pagamento = ref({});
@@ -341,7 +341,7 @@ const pushData = async () => {
 	
 };
 
-onMounted( async () => await pushData() );
+onMounted( pushData );
 
 </script>
 

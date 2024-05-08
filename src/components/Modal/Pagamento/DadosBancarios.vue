@@ -2,7 +2,7 @@
 
     <v-row class="pa-3">
 
-		<v-col>
+		<v-col cols="3">
 			<CustomInput
 				append-inner-icon="mdi-cash-clock"
 				type="select"
@@ -17,7 +17,55 @@
 			/>
 	    </v-col>
 
-		<v-col v-if="formValue.tipo_id === 1">
+		<!-- <v-col v-if="formValue.tipo_id === 1">
+			<CustomInput
+				v-model="formValue.tipo_chave_pix"
+				append-inner-icon="mdi-key"
+				type="select"
+				required
+				:items="chavesPix"
+				itemTitle="nome"
+				itemValue="id"
+				label="Tipo de Chave"
+				/>
+		</v-col> -->
+
+		<!-- <v-col v-else>
+			<div class="mt-5">
+				<v-divider color="#118B9F"></v-divider>
+			</div>
+		</v-col> -->
+
+		<v-col cols="3">
+			<CustomInput
+				type="date"
+				required
+				label="Data de vencimento"
+				v-model="formValue.data_vencimento"
+				:messages="messagesDate()"
+				:min="minDate"
+			/>
+		</v-col>
+
+		<v-col cols="4">
+			<CustomInput
+				type="text"
+				mask="money"
+				required
+				label="Valor total"
+				v-model="formValue.valor_total"
+				hide-details
+			/>
+		</v-col>
+
+		<v-col cols="2">
+			<CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="#118B9F" />
+		</v-col>
+
+	</v-row>
+
+	<v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
+		<v-col v-if="formValue.tipo_id === 1" cols="3">
 			<CustomInput
 				v-model="formValue.tipo_chave_pix"
 				append-inner-icon="mdi-key"
@@ -100,7 +148,13 @@
 
 	<v-row v-if="formValue.urgente" class="pa-3 mt-n12">
 		<v-col>
-			<CustomInput type="textarea" :required="formValue.urgente" :rows="1" label="Justificativa da urgência" v-model="formValue.justificativa_urgente" />
+			<CustomInput
+				type="textarea"
+				:required="formValue.urgente"
+				:rows="1"
+				label="Justificativa da urgência"
+				v-model="formValue.justificativa_urgente"
+			/>
 		</v-col>
 	</v-row>
 

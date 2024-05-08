@@ -29,7 +29,7 @@ const props = defineProps({
 	title: { type: String, default: 'Confirmação' },
 	actions: { type: Array, default: () => [] },
 	confirm: { type: String, default: 'aprovar' },
-	justificativa: { type: String, required: true },
+	justificativa: { type: String, default: '' },
 });
 
 const ambos = ref(true);
