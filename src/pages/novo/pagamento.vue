@@ -1,7 +1,11 @@
 <template>
-	<div>
+	<div >
 
-		<CustomHeader title="Solicitação de Pagamento" />
+		<CustomHeader title="Solicitação de Pagamento">
+			<v-btn icon variant="plain" color="primary">
+				<v-icon>mdi-arrow-left</v-icon>
+			</v-btn>
+		</CustomHeader>
 
 		<LayoutForm class="mb-12">
 
@@ -55,14 +59,21 @@
 				</v-card>
 
 				<div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
-					<v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()">
+					<v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()" >
 						{{ action.title }}
 						<v-icon size="small" :icon="action.icon"/>
 					</v-btn>
 				</div>
 
+
+
 			</v-form>
 		</LayoutForm>
+		<v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
+			<v-icon>mdi-arrow-left</v-icon>
+			<v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
+		</v-btn>
+
 	</div>
 </template>
 
@@ -127,9 +138,6 @@ function buildFormData() {
 
 	const formData = new FormData();
 
-	const doc = form.value.doc ? [form.value.doc] : null;
-
-	console.log(doc)
 	formData.append('motivo', form.value.motivo);
 	formData.append('tipo_id', form.value.tipo_id);
 	formData.append('urgente', form.value.urgente);
@@ -152,11 +160,13 @@ function buildFormData() {
 
 	if (form.value.nf && form.value.nf.length > 0) formData.append('nf', form.value.nf[0]);
 	
-	if (doc && doc.length > 0) {
-		for (let i = 0; i < doc.length; i++) {
-        	formData.append('doc', doc[i]);
+	// formData.append('doc', form.value.doc);
+	if (form.value.doc && form.value.doc.length > 0) {
+		for (let i = 0; i < form.value.doc.length; i++) {
+        	formData.append('doc', form.value.doc[i]);
     	}
 	}
+	console.log("🚀 ~ buildFormData ~ formData:", formData.get('doc'))
 
 	return formData;
 }
@@ -246,7 +256,7 @@ function formatPaymentData(data) {
 
     form.value = {
 		nf,
-		doc,
+		doc: [doc],
 		pathNF,
 		...data,
 		pathDoc,
@@ -257,6 +267,8 @@ function formatPaymentData(data) {
         dados_bancarios: formatBankingData(data),
         data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD'),
     };
+
+	console.log("🚀 ~ formatPaymentData ~ form.value", form.value)
 }
 
 function formatBankingData(data) {
@@ -348,6 +360,13 @@ onMounted(async () => {
 }
 .ajust {
 	max-width: 1400px !important;
+}
+
+.btn-flutter {
+	position: fixed;
+	top: 100px;
+	left: 70px;
+	scale: 1.5;
 }
 
 </style>
