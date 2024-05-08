@@ -48,8 +48,12 @@
 			/>
 		</v-col>
 
+		<v-col v-if="isInternacional">
+			<CustomInput type="text" mask="money" required label="Valor Dolar" v-model="formValue.valor_total" hide-details />
+		</v-col>
+
 		<v-col cols="2">
-			<CustomInput type="text" mask="money" required label="Valor total" v-model="formValue.valor_total" hide-details />
+			<CustomInput type="text" mask="money" required :label="labelValue" v-model="formValue.valor_total" hide-details />
 		</v-col>
 
 		<v-col cols="2">
@@ -137,6 +141,13 @@ const maskDescriptionOuthers = computed(() => {
 })
 
 const validDateToCard = computed(() => isExpired.value && (formValue.value.tipo_id !== 5 && formValue.value.tipo_id !== 6))
+
+const labelValue = computed(() => {
+	if(formValue.value.fornecedor.modo.internacional) return 'Valor Estimado em Reais';
+	return 'Valor Total';
+});
+
+const isInternacional = computed(() => formValue.value.fornecedor.modo.internacional);
 
 const messagesDate = () => {
 	if (isExpired.value && (validDateToCard.value)) return 'Data de vencimento inválida';

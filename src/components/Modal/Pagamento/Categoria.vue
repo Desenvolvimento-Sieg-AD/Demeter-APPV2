@@ -53,12 +53,12 @@
 <script setup>
 
 import { getFileContent } from '@api/conversor';
-import { getGrupos, getCategorias, getFornecedor } from "@api"
+import { getGrupos, getCategorias, getFornecedor, getCategoriasByGrupo } from "@api"
 
 const { $toast } = useNuxtApp();
 const { data: fornecedores } = await getFornecedor();
 
-const [ { data: grupos }, { data: categorias } ] = await Promise.all([getGrupos(), getCategorias()]);
+const [ { grupos }, { data: categorias } ] = await Promise.all([getGrupos(), getCategorias()]);
 
 const emit = defineEmits(['update:form'])
 
@@ -75,7 +75,15 @@ const formValue = computed({
 
 const validGroup = async () => {
 	if (formValue.value.grupo_id){ 
-		selectedCategories.value = categorias.filter((categoria) => categoria.grupo_id === formValue.value.grupo_id);
+		try {
+			const { success, message, data } = await getCategoriasByGrupo(formValue.value.grupo_id);
+			if(!success) throw new Error(message)
+
+			selectedCategories.value = data;
+		} catch (error) {
+			console.error('Erro ao buscar categorias por grupo:', error.message);
+			$toast.error(error.message);
+		}
 	}
 };
 

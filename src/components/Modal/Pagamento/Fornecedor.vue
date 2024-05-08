@@ -1,10 +1,28 @@
 <template>
 
-    <v-row class="pa-3">
+	<div class="d-flex justify-center" v-if="!notSelected">
+		<v-btn variant="plain" @click="toggleTipoFornecedor">
+			<v-icon>mdi-refresh</v-icon>
+			Trocar
+		</v-btn>
+	</div>
+
+	<v-row class="pa-3 ga-3" justify="center" no-gutters v-if="notSelected">
+			<v-btn color="#6081f7" @click="isNacional">
+				Nacional
+				<v-icon>mdi-flag</v-icon>
+			</v-btn>
+			<v-btn color="#60b99a" @click="isInternacional">
+				Internacional 
+				<v-icon>mdi-earth</v-icon>
+			</v-btn>
+	</v-row>
+
+    <v-row class="pa-3" v-else-if="fornecedor.nacional">
 
 		<v-col cols="12" md="3">
 			<CustomInput
-				required
+				:required="fornecedor.nacional"
 				type="text"
 				hide-details
 				:change="validDocument()"
@@ -19,7 +37,7 @@
 
 		<v-col cols="12" md="3">
 			<CustomInput
-				required
+				:required="fornecedor.nacional"
 				hide-details
 				type="select"
 				itemTitle="nome"
@@ -34,7 +52,7 @@
 
 		<v-col cols="12" md="6">
 			<CustomInput
-				required
+				:required="fornecedor.nacional"
 				hideDetails
 				type="combobox"
 				label="Fornecedor"
@@ -57,6 +75,30 @@
 
 	</v-row>
 
+	<v-row v-else-if="fornecedor.internacional" class="pa-3">
+
+		<v-col >
+			<CustomInput
+				required
+				hideDetails
+				type="combobox"
+				label="Fornecedor"
+				:items="fornecedores"
+				itemValue="razao_social"
+				itemTitle="razao_social"
+				:onchange="verifyFornecedor()"
+				v-model="formValue.fornecedor.nome"
+				append-inner-icon="mdi-shopping-outline"
+			/>
+		</v-col>
+
+		<v-col >
+			<CustomInput type="text" label="Número Invoice" v-model="form.numero_nf" />
+		</v-col>
+
+	</v-row>
+
+
 </template>
 <script setup>
 
@@ -72,6 +114,34 @@ const formValue = computed({
     get: () => props.form,
     set: (value) => emit('update:form', value)
 })
+
+const fornecedor = reactive({
+	nacional: false,
+	internacional: false,
+});
+
+const notSelected = computed(() => !fornecedor.nacional && !fornecedor.internacional);
+const toggleTipoFornecedor = () => {
+	fornecedor.nacional = false;
+	fornecedor.internacional = false;
+	formValue.value.fornecedor.modo.internacional = false;
+	formValue.value.fornecedor.modo.nacional = false;
+};
+
+const isNacional = () => {
+	fornecedor.nacional = true;
+	formValue.value.fornecedor.modo.internacional = false;
+	formValue.value.fornecedor.modo.nacional = true;
+};
+
+const isInternacional = () => {
+	fornecedor.nacional = false;
+	fornecedor.internacional = true
+	formValue.value.fornecedor.modo.nacional = false;	
+	formValue.value.fornecedor.modo.internacional = true;
+	console.log(formValue.value.fornecedor.modo)
+};
+
 
 const fornecedorExistente = ref(false);
 

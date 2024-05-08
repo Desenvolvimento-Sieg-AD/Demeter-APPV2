@@ -7,7 +7,7 @@
 					:columns="columns"
 					:items="pagamentos"
 					:actions="actions"
-					:loading="false"
+					:loading="loadingTable"
 					scrolling="standard"
 					noDataText="Você não tem nenhuma solicitação de pagamento"
 					allow-search
@@ -68,7 +68,7 @@
 
 							<v-btn flat icon variant="plain" v-else>
 								
-								<v-icon color="#118B9F" class="cursor-pointer" @click="uploadFile(item, 'NF')" icon="mdi-paperclip-plus" />
+								<v-icon color="#118B9F" class="cursor-pointer" @click="uploadFile(item, 3)" icon="mdi-paperclip-plus" />
 
 								<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
 
@@ -108,7 +108,7 @@
 
 								<div>
 
-									<v-icon class="cursor-pointer" color="#118B9F" @click="uploadFile(item, 'DOC')" icon="mdi-paperclip-plus" />
+									<v-icon class="cursor-pointer" color="#118B9F" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
 
 									<v-tooltip text="Anexar arquivo" activator="parent" location="top" />
 
@@ -166,7 +166,11 @@
 				:item="pagamento"
 				:actions="modalActions"
 			/>
-			<LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="pushData" :type="typeUpload" />
+			<LazyModalUpload 
+				v-model:enable="enableModal.upload" 
+				:item="pagamento" 
+				@update="pushData" 
+				:tipo_anexo_id="tipo_anexo_id" />
 	</div>
 </template>
 
@@ -188,7 +192,8 @@ const loading = ref(false);
 const allowEdit = ref(true);
 const pagamento = ref({});
 const pagamentos = ref([]);
-const typeUpload = ref(null);
+const tipo_anexo_id = ref(null);
+const loadingTable = ref(false);
 const justificativa = ref(null);
 
 const enableModal = reactive({
@@ -283,9 +288,9 @@ const documentByType = (tipo, documento) => tipo === 'juridico' ? maskCnpj(docum
 
 const isNotStatusAllowed = (status) => status !== 'Recusado' && status !== 'Cancelado';
 
-const uploadFile = (item, tipo) => {
+const uploadFile = (item, id) => {
 	pagamento.value = item;
-	type.value = tipo;
+	tipo_anexo_id.value = id;
 	enableModal.upload = true;
 };
 
@@ -314,18 +319,26 @@ const cancelPayment = async (ids) => {
 };
 
 const pushData = async () => {
+	loadingTable.value = true;
 
-	const { success, data } = await getPagamentoByScope('usuario');
+	try {
+		const { success, message, data } = await getPagamentoByScope('usuario');
 
-	if (success) {
-
+		if (!success) throw new Error(message);
+		
 		data.map((item) => {
 			item.status = item.movimentacoes_pagamento[0].status_pagamento.label;
 			item.lote = item.movimentacoes_pagamento.at().lote;
 		});
 
 		pagamentos.value = data;
+		loadingTable.value = false;
+
+	} catch (error) {
+		console.log(error.message)
+		$toast.error(error.message);		
 	}
+	
 };
 
 onMounted( async () => await pushData() );

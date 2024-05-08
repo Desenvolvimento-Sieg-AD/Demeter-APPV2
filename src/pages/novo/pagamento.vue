@@ -160,13 +160,11 @@ function buildFormData() {
 
 	if (form.value.nf && form.value.nf.length > 0) formData.append('nf', form.value.nf[0]);
 	
-	// formData.append('doc', form.value.doc);
 	if (form.value.doc && form.value.doc.length > 0) {
 		for (let i = 0; i < form.value.doc.length; i++) {
         	formData.append('doc', form.value.doc[i]);
     	}
 	}
-	console.log("🚀 ~ buildFormData ~ formData:", formData.get('doc'))
 
 	return formData;
 }
@@ -268,7 +266,6 @@ function formatPaymentData(data) {
         data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD'),
     };
 
-	console.log("🚀 ~ formatPaymentData ~ form.value", form.value)
 }
 
 function formatBankingData(data) {
@@ -311,7 +308,10 @@ const reset = () => {
 
 function initFormState() {
 	return {
-		fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null },
+		fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null, modo: {
+			nacional: false,
+			internacional: false,
+		}},
 		empresa_id: null,
 		nf: [],
 		doc: [],
