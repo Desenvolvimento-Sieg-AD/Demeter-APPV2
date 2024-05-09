@@ -2,7 +2,7 @@
   <v-container class="ajust" fluid>
     <v-form ref="customForm" @submit.prevent="submit">
       <v-col cols="12">
-        <v-card style="max-height: 88vh; overflow-y: auto; background-color: white; border-radius: 15px" class="backgroundimg">
+        <v-card class="backgroundimg" style="overflow-y: auto" height="calc(100vh - 140px)">
           <v-card-text class="card-box">
             <slot />
           </v-card-text>

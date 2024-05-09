@@ -170,14 +170,6 @@ const handleSelectionChange = (items) => {
   idsSelect.value = ids
 }
 
-const openFile = (filePath) => {
-  window.electronAPI.openFile(filePath).then((response) => {
-    if (!response.success) {
-      console.error('Erro ao abrir arquivo:', response.message)
-    }
-  })
-}
-
 const actions = ref([
   {
     icon: 'mdi-eye',
@@ -279,15 +271,9 @@ const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
 const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
-const openFile = (filePath) => {
-	// window.electronAPI.openFile(filePath).then((response) => {
-	// 	if (!response.success) {
-	// 		console.error('Erro ao abrir arquivo:', response.message);
-	// 	}
-	// }); //? APP
-
-	useOs().openFile(filePath) // ? Template
-};
+const openFile = async (filePath) => {
+  await useOs().openFile(filePath)
+}
 
 const openFiles = (anexos) => {
   const statusAllowed = [3, 4]

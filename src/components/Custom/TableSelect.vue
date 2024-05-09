@@ -7,7 +7,7 @@
     <DxDataGrid
       v-else
       ref="customTable"
-      height="800px"
+      height="calc(100vh - 180px)"
       render-async
       :key-expr="keyExpr"
       auto-navigate-to-focused-row
@@ -59,9 +59,9 @@
       <DxToolbar :visible="enableAddButton || filterOn || props.enableAddButton || allowGroupingColumns || searchable || columns.some((el) => el.searchable) || chooseColumns">
         <DxItem name="create" v-if="props.enableAddButton" locate-in-menu="auto" location="before" template="create" />
 
-        <DxItem name="removingFilter" v-if="filterOn" locate-in-menu="auto" location="before" template="removingFilter" />
-
         <DxItem name="resetTable" locate-in-menu="auto" location="before" template="resetTable" />
+
+        <DxItem name="removingFilter" v-if="filterOn" locate-in-menu="auto" location="before" template="removingFilter" />
 
         <DxItem name="groupPanel" v-if="allowGroupingColumns" locate-in-menu="auto" location="before" />
 
@@ -73,31 +73,27 @@
       </DxToolbar>
 
       <template #create>
-        <button
-          :onclick="() => emit('add')"
-          style="padding: 3px; background-color: #118b9f; color: white; display: flex; align-items: center; border-radius: 3px"
-          class="dx-button dx-button-mode-contained"
-        >
-          <v-icon size="small" :icon="`mdi mdi-plus`" />
-          <v-tooltip activator="parent" location="start" :text="createText" />
-          <p class="pa-1 text-body-2">{{ createTitle }}</p>
-        </button>
-      </template>
-
-      <template #removingFilter>
-        <button :onclick="() => clearFiltersAndRefreshToolbar()" style="padding: 8px 18px !important" class="dx-button dx-button-mode-contained">
-          <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" />
-          <v-tooltip activator="parent" location="start" :text="`Remover filtro`" />
-          <p class="ml-2">Remover filtro</p>
-        </button>
+        <v-btn @click="emit('add')" class="dx-button dx-button-mode-contained" color="primary" flat>
+          <v-icon size="small" :icon="`mdi mdi-plus`" start />
+          <v-tooltip activator="parent" location="bottom" :text="createText" />
+          {{ createTitle }}
+        </v-btn>
       </template>
 
       <template #resetTable>
-        <button :onclick="() => resetTable()" style="padding: 8px 18px !important" class="dx-button dx-button-mode-contained">
-          <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" />
-          <v-tooltip activator="parent" location="start" :text="`Remover filtro`" />
-          <p class="ml-2">Resetar</p>
-        </button>
+        <v-btn @click="resetTable" class="dx-button dx-button-mode-contained" color="red" flat variant="outlined">
+          <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" start />
+          <v-tooltip activator="parent" location="bottom" :text="`Remover filtro`" />
+          Resetar
+        </v-btn>
+      </template>
+
+      <template #removingFilter>
+        <v-btn @click="clearFiltersAndRefreshToolbar" class="dx-button dx-button-mode-contained" color="orange" flat variant="outlined">
+          <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" start />
+          <v-tooltip activator="parent" location="bottom" :text="`Remover filtro`" />
+          Remover filtro
+        </v-btn>
       </template>
 
       <!-- Columns Configuration -->
@@ -268,7 +264,7 @@ let tablePageSize = ref(
 const focusedRowIndex = ref(0)
 
 const customTable = ref(null)
-const filterOn = ref(true)
+const filterOn = ref(false)
 const render = ref(true)
 const toolbarKey = ref(0)
 
