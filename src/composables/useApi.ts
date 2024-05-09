@@ -54,6 +54,7 @@ export const useApi = async <T>(path: string, options?: any): Promise<ApiRespons
 			...options?.body && {
 				body: options.body
 			},
+			query: params.query,
 		});
 
 		const response: ApiResponse = data as unknown as ApiResponse;

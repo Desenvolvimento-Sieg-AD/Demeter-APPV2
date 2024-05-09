@@ -18,6 +18,16 @@ export async function getConta() {
 	}
 }
 
+export async function getCard() {
+	try {
+		const { success, message, data } = await useApi(`/empresa/conta/cards`);
+		if (!success) throw new Error(message);
+		return { success, message, data };
+	} catch (error) {
+		return { success: false, message: error, data: null };
+	}
+}
+
 export async function getClientByPayment() {
 	try {
 		const { success, message, data } = await useApi(`/empresa/client-by-payment`);

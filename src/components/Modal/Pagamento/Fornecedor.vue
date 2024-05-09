@@ -11,6 +11,7 @@
 				v-model="formValue.fornecedor.documento"
 				append-inner-icon="mdi-content-copy"
 				@click:append-inner="pasteFromClipboard"
+				@change="verifyFornecedor"
 				:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
 			/>
 		</v-col>
@@ -25,7 +26,7 @@
 				label="Tipo fornecedor"
 				:items="tiposFornecedor"
 				v-model="formValue.fornecedor.tipo"
-				:disabled="fornecedorExistente"
+				:disabled="formValue.fornecedor.nome"
 				append-inner-icon="mdi-card-account-details-outline"
 			/>
 		</v-col>
@@ -39,7 +40,7 @@
 				:items="fornecedores"
 				itemValue="razao_social"
 				itemTitle="razao_social"
-				:onchange="verifyFornecedor()"
+				@change="[verifyFornecedor()]"
 				v-model="formValue.fornecedor.nome"
 				append-inner-icon="mdi-shopping-outline"
 			/>
@@ -96,7 +97,7 @@ import { getFornecedor, getFornecedorByDocumentOrName } from "@api"
 
 const { $toast } = useNuxtApp()
 
-const { data: fornecedores } = await getFornecedor();
+const fornecedores = ref((await getFornecedor()).data)
 
 const props = defineProps({
     form: { type: Object, required: true },
@@ -111,24 +112,11 @@ const route = useRoute();
 
 const hasID = computed(() => route.params.id);
 
-const fornecedorExistente = ref(false);
-
-watch(() => formValue.value.fornecedor.razao_social, () => {
-	if (formValue.value.fornecedor.documento || formValue.value.fornecedor.razao_social) {
-		validDocument();
-	}
-}, { deep: true });
-
-const validDocument = async () => {
-
-	const registro = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
-	const nome = formValue.value.fornecedor.razao_social;
-
-	if (!registro && !nome) return $toast.error('Informe o documento ou nome do fornecedor');
+const verifyFornecedor = async () => {
 
 	try {
-		
-		const { success, message , data } = await getFornecedorByDocumentOrName(registro, nome)
+
+		const { success, message , data } = await getFornecedorByDocumentOrName(formValue.value.fornecedor.documento, formValue.value.fornecedor.nome)
 
 		if (!success) throw new Error(message);
 
@@ -138,30 +126,20 @@ const validDocument = async () => {
 		console.error('Erro ao buscar fornecedor:', error);
 		$toast.error('Erro ao buscar fornecedor');
 	}
-
-};
-
-const verifyFornecedor = () => {
-
-	fornecedorExistente.value = false;
-	const existFornecedor = fornecedores.some((fornecedor) => fornecedor.razao_social === formValue.value.fornecedor.nome) 
-
-	if (existFornecedor) {
-		fornecedorExistente.value = true;
-
-		const fornecedor = fornecedores.find((fornecedor) => fornecedor.razao_social === formValue.value.fornecedor.nome);
-
-		getDataFornecedor(fornecedor);
-	} 
 };
 
 const getDataFornecedor = (data) => {
+
+	clearFornecedor();
 
 	formValue.value.fornecedor.id = data.id;
 	formValue.value.fornecedor.nome = data.razao_social;
 	formValue.value.fornecedor.apelido = data.nome_fantasia;
 	formValue.value.fornecedor.tipo = data.internacional ? null : data.tipo;
+	formValue.value.fornecedor.documento = data.internacional ? null : data.documento;
 	formValue.value.fornecedor.internacional = data.internacional;	
+
+	console.log(data);
 
 	if(!formValue.value.fornecedor.documento) return
 		
@@ -196,5 +174,20 @@ const pasteFromClipboard = async () => {
 	}
 };
 
+const clearFornecedor = () => {
+	for(const key in formValue.value.fornecedor) {
+		if (key === 'internacional') continue;
+		formValue.value.fornecedor[key] = null;
+	}
+};
+
+watch(() => formValue.value.fornecedor.internacional, async (value) => {
+	
+    clearFornecedor();
+	
+    const { data } = await getFornecedor(value);
+    fornecedores.value = data;
+
+}, { deep: true, immediate: true });
 
 </script>

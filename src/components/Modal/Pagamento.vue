@@ -5,13 +5,19 @@
 
 			<v-col v-else-if="pagamento">
 
-				<v-row align="center" class="px-3">
+				<v-row align="center" class="px-3 mb-2">
 					<v-col cols="9" class="d-flex align-center justify-start pb-0">
 						<h3 style="color: #118b9f">Dados do Pagamento</h3>
 					</v-col>
 					<v-col cols="3" class="d-flex align-center justify-end pb-0">
 						<v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
 						<v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1"/>
+					</v-col>
+				</v-row>
+
+				<v-row class="my-2" v-if="statusCancelados">
+					<v-col>
+						<v-alert density="compact" :color="ultimaMovimentacao.status_pagamento.cor" variant="tonal" icon="mdi-cancel" type="textarea" v-model="pagamento.observacao" :text="ultimaMovimentacao.justificativa" hide-details :rows="2" />
 					</v-col>
 				</v-row>
 
@@ -43,7 +49,7 @@
 						<CustomInput disabled label="Fornecedor" hide-details v-model="pagamento.fornecedor.razao_social" />
 					</v-col>
 
-					<v-col cols="4">
+					<v-col cols="4" v-if="!isInternacional">
 						<CustomInput disabled label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
 					</v-col>
 
@@ -52,15 +58,19 @@
 					</v-col>
 
 					<v-col cols="3">
-						<CustomInput disabled label="Número NF" hide-details v-model="pagamento.numero_nf" />
+						<CustomInput disabled :label="isInternacional ? 'Invoice' : 'Número NF'" hide-details v-model="pagamento.numero_nf" />
 					</v-col>
 
-					<v-col cols="12">
+					<v-col cols="12" v-if="!isInternacional">
 						<CustomInput disabled label="Chave de Acesso" hide-details v-model="chave_nf" />
 					</v-col>
 
+					<v-col v-if="isInternacional">
+						<CustomInput disabled label="Valor em Dólar" hide-details mask="money" currency="USD" v-model="pagamento.valor_total_dolar" />
+					</v-col>
+
 					<v-col cols="4">
-						<CustomInput disabled label="Valor total" hide-details mask="money" v-model="pagamento.valor_total" />
+						<CustomInput disabled :label="isInternacional ? 'Valor em Reais' : 'Valor total'" hide-details mask="money" v-model="pagamento.valor_total" />
 					</v-col>
 
 					<v-col cols="4">
@@ -188,6 +198,10 @@ const ultimaMovimentacao = computed(() => {
 	return pagamento.value.movimentacoes_pagamento.find((mov) => !mov.data_fim);
 });
 
+const statusdeCancelamento = [7, 8, 9]
+
+const statusCancelados = computed(() => statusdeCancelamento.includes(ultimaMovimentacao.value.status_pagamento.id));
+
 const dataSolitacao = computed(() => {
 	if (!pagamento.value) return null;
 	return dayjs(pagamento.value.created_at).format('DD/MM/YYYY HH:mm');
@@ -199,10 +213,14 @@ const dataVencimento = computed(() => {
 });
 
 const documentoFormatado = computed(() => {
+	const documento = pagamento.value.fornecedor.documento;
+	if (!documento) return null;
 	if (!pagamento.value) return null;
-	if (pagamento.value.fornecedor.tipo === 'juridico') return maskCnpj(pagamento.value.fornecedor.documento);
-	return maskCpf(pagamento.value.fornecedor.documento);
+	if (pagamento.value.fornecedor.tipo === 'juridico' && documento) return maskCnpj(documento);
+	return maskCpf(documento);
 });
+
+const isInternacional = computed(() => pagamento.value.fornecedor.internacional);
 
 const actions = computed(() => [
 	{	title: 'Fechar',
@@ -238,7 +256,6 @@ const getPagamento = async () => {
 
 		loading.value = false;
 
-		loading.value = false;
 	} 
 	catch (error) {
 		console.error('Erro ao buscar pagamento:', error.message);
@@ -298,6 +315,9 @@ const copyData = async (data) => {
 //* WATCHERS
 
 watch(() => props.enable, (value) => {
-	if (value) getPagamento();
+	if (value){
+		getPagamento();
+		console.log(ultimaMovimentacao.value)
+	}
 });
 </script>

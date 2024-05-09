@@ -110,7 +110,7 @@ const routeId = computed(() =>{
 
 const documentRequired = computed(() => {
 	const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
-	return type?.requer_documento
+	return type?.requer_documento 
 })
 
 const isExpired = computed(() => dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')));
@@ -119,18 +119,11 @@ const validDateToCard = computed(() => isExpired.value && (form.value.tipo_id !=
 
 const actionsForm = [
 	{
-		title: 'Limpar',
-		icon: 'mdi-trash-can-outline',
-		color: 'red',
-		onClick: () => reset(),
-	},
-	{
-		title: routeId.value ? 'Atualizar' : 'Salvar',
+		title: 'Atualizar',
 		icon: 'mdi-currency-usd',
 		color: 'green',
 		onClick: () => {
-			if(routeId.value) updatePayment(Number(routeId.value), form.value)
-			else sendForm()
+			updatePayment(Number(routeId.value), form.value)
 		},
 	},
 ];
@@ -141,25 +134,32 @@ function buildFormData() {
 
 	const formData = new FormData();
 
+	const deleteKeys = ['conta_empresa', 'empresa', 'usuario', 'categoria', 'tipo_pagamento', 'anexos_pagamento', 'movimentacoes_pagamento'];
+
 	for(const key in form.value) {
+
+		if(deleteKeys.includes(key)) continue;
+
 		if (key === 'fornecedor') {
-			formData.append('fornecedor_id', form.value.fornecedor.id);
-			formData.append('fornecedor_nome', form.value.fornecedor.nome);
-			formData.append('fornecedor_apelido', form.value.fornecedor.apelido);
-			formData.append('fornecedor_documento', form.value.fornecedor.documento);
-			formData.append('fornecedor_tipo', form.value.fornecedor.tipo);
-			formData.append('fornecedor_internacional', form.value.fornecedor.internacional);
-			continue;
+			if(!formData.get('fornecedor_id')) {
+				formData.append('fornecedor_id', form.value.fornecedor.id);
+				formData.append('fornecedor_nome', form.value.fornecedor.nome);
+				formData.append('fornecedor_apelido', form.value.fornecedor.apelido);
+				formData.append('fornecedor_documento', form.value.fornecedor.documento);
+				formData.append('fornecedor_tipo', form.value.fornecedor.tipo);
+				formData.append('fornecedor_internacional', form.value.fornecedor.internacional);
+				continue;
+			}
 		}
 		if (key === 'dados_bancarios') {
 			formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios));
 			continue;
 		}
-		if (key === 'nf' && form.value.nf && form.value.nf.length > 0) {
+		if (form.value.nf && key === 'nf' && form.value.nf && form.value.nf.length > 0) {
 			formData.append('nf', form.value.nf[0]);
 			continue;
 		}
-		if (key === 'doc' && form.value.doc.length > 0) {
+		if (form.value.doc && key === 'doc' && form.value.doc.length > 0) {
 			for (let i = 0; i < form.value.doc.length; i++) {
 				formData.append('doc', form.value.doc[i]);
 			}
@@ -223,11 +223,9 @@ function formatPaymentData(data) {
 	const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC);
 	const { file: nf, folder: pathNF }  = createFileFromAnexo(fileNF);
 
-	console.log(data);
-
     form.value = {
-		nf,
-		doc: [doc],
+		nf: nf ? [nf] : null,
+		doc: doc ? [doc] : null,
 		pathNF,
 		...data,
 		pathDoc,
@@ -239,22 +237,21 @@ function formatPaymentData(data) {
         data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD'),
     };
 
-	console.log(form.value);
-
 }
 
 function formatBankingData(data) {
-    const dadosBancarios = JSON.parse(data.dados_bancarios);
+    let dadosBancarios = JSON.parse(data.dados_bancarios);
     switch (form.value.tipo_id) {
         case 1: 
             dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '');
             break;
         case 3: 
-            const { banco, agencia, conta, digito } = dadosBancarios;
-            return { banco, agencia, conta, digito, ...dadosBancarios };
+			dadosBancarios = { banco, agencia, conta, digito, ...dadosBancarios };
+            break
         default:
-            return dadosBancarios;
+            break;
     }
+	return JSON.parse(dadosBancarios);
 }
 
 const getPagamento = async (id) => {

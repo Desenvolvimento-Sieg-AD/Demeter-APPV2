@@ -24,7 +24,7 @@
     :readonly="readonly"
     validate-on="lazy blur"
     :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -60,7 +60,7 @@
     :maxlength="max"
     validate-on="lazy blur"
     :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -155,7 +155,7 @@
     :persistent-hint="persistentHint"
     validate-on="lazy blur"
     :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   />
@@ -190,7 +190,7 @@
     :rows="rows"
     :auto-grow="autogrow"
     :class="{ 'required-field': required && !enableValue }"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   />
@@ -255,7 +255,7 @@
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
     :delimiters="[',', ';', ' ']"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -352,7 +352,7 @@
     :return-object="itemValue ? false : true"
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   />
@@ -392,7 +392,7 @@
     :return-object="itemValue ? false : true"
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -477,6 +477,18 @@ const props = defineProps({
 
 const dayjs = useDayjs()
 const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur'])
+
+const onChange = (attrs) => {
+  emit('change', attrs)
+}
+
+const onFocus = (attrs) => {
+  emit('focus', attrs)
+}
+
+const onBlur = (attrs) => {
+  emit('blur', attrs)
+}
 
 import { useCurrencyInput } from 'vue-currency-input'
 const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
@@ -691,15 +703,6 @@ const textAreaRule = (v) => (v || '').length <= props.counter || `Máximo de ${p
 
 //* MASK
 
-const onChange = (attrs) => {
-  emit('change', enableValue.value)
-}
-const onFocus = (attrs) => {
-  emit('focus', enableValue.value)
-}
-const onBlur = (attrs) => {
-  emit('blur', enableValue.value)
-}
 
 const customInput = ref(null)
 

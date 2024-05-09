@@ -161,11 +161,12 @@ const getPayment = async () => {
 
 const getGruposCategoria = async () => {
 	try {
-		const { success, message, data } = await getGrupos();
+		const { success, message, grupos } = await getGrupos();
 
 		if (!success) throw new Error(message);
 
-		gruposCategoria.value = data;
+		gruposCategoria.value = grupos;
+		console.log("🚀 ~ getGruposCategoria ~ gruposCategoria:", gruposCategoria.value)
 	} catch (error) {
 		console.log(error.message);
 		$toast.error(error.message);

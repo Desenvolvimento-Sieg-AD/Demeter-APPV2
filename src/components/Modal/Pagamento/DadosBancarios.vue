@@ -58,7 +58,7 @@
 
 	</v-row>
 
-	<v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
+	<v-row class="pa-3 mt-n12" v-if="!tiposNormalize.includes(form.tipo_id)">
 		<v-col v-if="formValue.tipo_id === 1" cols="3">
 			<CustomInput
 				v-model="formValue.tipo_chave_pix"
@@ -72,7 +72,7 @@
 				/>
 		</v-col>
 
-		<v-col v-if="form.tipo_id !== 2">
+		<v-col>
 			<CustomInput
 				:disabled="!tipos.descricao"
 				type="text"
@@ -87,8 +87,7 @@
 		</v-col>
 	</v-row>
 
-
-	<v-row class="pa-3 mt-n12" v-else>
+	<v-row class="pa-3 mt-n12" v-else-if="form.tipo_id === 2">
 
 		<v-col>
 			<CustomInput 
@@ -135,6 +134,22 @@
 
 	</v-row>
 
+	<v-row class="pa-3 mt-n12" v-else>
+
+		<v-col>
+			<CustomInput 
+				type="autocomplete" 
+				label="Cartão" 
+				v-model="formValue.dados_bancarios.outhers"
+				required 
+				:items="cards"
+				itemTitle="descricao"
+				itemValue="id"
+			/>
+		</v-col>
+
+	</v-row>
+
 	<v-row v-if="formValue.urgente" class="pa-3 mt-n12">
 		<v-col>
 			<CustomInput
@@ -150,13 +165,15 @@
 </template>
 <script setup>
 
-import { getPagamentoTipo, getTiposChavePix } from "@api"
+import { getPagamentoTipo, getTiposChavePix, getCard } from "@api"
 
 const dayjs = useDayjs();
 
 const route = useRoute();
 
 const emit = defineEmits(['update:form'])
+
+const { $toast } = useNuxtApp()
 
 const props = defineProps({
     form: { type: Object, default: {} }	,
@@ -169,7 +186,10 @@ const formValue = computed({
 })
 
 const tipos = ref(false);
+const cards = ref([])
 const chavesPix = ref([])
+
+const tiposNormalize = [2, 5, 6]
 
 const isExpired = computed(() => dayjs(formValue.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')))
 
@@ -241,7 +261,19 @@ const getTiposChave = async () => {
 	}
 }
 
-getTiposChave()
+const getCards = async () => {
+	try {
+		const { success, message, data } = await getCard()
+		if(!success) throw new Error(message)
+		cards.value = data
+	} catch (error) {
+		console.log(error.message)
+		$toast.error(error.message)
+	}
+}
+
+await getTiposChave()
+await getCards()
 
 watch(() => formValue.value.tipo_id, async (nv, oV) => {
 	if(nv !== oV){

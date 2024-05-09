@@ -1,6 +1,8 @@
-export async function getFornecedor() {
+export async function getFornecedor(internacional: boolean = false) {
 	try {
-		const { success, message, data } = await useApi(`/fornecedor`);
+		const { success, message, data } = await useApi(`/fornecedor`, {
+			query: { internacional },
+		});
 		if (!success) throw new Error(message);
 		return { success, message, data };
 	} catch (error) {

@@ -108,6 +108,7 @@ const formValidate = ref(null)
 const routeId = computed(() => route.query.id)
 
 const documentRequired = computed(() => {
+	if(form.value.fornecedor.internacional) return false
 	const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
 	return type?.requer_documento
 })
