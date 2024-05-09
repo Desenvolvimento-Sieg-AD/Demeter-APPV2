@@ -49,7 +49,7 @@
 						<v-col>
 							<CustomInput
 								type="file"
-								:label="type == 'NF' ? 'Nota fiscal' : 'Documento'"
+								:label="tipo_anexo_id == 3 ? 'Anexar NF' : 'Anexar documento'"
 								v-model="anexo"
 								hide-details
 								prependInnerIcon="mdi-paperclip"
@@ -81,11 +81,11 @@ const props = defineProps({
 	message: { type: String, default: '' },
 	title: { type: String, default: 'Upload NF' },
 	item: { type: Object, required: true },
-	type: { type: String, default: 'NF' },
+	tipo_anexo_id: { type: String, default: null },
 });
 
 //* REFS
-const anexo = ref();
+const anexo = ref(null);
 const loading = ref(false);
 const formValidate = ref(null)
 
@@ -130,30 +130,26 @@ const sendUpload = async () => {
 	try {
 		const formData = new FormData();
 
-		formData.append('file', anexo.value[0]);
+		formData.append('file', anexo.value);
 		formData.append('name_file', nameFile.value)
 
-		if (props.type == 'NF') {
-			formData.append('tipo_anexo_id', 3);
-		} else {
-			formData.append('tipo_anexo_id', 4);
-		}
+		formData.append('tipo_anexo_id', props.tipo_anexo_id);
 
-		const {success, message, data } = await postUpload(formData, props.item.id);
+		const { success, message } = await postUpload(formData, props.item.id);
 
 		if (!success) throw new Error(message) 
 
 		$toast.success('Arquivo enviado com sucesso');
+
+		loading.value = false;
+		enableValue.value = false;
+
 		emit('update');
 
 	} catch (error) {
 		console.log(error.message)
 		$toast.error(error.message)
-	} finally {
-		loading.value = false;
-		enableValue.value = false;
-		await formValidate.value.reset()
-	}
+	} 
 	
 };
 
@@ -162,8 +158,6 @@ const enableValue = computed({
 	set: (value) => emit('update:enable', value),
 });
 
-// 20241012 - Razao Social - R$ valor - Boleto
-
 // * Definir o titulo do arquivo pois se deixar o tamanho original e for maior que tamanho 20, o nome ultrapassa o tamanho do input
 const defineFileTitle = (fileName) => {
 	if (fileName.length > 20) {
@@ -171,6 +165,11 @@ const defineFileTitle = (fileName) => {
 	}
 	return fileName;
 };
+
+watch(() => props.enable, (value) => {
+	if (!value) anexo.value = null;
+});
+
 </script>
 
 <style scoped>

@@ -77,6 +77,40 @@
 				label="Tipo de Chave"
 				/>
 		</v-col>
+
+		<v-col v-else>
+			<div class="mt-5">
+				<v-divider color="#118B9F"></v-divider>
+			</div>
+		</v-col>
+
+		<v-col cols="2">
+			<CustomInput
+				type="date"
+				:required="true"
+				label="Data de vencimento"
+				v-model="formValue.data_vencimento"
+				:messages="messagesDate()"
+				:min="minDate"
+				:rules="[dateRules]"
+			/>
+		</v-col>
+
+		<v-col v-if="isInternacional">
+			<CustomInput type="text" mask="money" required label="Valor Dolar" v-model="formValue.valor_total" hide-details />
+		</v-col>
+
+		<v-col cols="2">
+			<CustomInput type="text" mask="money" required :label="labelValue" v-model="formValue.valor_total" hide-details />
+		</v-col>
+
+		<v-col cols="2">
+			<CustomInput type="checkbox" label="Urgência" v-model="formValue.urgente" hide-details color="#118B9F" />
+		</v-col>
+
+	</v-row>
+
+	<v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
 		<v-col>
 			<CustomInput
 				:disabled="!tipos.descricao"
@@ -161,6 +195,13 @@ const maskDescriptionOuthers = computed(() => {
 })
 
 const validDateToCard = computed(() => isExpired.value && (formValue.value.tipo_id !== 5 && formValue.value.tipo_id !== 6))
+
+const labelValue = computed(() => {
+	if(formValue.value.fornecedor.modo.internacional) return 'Valor Estimado em Reais';
+	return 'Valor Total';
+});
+
+const isInternacional = computed(() => formValue.value.fornecedor.modo.internacional);
 
 const messagesDate = () => {
 	if (isExpired.value && (validDateToCard.value)) return 'Data de vencimento inválida';

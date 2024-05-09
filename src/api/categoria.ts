@@ -2,7 +2,8 @@ export async function getCategorias() {
 	try {
 		const { success, message, data } = await useApi(`/categoria`);
 		if (!success) throw new Error(message);
-		return { success, message, data };
+		
+		return { success, message, data: data.grupo };
 	} catch (error) {
 		return { success: false, message: error, data: null };
 	}
@@ -24,7 +25,11 @@ export async function getGrupos() {
 		const { success, message, data } = await useApi(`/categoria/grupo`);
 		if (!success) throw new Error(message);
 
-		return { success, message, data };
+		const grupos = data.map((g: any) => {
+			return g.grupo
+		})
+
+		return { success, message, grupos };
 	} catch (error) {
 		return { success: false, message: error, data: null };
 	}
