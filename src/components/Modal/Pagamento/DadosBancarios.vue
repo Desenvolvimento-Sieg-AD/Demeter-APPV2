@@ -84,6 +84,7 @@
 </template>
 <script setup>
 import { getPagamentoTipo, getTiposChavePix, getCard } from '@api'
+import { getContasDisponiveis } from '~/api'
 
 const dayjs = useDayjs()
 
@@ -164,6 +165,34 @@ const dateRules = (v) => {
   return true
 }
 
+watch(
+  () => formValue.value.tipo_id,
+  (value) => {
+    if (formValue.value.tipo_id == 5 || formValue.value.tipo_id == 6) {
+      try {
+        getCards()
+      } catch (error) {
+        console.error(error.message)
+      }
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => formValue.value.empresa_id,
+  (value) => {
+    if (formValue.value.tipo_id == 5 || formValue.value.tipo_id == 6) {
+      try {
+        getCards()
+      } catch (error) {
+        console.error(error.message)
+      }
+    }
+  },
+  { immediate: true }
+)
+
 const getTiposChave = async () => {
   try {
     const { success, message, data } = await getTiposChavePix()
@@ -179,8 +208,11 @@ const getTiposChave = async () => {
 
 const getCards = async () => {
   try {
-    const { success, message, data } = await getCard()
+    if (!formValue.value.empresa_id || !formValue.value.tipo_id) return
+
+    const { success, message, data } = await getContasDisponiveis(formValue.value.empresa_id, formValue.value.tipo_id)
     if (!success) throw new Error(message)
+
     cards.value = data
   } catch (error) {
     console.log(error.message)
@@ -189,7 +221,6 @@ const getCards = async () => {
 }
 
 await getTiposChave()
-await getCards()
 
 watch(
   () => formValue.value.tipo_id,

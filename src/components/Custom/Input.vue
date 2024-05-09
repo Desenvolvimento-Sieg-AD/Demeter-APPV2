@@ -486,8 +486,8 @@ const onFocus = (attrs) => {
   emit('focus', attrs)
 }
 
-const onBlur = (attrs) => {
-  emit('blur', attrs)
+const onBlur = () => {
+  emit('blur', enableValue.value)
 }
 
 import { useCurrencyInput } from 'vue-currency-input'
@@ -729,14 +729,6 @@ select,
 textarea {
   font-size: 14px;
 }
-
-.v-label,
-.v-field-label,
-.v-autocomplete__selection-text,
-.v-autocomplete__selection,
-.v-autocomplete__selection--comma {
-  font-size: 14px;
-}
 input[type='date']::-webkit-inner-spin-button,
 input[type='datetime-local']::-webkit-inner-spin-button,
 input[type='date']::-webkit-calendar-picker-indicator,
@@ -744,6 +736,19 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
 }
+.v-label,
+.v-field-label,
+.v-field__input,
+.v-autocomplete__selection-text,
+.v-autocomplete__selection,
+.v-autocomplete__selection--comma {
+  font-size: 14px !important;
+}
+
+.v-text-field input.v-field__input {
+  min-height: 44px !important;
+}
+
 .input-row {
   display: flex;
   flex-direction: row;
@@ -767,10 +772,5 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   justify-content: center;
   margin-left: 8px;
   color: #ccc;
-}
-
-.required-field .v-label::before {
-  content: '*\00a0';
-  color: red;
 }
 </style>
