@@ -223,8 +223,6 @@ const openFile = async (item, tipo_anexo) => {
     if (!itemFind) throw new Error('Anexo não encontrado')
     if (!itemFind.caminho) return $toast.error('Anexo não encontrado')
 
-    console.log(`${path}${itemFind.caminho}`)
-
     const { success, message } = await useOs().openFile(`${path}${itemFind.caminho}`)
     if (!success) $toast.error(message)
   } catch (error) {
