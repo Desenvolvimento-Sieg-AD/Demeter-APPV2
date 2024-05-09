@@ -18,15 +18,26 @@ export async function getConta() {
 	}
 }
 
-export async function getClientByPayment(){
+export async function getClientByPayment() {
 	try {
-		const { success, message, data } = await useApi(`/empresa/clientByPayment`);
+		const { success, message, data } = await useApi(`/empresa/client-by-payment`);
 
 		if (!success) throw new Error(message)
 
 		return { success, message, data }
 
 	} catch (error) {
-		return { success: false, message: error}
+		return { success: false, message: error }
+	}
+}
+
+export async function getContasDisponiveis(empresa_id: number, tipo_pagamento_id: number) {
+	try {
+		const { success, message, data } = await useApi(`/empresa/${empresa_id}/contas/${tipo_pagamento_id}`);
+		if (!success) throw new Error(message);
+		return { success, message, data };
+	}
+	catch (error) {
+		return { success: false, message: error, data: null };
 	}
 }
