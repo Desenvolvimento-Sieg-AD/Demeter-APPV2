@@ -265,10 +265,11 @@ const openFile = (item, tipo_anexo) => {
 		const itemFind = item.anexos_pagamento.find((ref) => ref.tipo_anexo_id == tipo_anexo);
 		if (!itemFind) throw new Error('Anexo não encontrado');
 
-		window.electronAPI.openFile(`${path}${itemFind.path}`);
+		// window.electronAPI.openFile(`${path}${itemFind.path}`); //? APP
+		useOs().openFile(`${path}${itemFind.caminho}`); //? Template
 	} 
 	catch (error) {
-		$toast.error(error.message);
+		$toast.error('Erro para abrir arquivo');
 		console.error(error);
 	}
 };

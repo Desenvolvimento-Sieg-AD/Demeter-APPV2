@@ -368,11 +368,13 @@ const messageConfirmAllStatus = computed(() => {
 // * METHODS
 
 const openFile = (filePath) => {
-	window.electronAPI.openFile(filePath).then((response) => {
-		if (!response.success) {
-			console.error('Erro ao abrir arquivo:', response.message);
-		}
-	});
+	// window.electronAPI.openFile(filePath).then((response) => {
+	// 	if (!response.success) {
+	// 		console.error('Erro ao abrir arquivo:', response.message);
+	// 	}
+	// }); //? APP
+
+	useOs().openFile(filePath); //? Template
 };
 
 const openFiles = (anexos) => {

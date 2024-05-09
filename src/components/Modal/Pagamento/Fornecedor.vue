@@ -11,7 +11,7 @@
 				v-model="formValue.fornecedor.documento"
 				append-inner-icon="mdi-content-copy"
 				@click:append-inner="pasteFromClipboard"
-				@change="verifyFornecedor"
+				@change="verifyFornecedor()"
 				:mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
 			/>
 		</v-col>
@@ -26,7 +26,7 @@
 				label="Tipo fornecedor"
 				:items="tiposFornecedor"
 				v-model="formValue.fornecedor.tipo"
-				:disabled="formValue.fornecedor.nome"
+				:disabled="formValue.fornecedor.nome !== null"
 				append-inner-icon="mdi-card-account-details-outline"
 			/>
 		</v-col>
@@ -40,7 +40,7 @@
 				:items="fornecedores"
 				itemValue="razao_social"
 				itemTitle="razao_social"
-				@change="[verifyFornecedor()]"
+				@change="verifyFornecedor()"
 				v-model="formValue.fornecedor.nome"
 				append-inner-icon="mdi-shopping-outline"
 			/>
@@ -97,8 +97,6 @@ import { getFornecedor, getFornecedorByDocumentOrName } from "@api"
 
 const { $toast } = useNuxtApp()
 
-const fornecedores = ref((await getFornecedor()).data)
-
 const props = defineProps({
     form: { type: Object, required: true },
 })
@@ -108,19 +106,24 @@ const formValue = computed({
     set: (value) => emit('update:form', value)
 })
 
-const route = useRoute();
-
-const hasID = computed(() => route.params.id);
+const fornecedores = ref([]);
 
 const verifyFornecedor = async () => {
-
 	try {
 
-		const { success, message , data } = await getFornecedorByDocumentOrName(formValue.value.fornecedor.documento, formValue.value.fornecedor.nome)
+		if(formValue.value.fornecedor.nome){
 
-		if (!success) throw new Error(message);
+			const fornecedor = fornecedores.value.find(f => f.razao_social === formValue.value.fornecedor.nome);
+			if (!fornecedor) return;
+			getDataFornecedor(fornecedor);
+			
+		} else if (formValue.value.fornecedor.documento) {
 
-		if (data) getDataFornecedor(data);
+			const fornecedor = fornecedores.value.find(f => f.documento === formValue.value.fornecedor.documento);
+			if (!fornecedor) return;
+			getDataFornecedor(fornecedor);
+		}
+
 
 	} catch (error) {
 		console.error('Erro ao buscar fornecedor:', error);
@@ -128,25 +131,34 @@ const verifyFornecedor = async () => {
 	}
 };
 
-const getDataFornecedor = (data) => {
+const getDataFornecedor = async (fornecedor) => {
+	for(const key in formValue.value.fornecedor) {
 
-	clearFornecedor();
+		if (key === 'internacional') continue;
+		formValue.value.fornecedor[key] = fornecedor[key];
+		formValue.value.fornecedor.nome = fornecedor.razao_social
 
-	formValue.value.fornecedor.id = data.id;
-	formValue.value.fornecedor.nome = data.razao_social;
-	formValue.value.fornecedor.apelido = data.nome_fantasia;
-	formValue.value.fornecedor.tipo = data.internacional ? null : data.tipo;
-	formValue.value.fornecedor.documento = data.internacional ? null : data.documento;
-	formValue.value.fornecedor.internacional = data.internacional;	
-
-	console.log(data);
-
-	if(!formValue.value.fornecedor.documento) return
-		
-	if (data.tipo === 'fisico') formValue.value.fornecedor.documento = maskCpf(data.documento)
-	else formValue.value.fornecedor.documento = maskCnpj(data.documento);
-		
+		if (fornecedor.tipo === 'fisico') formValue.value.fornecedor.documento = maskCpf(fornecedor.documento)
+		else formValue.value.fornecedor.documento = maskCnpj(fornecedor.documento);
+	}
 };
+
+const getFornecedores = async () => {
+	try {
+		const { success, message, data } = await getFornecedor();
+		if (!success) throw new Error(message);
+
+		fornecedores.value = data;
+
+	} catch (error) {
+		console.error('Erro ao buscar fornecedores:', error);
+		$toast.error('Erro ao buscar fornecedores');
+	}
+};
+
+onMounted(() => {
+	getFornecedores();
+});
 
 const documentFornecedor = computed(() => {
 	const tipo = formValue.value.fornecedor?.tipo;
@@ -182,12 +194,9 @@ const clearFornecedor = () => {
 };
 
 watch(() => formValue.value.fornecedor.internacional, async (value) => {
-	
-    clearFornecedor();
-	
     const { data } = await getFornecedor(value);
     fornecedores.value = data;
 
-}, { deep: true, immediate: true });
+});
 
 </script>
