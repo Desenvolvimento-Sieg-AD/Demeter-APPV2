@@ -36,7 +36,8 @@
     "wait-on": "^7.0.1"
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.4.7",
+    "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
+    "@pinia/nuxt": "0.4.11",
     "@types/electron-is-dev": "^1.1.1",
     "dayjs-nuxt": "^2.1.9",
     "devextreme": "^23.2.5",

@@ -42,7 +42,8 @@ export default defineNuxtConfig({
 	modules: [
 		'@pinia/nuxt',
 		'dayjs-nuxt',
-    	'vuetify-nuxt-module',
+		'vuetify-nuxt-module',
+		'@pinia-plugin-persistedstate/nuxt',
 	],
 	build: {
 		transpile: ['vuetify'],
@@ -66,62 +67,62 @@ export default defineNuxtConfig({
 	vuetify: {
 		vuetifyOptions: {
 			labComponents: ['VTimePicker'],
-		  theme: {
-			defaultTheme: 'light',
-			themes: {
-			  dark: {
-				dark: true,
-				colors: {
-				  "primary": "#118B9F",
-				  "secondary": "#F68A1A",
-				  "danger": "#D9534F",
-				  "info": "#5BC0DE",
-				  "success": "#5CB85C",
-				  "warning": "#F0AD4E",
-				  "light": "#636363",
-				  "muted": "#CCCCCC",
-				  "dark": "#343A40",
-				  "purple": "#6F42C1",
-				  "graylighter": "#2C2C2C",
-				  "graylight": "#3C3C3C",
-				  "gray": "#4C4C4C",
-				  "graydark": "#5C5C5C",
-				  "black": "#000000"
-				},
-			  },
-			  light: {
-				dark: false,
-				colors: {
-				  "primary": "#118B9F",
-				  "secondary": "#F68A1A",
-				  "danger": "#D9534F",
-				  "info": "#5BC0DE",
-				  "success": "#5CB85C",
-				  "warning": "#F0AD4E",
-				  "light": "#F7F7F7",
-				  "muted": "#6C757D",
-				  "dark": "#343A40",
-				  "purple": "#6F42C1",
-				  "graylighter": "#EDEDED",
-				  "graylight": "#CCCCCC",
-				  "gray": "#959595",
-				  "graydark": "#636363",
-				  "black": "#000000"
-				},
-			  }
+			theme: {
+				defaultTheme: 'light',
+				themes: {
+					dark: {
+						dark: true,
+						colors: {
+							"primary": "#118B9F",
+							"secondary": "#F68A1A",
+							"danger": "#D9534F",
+							"info": "#5BC0DE",
+							"success": "#5CB85C",
+							"warning": "#F0AD4E",
+							"light": "#636363",
+							"muted": "#CCCCCC",
+							"dark": "#343A40",
+							"purple": "#6F42C1",
+							"graylighter": "#2C2C2C",
+							"graylight": "#3C3C3C",
+							"gray": "#4C4C4C",
+							"graydark": "#5C5C5C",
+							"black": "#000000"
+						},
+					},
+					light: {
+						dark: false,
+						colors: {
+							"primary": "#118B9F",
+							"secondary": "#F68A1A",
+							"danger": "#D9534F",
+							"info": "#5BC0DE",
+							"success": "#5CB85C",
+							"warning": "#F0AD4E",
+							"light": "#F7F7F7",
+							"muted": "#6C757D",
+							"dark": "#343A40",
+							"purple": "#6F42C1",
+							"graylighter": "#EDEDED",
+							"graylight": "#CCCCCC",
+							"gray": "#959595",
+							"graydark": "#636363",
+							"black": "#000000"
+						},
+					}
+				}
 			}
-		  } 
 		}
-	  },
-	  dayjs: {
+	},
+	dayjs: {
 		locales: ['pt-br'],
 		defaultLocale: 'pt-br',
 		defaultTimezone: 'America/Bahia',
 		plugins: [
-		  'relativeTime',
-		  'utc',
-		  'timezone',
-		  'localizedFormat'
+			'relativeTime',
+			'utc',
+			'timezone',
+			'localizedFormat'
 		],
-	  },
+	},
 });

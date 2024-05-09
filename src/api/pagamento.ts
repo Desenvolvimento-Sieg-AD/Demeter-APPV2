@@ -7,14 +7,14 @@ interface PagamentoUpdate {
 }
 
 interface StatusManage {
-	id: Number[]
-	status: number
-	justificativa: string
-	justificativaCliente: string
-	justificativaFinanceiro: string
-	ambos: boolean
-	lote: boolean
-	cancelamento: boolean
+  id: Number[]
+  status: number
+  justificativa: string
+  justificativaCliente: string
+  justificativaFinanceiro: string
+  ambos: boolean
+  lote: boolean
+  cancelamento: boolean
 }
 
 export async function getPagamentoTipo() {
@@ -38,12 +38,17 @@ export async function getPagamentoByScope(scope: string) {
   }
 }
 
-export async function getProjects() {
+export async function getProjects(search: string) {
   try {
-    const { success, message, data } = await useApi(`/pagamento/projetos`)
+    const { success, message, data } = await useApi(`/pagamento/projetos`, {
+      method: 'POST',
+      body: { search }
+    });
     if (!success) throw new Error(message)
+
     return { success, message, data }
-  } catch (error) {
+  }
+  catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -59,14 +64,14 @@ export async function getOnePayment(id: number, scope: string) {
   }
 }
 
-export async function getPagamentoByClient(client_id: number){
+export async function getPagamentoByClient(client_id: number) {
   try {
 
-      const { success, message, data } = await useApi(`/pagamento/cliente/${client_id}`)
+    const { success, message, data } = await useApi(`/pagamento/cliente/${client_id}`)
 
-      if (!success) throw new Error(message)
+    if (!success) throw new Error(message)
 
-      return { success, message, data }
+    return { success, message, data }
 
   } catch (error) {
     return { success: false, message: error, data: null }
@@ -93,14 +98,14 @@ export async function postPagamento(formData: FormData) {
 export async function sendPaymentsToOmie(payment_id: number) {
   try {
 
-      const { success, message, data } = await useApi(`/pagamento/omie`, {
-        method: 'POST',
-        body: {payment_id}
-      })
-  
-      if (!success) throw new Error(message)
-      return { success, message, data }
-   
+    const { success, message, data } = await useApi(`/pagamento/omie`, {
+      method: 'POST',
+      body: { payment_id }
+    })
+
+    if (!success) throw new Error(message)
+    return { success, message, data }
+
   } catch (error) {
     return { success: false, message: error, data: null }
   }

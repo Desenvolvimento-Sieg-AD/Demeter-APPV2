@@ -5,7 +5,7 @@
       <v-card class="card-box d-flex align-center" flat>
         <v-col cols="4">
           <CustomText class="mb-4" title="Cliente" color="#118B9F" size="20" :bold="true" />
-          <CustomInput label="Selecione o cliente" type="autocomplete" v-model="selectedClient" :items="clients" itemValue="id" itemTitle="apelido" variant="solo-filled" />
+          <CustomInput label="Selecione o cliente" type="autocomplete" v-model="selectedClient" :items="clients" itemValue="id" itemTitle="apelido" />
         </v-col>
       </v-card>
 
@@ -17,7 +17,7 @@
           <div>
             <v-btn color="green" variant="text" v-if="hasPaymentSuccessFul" @click="sendPaidPayments">
               Pagar
-              <v-tooltip text="Pagar os pagamentos que foram enviados com sucesso" activator="parent" location="top"></v-tooltip>
+              <v-tooltip text="Pagar os pagamentos que foram enviados com sucesso" activator="parent" location="top" />
             </v-btn>
             <CustomText class="mr-5" v-if="countPayments > 0" :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
             <v-chip color="#F68A1A" text="Pagamentos aprovados pela gerência"></v-chip>
@@ -62,9 +62,11 @@
                 <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
                   <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="#118B9F" disabled hide-details />
                 </v-col>
+
                 <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
                   <CustomInput label="Agência" v-model="payment.dados_bancarios.agencia" color="#118B9F" disabled hide-details />
                 </v-col>
+
                 <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
                   <CustomInput label="Conta" v-model="payment.dados_bancarios.conta" color="#118B9F" disabled hide-details />
                 </v-col>
@@ -83,7 +85,7 @@
               </v-row>
             </v-col>
 
-            <v-col cols="auto">
+            <v-col cols="1">
               <v-row align="end" style="flex-direction: column; align-items: center; justify-content: center" justify="center">
                 <v-col cols="auto">
                   <v-chip v-if="sentWithSuccess(payment)" color="green" text="Enviado com sucesso" />

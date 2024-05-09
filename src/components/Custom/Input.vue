@@ -250,7 +250,7 @@
     :append-icon="appendIcon"
     :append-inner-icon="appendInnerIcon"
     :item-title="itemTitle"
-    :return-object="itemValue ? false : true"
+    :return-object="returnObject"
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
     :delimiters="[',', ';', ' ']"
@@ -442,6 +442,7 @@ const props = defineProps({
   options: { type: Array, default: () => [] },
   items: { type: Array, default: () => [] },
   itemValue: { type: String },
+  returnObject: { type: Boolean, default: false },
   itemTitle: { type: [String, Function], default: 'title' },
   itemProps: { type: Function, default: () => {} },
   messages: { type: [String, Array], default: '' },
@@ -466,11 +467,11 @@ const props = defineProps({
   allowWeekends: { type: Boolean, default: false },
   comercialHoursOnly: { type: Boolean, default: true },
   restrictedDates: { type: Array, default: [] },
-  allowZero: { type: Boolean, default: false },
+  allowZero: { type: Boolean, default: false }
   //* Events
-  onChange: { type: Function, default: () => {} },
-  onFocus: { type: Function, default: () => {} },
-  onBlur: { type: Function, default: () => {} }
+  // onChange: { type: Function, default: () => {} },
+  // onFocus: { type: Function, default: () => {} },
+  // onBlur: { type: Function, default: () => {} }
 })
 
 const dayjs = useDayjs()
@@ -694,6 +695,8 @@ const onFocus = (attrs) => {
   emit('focus', enableValue.value)
 }
 const onBlur = (attrs) => {
+  console.log(attrs)
+  console.log(enableValue.value)
   emit('blur', enableValue.value)
 }
 

@@ -1,59 +1,75 @@
 import { defineStore } from 'pinia';
 
+interface AuthUser {
+	id: number;
+	nome: string;
+	sigla: string;
+	email: string;
+	tipo: {
+		id: number;
+		nome: string;
+	};
+	setores: [
+		{ id: number; nome: string; exibir_projetos: boolean; sigla: string; }
+	];
+}
+
 export const useAuthStore = defineStore('auth', {
 	state: () => ({
 		authenticated: localStorage.getItem('token') ? true : false,
 		loading: false,
-		user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null,
-		token: localStorage.getItem('token') || null,
+		user: null as AuthUser | null,
+		token: null as string | null,
 	}),
-	actions: {
-		setToken(token: string | null) {
-			this.token = token;
+	persist: {
+		storage: persistedState.localStorage,
+		paths: ['authenticated', 'user', 'token'],
+	},
+	getters: {
+		isAuthenticated(state) {
+			return state.authenticated;
 		},
+		isAdmin(state) {
+			return state.user?.tipo?.id === 1;
+		},
+		isGerente(state) {
+			return state.user?.tipo?.id === 2;
+		},
+		isFinanceiro(state) {
+			return state.user?.tipo?.id === 4;
+		},
+		isCompras(state) {
+			return state.user?.tipo?.id === 5;
+		}
+	},
+	actions: {
 		async authenticateUser(sigla: string) {
 			try {
 				// await this.checkAPI();
 
 				const { data, success, message } = await useApi('/auth', {
 					method: 'POST',
-					body: {
-						sigla,
-					},
+					body: { sigla }
 				});
+				if (!success) throw new Error(message);
 
-				if (success) {
-					localStorage.clear();
-					const expirationDate = new Date();
-					expirationDate.setDate(expirationDate.getDate() + 30);
-					localStorage.setItem('token', data.token);
-					localStorage.setItem('tokenExpiration', expirationDate.toString());
-					localStorage.setItem('user', JSON.stringify(data.user));
-					this.authenticated = true;
+				this.user = data.user;
+				this.token = data.token;
+				this.authenticated = true;
 
-					return {
-						success: true,
-						user: { ...data.user }
-					};
-				}
-				else {
-					throw new Error(message);
-				}
+				return { success: true, user: data.user };
 			}
-			catch (error: any) {
-				return {
-					success: false,
-					message: error.message,
-				};
+			catch (error) {
+				return { success: false, message: error.message };
 			}
 		},
 
 		async logUserOut() {
 			const router = useRouter();
-			localStorage.clear();
 
 			this.user = null;
 			this.authenticated = false;
+
 			this.$reset();
 			router.push('/login');
 		},
@@ -61,11 +77,10 @@ export const useAuthStore = defineStore('auth', {
 		async checkAPI() {
 			try {
 				const { success } = await useApi('/status');
-				if (!success) throw new Error('API não disponível');
+				if (!success) throw new Error('API indisponível, entre em contato com o Desenvolvimento');
 			}
-			catch (error: any) {
-				console.log(error.message);
-				throw new Error('API indisponível, entre em contato com o Desenvolvimento');
+			catch (error) {
+				throw new Error(error.message);
 			}
 		}
 	},
