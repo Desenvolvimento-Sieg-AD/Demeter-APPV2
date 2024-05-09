@@ -27,9 +27,8 @@
 		@focus="onFocus"
 		@blur="onBlur"
 	>
-		<template #prepend-inner> R$ </template>
+		<template #prepend-inner> {{ typeCurrency }} </template>
 	</v-text-field>
-
 
 	<v-text-field
 		v-else-if="type == 'text'"
@@ -476,6 +475,7 @@ const props = defineProps({
 	comercialHoursOnly: { type: Boolean, default: true },
 	restrictedDates: { type: Array, default: [] },
 	allowZero: { type: Boolean, default: false },
+	currency: { type: String, default: 'BRL'},
 	//* Events
 	onChange: { type: Function, default: () => {} },
 	onFocus: { type: Function, default: () => {} },
@@ -487,7 +487,7 @@ const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur']);
 
 import { useCurrencyInput } from 'vue-currency-input';
 const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
-	currency: 'BRL',
+	currency: props.currency,
 	autoDecimalDigits: true,
 	currencyDisplay: 'hidden',
 	hideCurrencySymbolOnFocus: false,
@@ -533,6 +533,8 @@ const datetimepicker = ref(false)
 
 const pick_date = ref(true)
 const pick_time = ref(false)
+
+const typeCurrency = computed(() => props.currency === 'BRL' ? 'R$' : '$')
 
 watch(datetimepicker, (enabled) => {
   if(enabled) {

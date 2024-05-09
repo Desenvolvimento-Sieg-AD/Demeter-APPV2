@@ -1,31 +1,12 @@
 <template>
 
-	<div class="d-flex justify-center" v-if="!notSelected">
-		<v-btn variant="plain" @click="toggleTipoFornecedor">
-			<v-icon>mdi-refresh</v-icon>
-			Trocar
-		</v-btn>
-	</div>
-
-	<v-row class="pa-3 ga-3" justify="center" no-gutters v-if="notSelected">
-			<v-btn color="#6081f7" @click="isNacional">
-				Nacional
-				<v-icon>mdi-flag</v-icon>
-			</v-btn>
-			<v-btn color="#60b99a" @click="isInternacional">
-				Internacional 
-				<v-icon>mdi-earth</v-icon>
-			</v-btn>
-	</v-row>
-
-    <v-row class="pa-3" v-else-if="fornecedor.nacional">
+    <v-row class="pa-3" v-if="!formValue.fornecedor.internacional">
 
 		<v-col cols="12" md="3">
 			<CustomInput
-				:required="fornecedor.nacional"
+				:required="!formValue.fornecedor.internacional"
 				type="text"
 				hide-details
-				:change="validDocument()"
 				:label="documentFornecedor"
 				v-model="formValue.fornecedor.documento"
 				append-inner-icon="mdi-content-copy"
@@ -36,7 +17,7 @@
 
 		<v-col cols="12" md="3">
 			<CustomInput
-				:required="fornecedor.nacional"
+				:required="!formValue.fornecedor.internacional"
 				hide-details
 				type="select"
 				itemTitle="nome"
@@ -51,7 +32,7 @@
 
 		<v-col cols="12" md="6">
 			<CustomInput
-				:required="fornecedor.nacional"
+				:required="!formValue.fornecedor.internacional"
 				hideDetails
 				type="combobox"
 				label="Fornecedor"
@@ -85,7 +66,7 @@
 
 	</v-row>
 
-	<v-row v-else-if="fornecedor.internacional" class="pa-3">
+	<v-row v-else class="pa-3">
 
 		<v-col >
 			<CustomInput
@@ -96,7 +77,6 @@
 				:items="fornecedores"
 				itemValue="razao_social"
 				itemTitle="razao_social"
-				:onchange="verifyFornecedor()"
 				v-model="formValue.fornecedor.nome"
 				append-inner-icon="mdi-shopping-outline"
 			/>
@@ -112,7 +92,9 @@
 </template>
 <script setup>
 
-import { getFornecedor } from "@api"
+import { getFornecedor, getFornecedorByDocumentOrName } from "@api"
+
+const { $toast } = useNuxtApp()
 
 const { data: fornecedores } = await getFornecedor();
 
@@ -125,49 +107,37 @@ const formValue = computed({
     set: (value) => emit('update:form', value)
 })
 
-const fornecedor = reactive({
-	nacional: false,
-	internacional: false,
-});
+const route = useRoute();
 
-const notSelected = computed(() => !fornecedor.nacional && !fornecedor.internacional);
-const toggleTipoFornecedor = () => {
-	fornecedor.nacional = false;
-	fornecedor.internacional = false;
-	formValue.value.fornecedor.modo.internacional = false;
-	formValue.value.fornecedor.modo.nacional = false;
-};
-
-const isNacional = () => {
-	fornecedor.nacional = true;
-	formValue.value.fornecedor.modo.internacional = false;
-	formValue.value.fornecedor.modo.nacional = true;
-};
-
-const isInternacional = () => {
-	fornecedor.nacional = false;
-	fornecedor.internacional = true
-	formValue.value.fornecedor.modo.nacional = false;	
-	formValue.value.fornecedor.modo.internacional = true;
-	console.log(formValue.value.fornecedor.modo)
-};
-
+const hasID = computed(() => route.params.id);
 
 const fornecedorExistente = ref(false);
 
-const validDocument = () => {
-	if (!formValue.value.fornecedor.documento) return formValue.value.fornecedor.tipo = null;
+watch(() => formValue.value.fornecedor.razao_social, () => {
+	if (formValue.value.fornecedor.documento || formValue.value.fornecedor.razao_social) {
+		validDocument();
+	}
+}, { deep: true });
 
-	const documento = formValue.value.fornecedor.documento.replace(/\D/g, '');
-	const fornecedor = fornecedores.find((fornecedor) => fornecedor.documento === documento);
+const validDocument = async () => {
 
-	if (fornecedor) getDataFornecedor(fornecedor);
+	const registro = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
+	const nome = formValue.value.fornecedor.razao_social;
 
-	if(validaCNPJ(formValue.value.fornecedor.documento)) formValue.value.fornecedor.tipo = 'juridico'
+	if (!registro && !nome) return $toast.error('Informe o documento ou nome do fornecedor');
 
-	else if (validaCPF(formValue.value.fornecedor.documento)) formValue.value.fornecedor.tipo = 'fisico'
+	try {
+		
+		const { success, message , data } = await getFornecedorByDocumentOrName(registro, nome)
 
-	else formValue.value.fornecedor.tipo = null
+		if (!success) throw new Error(message);
+
+		if (data) getDataFornecedor(data);
+
+	} catch (error) {
+		console.error('Erro ao buscar fornecedor:', error);
+		$toast.error('Erro ao buscar fornecedor');
+	}
 
 };
 
@@ -185,14 +155,19 @@ const verifyFornecedor = () => {
 	} 
 };
 
-const getDataFornecedor = (fornecedor) => {
-	formValue.value.fornecedor.id = fornecedor.id;
-	formValue.value.fornecedor.nome = fornecedor.razao_social;
-	formValue.value.fornecedor.apelido = fornecedor.nome_fantasia;
-	formValue.value.fornecedor.tipo = fornecedor.tipo;
+const getDataFornecedor = (data) => {
 
-	if (fornecedor.tipo === 'fisico') formValue.value.fornecedor.documento = maskCpf(fornecedor.documento);
-	else formValue.value.fornecedor.documento = maskCnpj(fornecedor.documento);
+	formValue.value.fornecedor.id = data.id;
+	formValue.value.fornecedor.nome = data.razao_social;
+	formValue.value.fornecedor.apelido = data.nome_fantasia;
+	formValue.value.fornecedor.tipo = data.internacional ? null : data.tipo;
+	formValue.value.fornecedor.internacional = data.internacional;	
+
+	if(!formValue.value.fornecedor.documento) return
+		
+	if (data.tipo === 'fisico') formValue.value.fornecedor.documento = maskCpf(data.documento)
+	else formValue.value.fornecedor.documento = maskCnpj(data.documento);
+		
 };
 
 const documentFornecedor = computed(() => {
@@ -220,5 +195,6 @@ const pasteFromClipboard = async () => {
 		console.error('Erro ao acessar a área de transferência:', error);
 	}
 };
+
 
 </script>

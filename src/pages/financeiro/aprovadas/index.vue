@@ -283,7 +283,7 @@ const isTED = (type) => type === 'TED'
 const isBoleto = (type) => type === 'Boleto'
 const isPagOnline = (type) => type === 'Pagamento Online'
 
-const editPayment = (id) => router.push({ path: '../novo/pagamento', query: { id }});
+const editPayment = (id) => router.push({ path: `../pagamento/${id}`});
 
 const sentAndError = (payment) => payment.enviado_externo && !payment.identificacao_externa
 const sentWithSuccess = (payment) => payment.enviado_externo && payment.identificacao_externa

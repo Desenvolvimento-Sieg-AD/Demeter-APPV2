@@ -19,7 +19,7 @@
 					enableAddButton
 					createTitle="NOVO PAGAMENTO"
 					createText="Ir para página de solicitação"
-					@add="router.push(`/novo/pagamento`);"
+					@add="router.push(`/pagamento/novo`);"
 					pager
 				>
 					<template #item-categoria="{ data: { data: item } }">
