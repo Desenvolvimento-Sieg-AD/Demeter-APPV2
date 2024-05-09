@@ -23,11 +23,11 @@
     :readonly="readonly"
     validate-on="lazy blur"
     :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
-    <template #prepend-inner> R$ </template>
+    <template #prepend-inner> {{ typeCurrency }} </template>
   </v-text-field>
 
   <v-text-field
@@ -59,7 +59,7 @@
     :maxlength="max"
     validate-on="lazy blur"
     :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -154,7 +154,7 @@
     :persistent-hint="persistentHint"
     validate-on="lazy blur"
     :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   />
@@ -189,7 +189,7 @@
     :rows="rows"
     :auto-grow="autogrow"
     :class="{ 'required-field': required && !enableValue }"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   />
@@ -254,7 +254,7 @@
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
     :delimiters="[',', ';', ' ']"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -351,7 +351,7 @@
     :return-object="itemValue ? false : true"
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   />
@@ -391,7 +391,7 @@
     :return-object="itemValue ? false : true"
     :item-value="itemValue"
     :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
-    @update:modalValue="onChange"
+    @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -467,7 +467,8 @@ const props = defineProps({
   allowWeekends: { type: Boolean, default: false },
   comercialHoursOnly: { type: Boolean, default: true },
   restrictedDates: { type: Array, default: [] },
-  allowZero: { type: Boolean, default: false }
+  allowZero: { type: Boolean, default: false },
+  currency: { type: String, default: 'BRL' }
   //* Events
   // onChange: { type: Function, default: () => {} },
   // onFocus: { type: Function, default: () => {} },
@@ -477,9 +478,21 @@ const props = defineProps({
 const dayjs = useDayjs()
 const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur'])
 
+const onChange = (attrs) => {
+  emit('change', attrs)
+}
+
+const onFocus = (attrs) => {
+  emit('focus', attrs)
+}
+
+const onBlur = (attrs) => {
+  emit('blur', attrs)
+}
+
 import { useCurrencyInput } from 'vue-currency-input'
 const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
-  currency: 'BRL',
+  currency: props.currency,
   autoDecimalDigits: true,
   currencyDisplay: 'hidden',
   hideCurrencySymbolOnFocus: false,
@@ -528,6 +541,8 @@ const datetimepicker = ref(false)
 
 const pick_date = ref(true)
 const pick_time = ref(false)
+
+const typeCurrency = computed(() => (props.currency === 'BRL' ? 'R$' : '$'))
 
 watch(datetimepicker, (enabled) => {
   if (enabled) {
@@ -687,18 +702,6 @@ const fieldRules = computed(() => {
 const textAreaRule = (v) => (v || '').length <= props.counter || `Máximo de ${props.counter} caracteres`
 
 //* MASK
-
-const onChange = (attrs) => {
-  emit('change', enableValue.value)
-}
-const onFocus = (attrs) => {
-  emit('focus', enableValue.value)
-}
-const onBlur = (attrs) => {
-  console.log(attrs)
-  console.log(enableValue.value)
-  emit('blur', enableValue.value)
-}
 
 const customInput = ref(null)
 

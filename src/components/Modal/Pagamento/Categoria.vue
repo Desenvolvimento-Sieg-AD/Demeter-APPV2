@@ -36,7 +36,7 @@
 				hide-details
 				v-model="form.nf"
 				:loading="loadingProcessFile"
-				:disabled="!form.categoria_id"
+				:disabled="!form.categoria_id || formValue.fornecedor.internacional"
 				label="Nota fiscal/Cupom fiscal"
 				accept="image/*,application/pdf"
 				append-inner-icon="mdi-file-upload-outline"
@@ -55,6 +55,8 @@
 import { getFileContent } from '@api/conversor';
 import { getGrupos, getCategorias, getFornecedor, getCategoriasByGrupo } from "@api"
 
+const route = useRoute();
+
 const { $toast } = useNuxtApp();
 const { data: fornecedores } = await getFornecedor();
 
@@ -63,7 +65,6 @@ const [ { grupos }, { data: categorias } ] = await Promise.all([getGrupos(), get
 const emit = defineEmits(['update:form'])
 
 const props = defineProps({ form: { type: Object, required: true } })
-
 const categoriaRef = ref(null);
 const selectedCategories = ref([]);
 const loadingProcessFile = ref(false);
@@ -87,13 +88,6 @@ const validGroup = async () => {
 	}
 };
 
-watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
-	validGroup();	
-	if(oldValue && newValue !== oldValue) {
-		formValue.value.categoria_id = null;
-		await categoriaRef?.value?.click();
-	}
-}, { immediate: true });
 
 function setFornecedorDocumentData(cpf_emitente, cnpj_emitente) {
     if (cpf_emitente) {
@@ -109,8 +103,11 @@ function setFornecedorDocumentData(cpf_emitente, cnpj_emitente) {
 }
 
 const processNfFile = async (file) => {
-    loadingProcessFile.value = true;
+
+	if(route.params.id) return;
+
     clearFornecedor();
+    loadingProcessFile.value = true;
     try {
         const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file);
 
@@ -132,20 +129,8 @@ const processNfFile = async (file) => {
     }
 };
 
-const determineDocumentType = (documento) => {
-    if (validaCNPJ(documento)) return 'juridico';
-    if (validaCPF(documento)) return 'fisico';
-    return null;
-};
-
 const findFornecedorByDocumento = (documento) => {
     return fornecedores.find(fornecedor => fornecedor.documento === documento);
-};
-
-const clearFornecedorFields = () => {
-    formValue.value.fornecedor.id = null;
-    formValue.value.fornecedor.nome = null;
-    formValue.value.fornecedor.apelido = null;
 };
 
 const validDocument = () => {
@@ -157,23 +142,27 @@ const validDocument = () => {
     const documento = formValue.value.fornecedor.documento.replace(/\D/g, '');
     const find = findFornecedorByDocumento(documento);
 
-    clearFornecedorFields();
-
     if (find) {
         formValue.value.fornecedor.id = find.id;
         formValue.value.fornecedor.nome = find.razao_social;
-        formValue.value.fornecedor.apelido = find.nome_fantasia;
+
+		if (find.tipo === 'fisico') {
+			formValue.value.fornecedor.documento = maskCpf(find.documento);
+		} else {
+			formValue.value.fornecedor.documento = maskCnpj(find.documento);
+		}
+
+		formValue.value.fornecedor.tipo = find.internacional ? null : find.tipo;
+		formValue.value.fornecedor.internacional = find.internacional;
     }
 
-    formValue.value.fornecedor.tipo = determineDocumentType(documento);
 };
 
 const clearFornecedor = () => {
-	formValue.value.fornecedor.tipo = null;
-	formValue.value.fornecedor.nome = null;
-	formValue.value.fornecedor.chave_nf = null;
-	formValue.value.fornecedor.numero_nf = null;
-	formValue.value.fornecedor.documento = null;
+	for(const key in formValue.value.fornecedor) {
+		if(key === 'internacional') continue;
+		formValue.value.fornecedor[key] = null;
+	}
 };
 
 const defineFileTitle = (fileName) => {
@@ -182,7 +171,16 @@ const defineFileTitle = (fileName) => {
 };
 
 watch(() => formValue.value.nf, async (value) => {
-	if (value && value.length > 0) processNfFile(value[0]);
-}, { deep: true, immediate: false });
+	if (value && value.length > 0) await processNfFile(value[0]);
+});
+
+watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
+	validGroup();	
+	if(oldValue && newValue !== oldValue) {
+		formValue.value.categoria_id = null;
+		await categoriaRef?.value?.click();
+	}
+}, { immediate: true });
+
 
 </script>

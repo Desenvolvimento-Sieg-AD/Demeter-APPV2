@@ -15,31 +15,16 @@
       />
     </v-col>
 
-    <!-- <v-col v-if="formValue.tipo_id === 1">
-			<CustomInput
-				v-model="formValue.tipo_chave_pix"
-				append-inner-icon="mdi-key"
-				type="select"
-				required
-				:items="chavesPix"
-				itemTitle="nome"
-				itemValue="id"
-				label="Tipo de Chave"
-				/>
-		</v-col> -->
-
-    <!-- <v-col v-else>
-			<div class="mt-5">
-				<v-divider color="#118B9F"></v-divider>
-			</div>
-		</v-col> -->
-
     <v-col cols="3">
       <CustomInput type="date" required label="Data de vencimento" v-model="formValue.data_vencimento" :messages="messagesDate()" :min="minDate" />
     </v-col>
 
-    <v-col cols="4">
-      <CustomInput type="text" mask="money" required label="Valor total" v-model="formValue.valor_total" hide-details />
+    <v-col v-if="isInternacional">
+      <CustomInput type="text" mask="money" currency="USD" required label="Valor em Dólar" v-model="formValue.valor_total_dolar" hide-details />
+    </v-col>
+
+    <v-col>
+      <CustomInput type="text" mask="money" currency="BRL" required :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'" v-model="formValue.valor_total" hide-details />
     </v-col>
 
     <v-col cols="2">
@@ -47,35 +32,11 @@
     </v-col>
   </v-row>
 
-  <v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
+  <v-row class="pa-3 mt-n12" v-if="!tiposNormalize.includes(form.tipo_id)">
     <v-col v-if="formValue.tipo_id === 1" cols="3">
       <CustomInput v-model="formValue.tipo_chave_pix" append-inner-icon="mdi-key" type="select" required :items="chavesPix" itemTitle="nome" itemValue="id" label="Tipo de Chave" />
     </v-col>
 
-    <v-col v-else>
-      <div class="mt-5">
-        <v-divider color="#118B9F"></v-divider>
-      </div>
-    </v-col>
-
-    <v-col cols="2">
-      <CustomInput type="date" :required="true" label="Data de vencimento" v-model="formValue.data_vencimento" :messages="messagesDate()" :min="minDate" :rules="[dateRules]" />
-    </v-col>
-
-    <v-col v-if="isInternacional">
-      <CustomInput type="text" mask="money" required label="Valor Dolar" v-model="formValue.valor_total" hide-details />
-    </v-col>
-
-    <v-col cols="2">
-      <CustomInput type="text" mask="money" required :label="labelValue" v-model="formValue.valor_total" hide-details />
-    </v-col>
-
-    <v-col cols="2">
-      <CustomInput type="checkbox" label="Urgência" v-model="formValue.urgente" hide-details color="#118B9F" />
-    </v-col>
-  </v-row>
-
-  <v-row class="pa-3 mt-n12" v-if="form.tipo_id !== 2">
     <v-col>
       <CustomInput
         :disabled="!tipos.descricao"
@@ -91,7 +52,7 @@
     </v-col>
   </v-row>
 
-  <v-row class="pa-3 mt-n12" v-else>
+  <v-row class="pa-3 mt-n12" v-else-if="form.tipo_id === 2">
     <v-col>
       <CustomInput type="text" mask="number" label="Banco" v-model="formValue.dados_bancarios.banco" required :maxLength="3" />
     </v-col>
@@ -109,6 +70,12 @@
     </v-col>
   </v-row>
 
+  <v-row class="pa-3 mt-n12" v-else>
+    <v-col>
+      <CustomInput type="autocomplete" label="Cartão" v-model="formValue.dados_bancarios.outhers" required :items="cards" itemTitle="descricao" itemValue="id" />
+    </v-col>
+  </v-row>
+
   <v-row v-if="formValue.urgente" class="pa-3 mt-n12">
     <v-col>
       <CustomInput type="textarea" :required="formValue.urgente" :rows="1" label="Justificativa da urgência" v-model="formValue.justificativa_urgente" />
@@ -116,13 +83,15 @@
   </v-row>
 </template>
 <script setup>
-import { getPagamentoTipo, getTiposChavePix } from '@api'
+import { getPagamentoTipo, getTiposChavePix, getCard } from '@api'
 
 const dayjs = useDayjs()
 
 const route = useRoute()
 
 const emit = defineEmits(['update:form'])
+
+const { $toast } = useNuxtApp()
 
 const props = defineProps({
   form: { type: Object, default: {} },
@@ -135,7 +104,10 @@ const formValue = computed({
 })
 
 const tipos = ref(false)
+const cards = ref([])
 const chavesPix = ref([])
+
+const tiposNormalize = [2, 5, 6]
 
 const isExpired = computed(() => dayjs(formValue.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')))
 
@@ -152,11 +124,11 @@ const maskDescriptionOuthers = computed(() => {
 const validDateToCard = computed(() => isExpired.value && formValue.value.tipo_id !== 5 && formValue.value.tipo_id !== 6)
 
 const labelValue = computed(() => {
-  if (formValue.value.fornecedor.modo.internacional) return 'Valor Estimado em Reais'
+  if (formValue.value.fornecedor.internacional) return 'Valor Estimado em Reais'
   return 'Valor Total'
 })
 
-const isInternacional = computed(() => formValue.value.fornecedor.modo.internacional)
+const isInternacional = computed(() => formValue.value.fornecedor.internacional)
 
 const messagesDate = () => {
   if (isExpired.value && validDateToCard.value) return 'Data de vencimento inválida'
@@ -205,7 +177,19 @@ const getTiposChave = async () => {
   }
 }
 
-getTiposChave()
+const getCards = async () => {
+  try {
+    const { success, message, data } = await getCard()
+    if (!success) throw new Error(message)
+    cards.value = data
+  } catch (error) {
+    console.log(error.message)
+    $toast.error(error.message)
+  }
+}
+
+await getTiposChave()
+await getCards()
 
 watch(
   () => formValue.value.tipo_id,

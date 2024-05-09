@@ -97,7 +97,7 @@ const login = async () => {
 
 const menuOptions = ref([
 	{ title: 'Pagamentos', icon: 'mdi-cash-check', to: '/', setores: ['ALL'] },
-	{ title: 'Novo pagamento', icon: 'mdi-cash-plus', to: '/novo/pagamento', setores: ['ALL'] },
+	{ title: 'Novo pagamento', icon: 'mdi-cash-plus', to: '/pagamento/novo', setores: ['ALL'] },
 	{ title: 'Financeiro', icon: 'mdi-account-cash-outline', to: '/financeiro', setores: ['FIN', 'GER', 'ADM'], tabs: [
        { title: 'Pendentes', icon: 'mdi-account-clock-outline', to: '/financeiro/pendentes', color: 'red' },
 	   { title: 'Aprovadas', icon: 'mdi-account-check-outline', to: '/financeiro/aprovadas', color: 'green' }]

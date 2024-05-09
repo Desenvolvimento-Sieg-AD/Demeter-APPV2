@@ -8,18 +8,22 @@
 
     <LayoutForm class="mb-12">
       <v-form ref="formValidate">
-        <v-card class="card-pagamento" flat>
-          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
-          <ModalPagamentoCategoria v-model:form="form" />
+        <v-card flat class="card-pagamento">
+          <v-row no-gutters justify="space-between" align="center" class="mt-2 mb-n7 mr-2">
+            <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
+            <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" />
+          </v-row>
+          <ModalPagamentoFornecedor v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
-        <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
+        <v-card class="card-pagamento" flat>
+          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
-          <ModalPagamentoFornecedor v-model:form="form" />
+          <ModalPagamentoCategoria v-model:form="form" />
         </v-card>
+
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="pt-2 card-pagamento" flat>
@@ -54,7 +58,7 @@
     </LayoutForm>
     <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
       <v-icon>mdi-arrow-left</v-icon>
-      <v-tooltip text="Voltar" activator="parent" location="right" />
+      <v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
     </v-btn>
   </div>
 </template>
@@ -79,14 +83,16 @@ const path = access.public.PAGAMENTO_PATH
 //* DATA
 
 const loading = ref(false)
+const priceNow = ref(null)
 const paymentsType = ref([])
 const formValidate = ref(null)
 
 // * COMPUTEDS
 
-const routeId = computed(() => route?.query?.id)
+const routeId = computed(() => route.query.id)
 
 const documentRequired = computed(() => {
+  if (form.value.fornecedor.internacional) return false
   const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
   return type?.requer_documento
 })
@@ -118,32 +124,31 @@ const actionsForm = [
 function buildFormData() {
   const formData = new FormData()
 
-  formData.append('motivo', form.value.motivo)
-  formData.append('tipo_id', form.value.tipo_id)
-  formData.append('urgente', form.value.urgente)
-  formData.append('chave_nf', form.value.chave_nf)
-  formData.append('numero_nf', form.value.numero_nf)
-  formData.append('empresa_id', form.value.empresa_id)
-  formData.append('projeto_id', form.value.projeto_id)
-  formData.append('valor_total', form.value.valor_total)
-  formData.append('categoria_id', form.value.categoria_id)
-  formData.append('fornecedor_id', form.value.fornecedor.id)
-  formData.append('tipo_chave_pix', form.value.tipo_chave_pix)
-  formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
-  formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
-  formData.append('data_vencimento', form.value.data_vencimento)
-  formData.append('fornecedor_nome', form.value.fornecedor.nome)
-  formData.append('fornecedor_apelido', form.value.fornecedor.apelido)
-  formData.append('fornecedor_documento', form.value.fornecedor.documento)
-  formData.append('dados_complementares', form.value.dados_complementares)
-  formData.append('justificativa_urgente', form.value.justificativa_urgente)
-
-  if (form.value.nf && form.value.nf.length > 0) formData.append('nf', form.value.nf[0])
-
-  if (form.value.doc && form.value.doc.length > 0) {
-    for (let i = 0; i < form.value.doc.length; i++) {
-      formData.append('doc', form.value.doc[i])
+  for (const key in form.value) {
+    if (key === 'fornecedor') {
+      formData.append('fornecedor_id', form.value.fornecedor.id)
+      formData.append('fornecedor_nome', form.value.fornecedor.nome)
+      formData.append('fornecedor_apelido', form.value.fornecedor.apelido)
+      formData.append('fornecedor_documento', form.value.fornecedor.documento)
+      formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
+      formData.append('fornecedor_internacional', form.value.fornecedor.internacional)
+      continue
     }
+    if (key === 'dados_bancarios') {
+      formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
+      continue
+    }
+    if (key === 'nf' && form.value.nf.length > 0) {
+      formData.append('nf', form.value.nf[0])
+      continue
+    }
+    if (key === 'doc' && form.value.doc.length > 0) {
+      for (let i = 0; i < form.value.doc.length; i++) {
+        formData.append('doc', form.value.doc[i])
+      }
+      continue
+    }
+    formData.append(key, form.value[key])
   }
 
   return formData
@@ -153,24 +158,31 @@ const sendForm = async () => {
   loading.value = true
   try {
     const { valid } = await formValidate.value.validate()
-    if (!valid) throw new Error('Preencha os campos obrigatórios')
 
-    if (validDateToCard.value) throw new Error('Data de vencimento expirada')
+    if (!valid) {
+      loading.value = false
+      return $toast.error('Preencha todos os campos obrigatórios')
+    }
+
+    if (validDateToCard.value) {
+      loading.value = false
+      return $toast.error('Data de vencimento inválida')
+    }
 
     const formData = buildFormData()
-
     const { success, message } = await postPagamento(formData)
+
     if (!success) throw new Error(message)
 
     $toast.success(message)
 
+    loading.value = false
     await definePaymentImportant()
     reset()
   } catch (error) {
     console.error(error.message)
     $toast.error(error.message)
   }
-  loading.value = false
 }
 
 const updatePayment = async (id, data) => {
@@ -178,6 +190,7 @@ const updatePayment = async (id, data) => {
     const payload = buildFormData()
 
     const { success, message } = await updatePagamento(id, payload)
+
     if (!success) throw new Error(message)
 
     $toast.success(message)
@@ -236,19 +249,17 @@ function formatPaymentData(data) {
 }
 
 function formatBankingData(data) {
-  let dadosBancarios = JSON.parse(data.dados_bancarios)
+  const dadosBancarios = JSON.parse(data.dados_bancarios)
   switch (form.value.tipo_id) {
     case 1:
       dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '')
       break
     case 3:
       const { banco, agencia, conta, digito } = dadosBancarios
-      dadosBancarios = { banco, agencia, conta, digito, ...dadosBancarios }
-      break
+      return { banco, agencia, conta, digito, ...dadosBancarios }
     default:
-      break
+      return dadosBancarios
   }
-  return dadosBancarios
 }
 
 const getPagamento = async (id) => {
@@ -276,17 +287,7 @@ const reset = () => {
 
 function initFormState() {
   return {
-    fornecedor: {
-      id: null,
-      nome: null,
-      apelido: null,
-      documento: null,
-      tipo: null,
-      modo: {
-        nacional: false,
-        internacional: false
-      }
-    },
+    fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null },
     empresa_id: null,
     nf: [],
     doc: [],
@@ -295,6 +296,7 @@ function initFormState() {
     categoria_id: null,
     dados_complementares: null,
     valor_total: null,
+    valor_total_dolar: null,
     data_vencimento: null,
     projeto: null,
     projeto_id: null,
@@ -303,6 +305,7 @@ function initFormState() {
     tipo_chave_pix: null,
     urgente: false,
     justificativa_urgente: null,
+    internacional: false,
     dados_bancarios: {
       banco: null,
       agencia: null,
@@ -316,10 +319,47 @@ function initFormState() {
 // * Lifecycle
 
 onMounted(async () => {
-  if (routeId.value) await Promise.all([await definePaymentImportant(), await getPagamento(routeId.value)])
+  await Promise.all([await definePaymentImportant()])
 })
 
+const getPriceDollar = async () => {
+  try {
+    const endpoint = `https://economia.awesomeapi.com.br/json/USD-BRL/1`
+    const response = await fetch(endpoint)
+
+    const data = await response.json()
+
+    const ask = data[0].ask
+    const bid = data[0].bid
+
+    const price = (parseFloat(ask) + parseFloat(bid)) / 2
+    priceNow.value = price
+
+    form.value.valor_total = price
+  } catch (error) {
+    console.log(error.message)
+    $toast.error(error.message)
+  }
+}
+
 // * Watchers
+
+watch(
+  () => form.value.fornecedor.internacional,
+  async (nv, oV) => {
+    if (nv) {
+      paymentsType.value = paymentsType.value.filter((type) => type.modo_internacional)
+      await getPriceDollar()
+    } else await definePaymentImportant()
+  }
+)
+
+watch(
+  () => form.value.valor_total_dolar,
+  (nv, oV) => {
+    if (nv) form.value.valor_total = priceNow.value * nv
+  }
+)
 </script>
 
 <style scoped>

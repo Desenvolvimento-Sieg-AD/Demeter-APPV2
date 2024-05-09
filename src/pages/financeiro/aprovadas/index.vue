@@ -32,7 +32,7 @@
           @click="selectPayment(payment.id)"
           :disabled="payment.identificacao_externa"
         >
-          <v-row justify="space-between" align="top">
+          <v-row justify="space-between" >
             <v-col cols="11">
               <v-row>
                 <v-col cols="5">
@@ -82,6 +82,10 @@
                 <v-col cols="6" v-if="isPagOnline(payment.tipo_pagamento.nome)">
                   <CustomInput label="Link de Pagamento" v-model="payment.dados_bancarios.outhers" color="#118B9F" disabled hide-details />
                 </v-col>
+
+                <v-col cols="2" v-if="isCartao(payment.tipo_pagamento.nome)">
+                  <CustomInput label="Número do Cartão" v-model="payment.dados_bancarios.numero_cartao" color="#118B9F" disabled hide-details />
+                </v-col>
               </v-row>
             </v-col>
 
@@ -94,6 +98,12 @@
                 </v-col>
 
                 <v-col cols="auto">
+
+                  <v-btn flat icon @click.stop="viewPayment(payment.id)" variant="plain" color="primary" size="40">
+                    <v-icon>mdi-eye</v-icon>
+                    <v-tooltip text="Visualizar pagamento" activator="parent" location="top" />
+                  </v-btn>
+
                   <v-btn flat icon @click.stop="editPayment(payment.id)" variant="plain" color="primary" size="40">
                     <v-icon>mdi-pencil</v-icon>
                     <v-tooltip text="Editar pagamento" activator="parent" location="top" />
@@ -134,7 +144,8 @@
         <v-tooltip text="Enviar pagamentos para o Omie" activator="parent" location="left" />
       </v-btn>
 
-      <ModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :actions="modalActions" :item="paymentToCancel" />
+      <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :actions="modalActions" :item="selectedPayment" />
+      <LazyModalPagamento v-model:enable="enableModal.viewPayment" :id="selectedPayment?.id" />
     </v-form>
   </LayoutForm>
 </template>
@@ -150,17 +161,19 @@ const { $toast } = useNuxtApp()
 
 const clients = ref([])
 const payments = ref([])
-const loading = ref(false)
 
-const enableModal = reactive({ cancel: false })
+const loading = ref(false)
+const loadingPayments = ref(false)
+const showPayments = ref(false)
+const notExistPayments = ref(false)
 
 const countPayments = ref(0)
-const showPayments = ref(false)
+
 const justificativa = ref(null)
+
 const selectedClient = ref(null)
-const paymentToCancel = ref(null)
-const loadingPayments = ref(false)
-const notExistPayments = ref(false)
+const selectedPayment = ref(null)
+const enableModal = reactive({ cancel: false, viewPayment: false })
 
 // * COMPUTEDS
 
@@ -168,8 +181,8 @@ const paymentsCountTitle = computed(() => `Pagamentos selecionados: ${countPayme
 const hasPaymentSuccessFul = computed(() => payments.value.some((payment) => payment.enviado_externo && payment.identificacao_externa))
 
 const modalActions = computed(() => [
-  { title: 'Fechar', icon: 'mdi-close', color: 'grey', click: () => (enableModal.cancel = false) },
-  { title: 'Confirmar', icon: 'mdi-check', color: 'green', click: cancelPayment, loading: loading.value }
+  { title: 'Fechar', icon: 'mdi-close', color: 'grey', type: "cancel", click: () => (enableModal.cancel = false) },
+  { title: 'Confirmar', icon: 'mdi-check', color: 'green', type: "success", click: cancelPayment, loading: loading.value }
 ])
 
 // * METHODS
@@ -209,8 +222,7 @@ const getPaymentByClient = async () => {
 const sendOmie = async () => {
   if (countPayments.value === 0) return $toast.error('Selecione ao menos um pagamento')
 
-  let errorCount = 0,
-    successCount = 0
+  let errorCount = 0, successCount = 0
 
   const paymentsToSend = payments.value.filter((payment) => payment.selectedOmie)
 
@@ -256,7 +268,10 @@ const sendPaidPayments = async () => {
 
 const cancelPayment = async () => {
   try {
-    const { success, message } = await postStatus({ id: [paymentToCancel.value.id], status: 7, justificativa }) // ! Cancelado
+
+    if (!justificativa.value) return $toast.error('Justificativa é obrigatória')
+
+    const { success, message } = await postStatus({ id: [selectedPayment.value.id], status: 7, justificativa: justificativa.value }) // ! Cancelado
     if (!success) throw new Error(message)
 
     $toast.success('Pagamento cancelado com sucesso')
@@ -271,20 +286,29 @@ const cancelPayment = async () => {
   }
 }
 
+const viewPayment = (id) => {
+  const payment = payments.value.find((payment) => payment.id === id)
+  if (!payment) return $toast.error('Pagamento não encontrado')
+
+  selectedPayment.value = payment
+  enableModal.viewPayment = true
+}
+
 // * AUX
 
 const isPIX = (type) => type === 'PIX'
 const isTED = (type) => type === 'TED'
 const isBoleto = (type) => type === 'Boleto'
 const isPagOnline = (type) => type === 'Pagamento Online'
+const isCartao = (type) => type === 'Cartão de crédito' || type === 'Cartão de débito'
 
-const editPayment = (id) => router.push({ path: '../novo/pagamento', query: { id } })
+const editPayment = (id) => router.push({ path: `../pagamento/${id}`});
 
 const sentAndError = (payment) => payment.enviado_externo && !payment.identificacao_externa
 const sentWithSuccess = (payment) => payment.enviado_externo && payment.identificacao_externa
 
 const confirmCancelPayment = async (id) => {
-  paymentToCancel.value = payments.value.find((payment) => payment.id === id)
+  selectedPayment.value = payments.value.find((payment) => payment.id === id)
   enableModal.cancel = true
 }
 
@@ -298,8 +322,10 @@ const selectPayment = (id) => {
 
 const formatPaymentData = (payment) => {
   payment.data_vencimento = new Date(payment.data_vencimento).toLocaleDateString()
-  payment.dados_bancarios = JSON.parse(JSON.stringify(payment.dados_bancarios))
-  payment.retorno_externo = JSON.parse(JSON.stringify(payment.retorno_externo))
+
+  if(typeof payment.dados_bancarios === 'string') payment.dados_bancarios = JSON.parse(payment.dados_bancarios)
+  if(typeof payment.retorno_externo === 'string') payment.retorno_externo = JSON.parse(payment.retorno_externo)
+  
   payment.selectedOmie = false
   return payment
 }
