@@ -78,7 +78,7 @@
 
   <v-row v-if="formValue.urgente" class="pa-3 mt-n12">
     <v-col>
-      <CustomInput type="textarea" :required="formValue.urgente" :rows="1" label="Justificativa da urgência" v-model="formValue.justificativa_urgente" />
+      <CustomInput type="textarea" :required="formValue.urgente" :rows="1" label="Justificativa da urgência" v-model="formValue.justificativa_urgente" :counter="600" />
     </v-col>
   </v-row>
 </template>

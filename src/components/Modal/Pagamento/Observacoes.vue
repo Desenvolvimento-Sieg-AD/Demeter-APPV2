@@ -3,19 +3,17 @@
     <v-col cols="12" md="4">
       <CustomInput
         required
-        hide-details
         label="Motivo"
         type="textarea"
-        no-resize
         :rows="3"
-        :counter="false"
+        :counter="300"
         v-model="formValue.motivo"
         append-inner-icon="mdi-chat-question-outline"
       />
     </v-col>
 
     <v-col cols="8">
-      <CustomInput hide-details type="textarea" no-resize :rows="3" :counter="false" label="Observações" v-model="formValue.dados_complementares" />
+      <CustomInput type="textarea" :counter="300" no-resize :rows="3" label="Observações" v-model="formValue.dados_complementares" />
     </v-col>
 
     <v-col cols="12" v-if="!requer_projeto">
