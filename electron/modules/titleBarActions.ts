@@ -39,6 +39,12 @@ export default (mainWindow: BrowserWindow) => {
     return mainWindow.isVisible()
   })
 
+  ipcMain.handle('reload:app', (event) => {
+    const win = getWindowFromEvent(event)
+    if (!win) return
+    win.reload()
+  })
+
   mainWindow.on('maximize', () => mainWindow.webContents.send('window:maximizeChanged', true))
   mainWindow.on('unmaximize', () => mainWindow.webContents.send('window:maximizeChanged', false))
   mainWindow.on('enter-full-screen', () => mainWindow.webContents.send('window:fullscreenChanged', true))
