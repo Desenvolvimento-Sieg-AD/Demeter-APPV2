@@ -10,7 +10,7 @@ interface AuthUser {
 		nome: string;
 	};
 	setores: [
-		{ id: number; nome: string; exibir_projetos: boolean; sigla: string; }
+		{ id: number; nome: string; exibe_projetos: boolean; sigla: string; }
 	];
 }
 

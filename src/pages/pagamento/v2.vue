@@ -1,58 +1,24 @@
 <template>
   <div>
-    <CustomHeader title="Editar Pagamento">
+    <CustomHeader title="Solicitação de Pagamento">
       <v-btn icon variant="plain" color="primary">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
     </CustomHeader>
 
-    <LayoutForm class="mb-12">
+    <LayoutForm>
       <v-form ref="formValidate">
-        <v-card flat class="card-pagamento">
-          <v-row no-gutters justify="space-between" align="center" class="mt-2 mb-n7 mr-2">
-            <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
-          </v-row>
-          <ModalPagamentoFornecedor v-model:form="form" />
-        </v-card>
+        <v-row justify="space-beetween" align="center">
+          <v-col cols="3">
+            <CustomInput required hide-details itemValue="id" itemTitle="nome" label="Setor" type="autocomplete" v-model="form.setor_id" :items="[]" />
+          </v-col>
 
-        <v-divider class="mt-2 mb-2" />
+          <v-col cols="7">
+            <CustomInput required hide-details itemValue="id" itemTitle="nome" label="Empresa pagadora" type="autocomplete" v-model="form.empresa_id" :items="[]" />
+          </v-col>
 
-        <v-card class="card-pagamento" flat>
-          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
-          <ModalPagamentoCategoria v-model:form="form" />
-        </v-card>
-
-        <v-divider class="mt-2 mb-2" />
-
-        <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
-          <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
-        </v-card>
-
-        <v-divider class="mt-2 mb-2" />
-
-        <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
-          <ModalPagamentoObservacoes v-model:form="form" :user="user" />
-        </v-card>
-
-        <v-divider class="mt-2 mb-2" />
-
-        <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
-          <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
-        </v-card>
-
-        <div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
-          <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()">
-            {{ action.title }}
-            <v-icon size="small" :icon="action.icon" />
-          </v-btn>
-        </div>
+          <v-col cols="2"> </v-col>
+        </v-row>
       </v-form>
     </LayoutForm>
     <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
@@ -66,6 +32,7 @@
 // * IMPORTS
 
 import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
+import { useAuthStore } from '~/store/auth'
 
 const { $toast } = useNuxtApp()
 
@@ -88,11 +55,10 @@ const formValidate = ref(null)
 
 // * COMPUTEDS
 
-const routeId = computed(() => {
-  return route.params.id
-})
+const routeId = computed(() => route.query.id)
 
 const documentRequired = computed(() => {
+  if (form.value.fornecedor.internacional) return false
   const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
   return type?.requer_documento
 })
@@ -103,11 +69,18 @@ const validDateToCard = computed(() => isExpired.value && form.value.tipo_id !==
 
 const actionsForm = [
   {
-    title: 'Atualizar',
+    title: 'Limpar',
+    icon: 'mdi-trash-can-outline',
+    color: 'red',
+    onClick: () => reset()
+  },
+  {
+    title: routeId.value ? 'Atualizar' : 'Salvar',
     icon: 'mdi-currency-usd',
     color: 'green',
     onClick: () => {
-      updatePayment(Number(routeId.value), form.value)
+      if (routeId.value) updatePayment(Number(routeId.value), form.value)
+      else sendForm()
     }
   }
 ]
@@ -117,31 +90,26 @@ const actionsForm = [
 function buildFormData() {
   const formData = new FormData()
 
-  const deleteKeys = ['conta_empresa', 'empresa', 'usuario', 'categoria', 'tipo_pagamento', 'anexos_pagamento', 'movimentacoes_pagamento']
-
   for (const key in form.value) {
-    if (deleteKeys.includes(key)) continue
-
+    console.log('key', key, form.value[key])
     if (key === 'fornecedor') {
-      if (!formData.get('fornecedor_id')) {
-        formData.append('fornecedor_id', form.value.fornecedor.id)
-        formData.append('fornecedor_nome', form.value.fornecedor.nome)
-        formData.append('fornecedor_apelido', form.value.fornecedor.apelido)
-        formData.append('fornecedor_documento', form.value.fornecedor.documento)
-        formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
-        formData.append('fornecedor_internacional', form.value.fornecedor.internacional)
-        continue
-      }
+      formData.append('fornecedor_id', form.value.fornecedor.id)
+      formData.append('fornecedor_nome', form.value.fornecedor.nome)
+      formData.append('fornecedor_apelido', form.value.fornecedor.apelido)
+      formData.append('fornecedor_documento', form.value.fornecedor.documento)
+      formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
+      formData.append('fornecedor_internacional', form.value.fornecedor.internacional)
+      continue
     }
     if (key === 'dados_bancarios') {
       formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
       continue
     }
-    if (form.value.nf && key === 'nf' && form.value.nf && form.value.nf.length > 0) {
+    if (key === 'nf' && form.value.nf.length > 0) {
       formData.append('nf', form.value.nf[0])
       continue
     }
-    if (form.value.doc && key === 'doc' && form.value.doc.length > 0) {
+    if (key === 'doc' && form.value.doc.length > 0) {
       for (let i = 0; i < form.value.doc.length; i++) {
         formData.append('doc', form.value.doc[i])
       }
@@ -151,6 +119,37 @@ function buildFormData() {
   }
 
   return formData
+}
+
+const sendForm = async () => {
+  loading.value = true
+  try {
+    const { valid } = await formValidate.value.validate()
+
+    if (!valid) {
+      loading.value = false
+      return $toast.error('Preencha todos os campos obrigatórios')
+    }
+
+    if (validDateToCard.value) {
+      loading.value = false
+      return $toast.error('Data de vencimento inválida')
+    }
+
+    const formData = buildFormData()
+    const { success, message } = await postPagamento(formData)
+
+    if (!success) throw new Error(message)
+
+    $toast.success(message)
+
+    loading.value = false
+    await definePaymentImportant()
+    reset()
+  } catch (error) {
+    console.error(error.message)
+    $toast.error(error.message)
+  }
 }
 
 const updatePayment = async (id, data) => {
@@ -165,7 +164,7 @@ const updatePayment = async (id, data) => {
 
     setTimeout(() => router.push('/financeiro/aprovadas'), 750)
   } catch (error) {
-    console.log('Erro ao atualizar pagamento', error)
+    console.log('Erro ao atualizar pagamento', error.message)
     $toast.error('Erro ao atualizar pagamento')
   }
 }
@@ -202,8 +201,8 @@ function formatPaymentData(data) {
   const { file: nf, folder: pathNF } = createFileFromAnexo(fileNF)
 
   form.value = {
-    nf: nf ? [nf] : null,
-    doc: doc ? [doc] : null,
+    nf,
+    doc: [doc],
     pathNF,
     ...data,
     pathDoc,
@@ -217,18 +216,17 @@ function formatPaymentData(data) {
 }
 
 function formatBankingData(data) {
-  let dadosBancarios = JSON.parse(data.dados_bancarios)
+  const dadosBancarios = JSON.parse(data.dados_bancarios)
   switch (form.value.tipo_id) {
     case 1:
       dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '')
       break
     case 3:
-      dadosBancarios = { banco, agencia, conta, digito, ...dadosBancarios }
-      break
+      const { banco, agencia, conta, digito } = dadosBancarios
+      return { banco, agencia, conta, digito, ...dadosBancarios }
     default:
-      break
+      return dadosBancarios
   }
-  return JSON.parse(dadosBancarios)
 }
 
 const getPagamento = async (id) => {
@@ -239,7 +237,7 @@ const getPagamento = async (id) => {
 
     formatPaymentData(data)
   } catch (error) {
-    console.error('Erro ao buscar pagamento:', error)
+    console.error('Erro ao buscar pagamento:', error.message)
     $toast.error('Erro ao buscar pagamento')
   }
 }
@@ -257,8 +255,8 @@ const reset = () => {
 function initFormState() {
   return {
     fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null },
-    internacional: false,
     empresa_id: null,
+    setor_id: user.setores.length <= 1 ? user.setores[0].id : null,
     nf: [],
     doc: [],
     tipo_id: null,
@@ -275,6 +273,7 @@ function initFormState() {
     tipo_chave_pix: null,
     urgente: false,
     justificativa_urgente: null,
+    internacional: false,
     dados_bancarios: {
       banco: null,
       agencia: null,
@@ -288,7 +287,7 @@ function initFormState() {
 // * Lifecycle
 
 onMounted(async () => {
-  await Promise.all([await definePaymentImportant(), await getPagamento(routeId.value)])
+  await Promise.all([await definePaymentImportant()])
 })
 
 const getPriceDollar = async () => {
@@ -311,21 +310,16 @@ const getPriceDollar = async () => {
   }
 }
 
-onBeforeUnmount(() => {
-  form.value = initFormState()
-})
-
 // * Watchers
 
 watch(
   () => form.value.fornecedor.internacional,
   async (nv, oV) => {
     if (nv) {
-      paymentsType.value = paymentsType.value.filter((type) => type.internacional)
+      paymentsType.value = paymentsType.value.filter((type) => type.modo_internacional)
       await getPriceDollar()
     } else await definePaymentImportant()
-  },
-  { immediate: true }
+  }
 )
 
 watch(

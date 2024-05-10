@@ -29,7 +29,6 @@ export async function getPagamentoTipo() {
 
 export async function getPagamentoByScope(scope: string) {
   try {
-
     const { success, message, data } = await useApi(`/pagamento/scope/${scope}`)
     if (!success) throw new Error(message)
     return { success, message, data }
@@ -43,12 +42,11 @@ export async function getProjects(search: string) {
     const { success, message, data } = await useApi(`/pagamento/projetos`, {
       method: 'POST',
       body: { search }
-    });
+    })
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  }
-  catch (error) {
+  } catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -66,13 +64,11 @@ export async function getOnePayment(id: number, scope: string) {
 
 export async function getPagamentoByClient(client_id: number) {
   try {
-
     const { success, message, data } = await useApi(`/pagamento/cliente/${client_id}`)
 
     if (!success) throw new Error(message)
 
     return { success, message, data }
-
   } catch (error) {
     return { success: false, message: error, data: null }
   }
@@ -96,18 +92,22 @@ export async function postPagamento(formData: FormData) {
 }
 
 export async function sendPaymentsToOmie(payment_id: number) {
-  try {
+  let codigo = ''
 
-    const { success, message, data } = await useApi(`/pagamento/omie`, {
+  try {
+    //@ts-ignore
+    const { success, message, data, faultcode } = await useApi(`/pagamento/omie`, {
       method: 'POST',
       body: { payment_id }
     })
 
-    if (!success) throw new Error(message)
+    if (!success) {
+      codigo = faultcode ?? ''
+      throw new Error(message)
+    }
     return { success, message, data }
-
   } catch (error) {
-    return { success: false, message: error, data: null }
+    return { success: false, message: error, data: null, codigo: codigo }
   }
 }
 
@@ -148,7 +148,7 @@ export async function postUpload(formData: FormData, id: Number) {
 
 export async function postStatus(status: StatusManage) {
   try {
-    const { success, message, data } = await useApi(`/pagamento/pagamento/status`, {
+    const { success, message, data } = await useApi(`/pagamento/status`, {
       method: 'POST',
       body: status
     })

@@ -27,12 +27,12 @@
         <v-card
           v-for="(payment, index) in payments"
           :key="`${payment}-${index}`"
-          :class="{ 'card-payment-box': true, 'selected-box': payment.selectedOmie, 'approved-box': payment.identificacao_externa }"
+          :class="{ 'card-payment-box': true, 'selected-box': payment.selectedOmie, 'approved-box': payment.codigo_lancamento_omie }"
           flat
           @click="selectPayment(payment.id)"
-          :disabled="payment.identificacao_externa"
+          :disabled="payment.codigo_lancamento_omie"
         >
-          <v-row justify="space-between" >
+          <v-row justify="space-between">
             <v-col cols="11">
               <v-row>
                 <v-col cols="5">
@@ -98,7 +98,6 @@
                 </v-col>
 
                 <v-col cols="auto">
-
                   <v-btn flat icon @click.stop="viewPayment(payment.id)" variant="plain" color="primary" size="40">
                     <v-icon>mdi-eye</v-icon>
                     <v-tooltip text="Visualizar pagamento" activator="parent" location="top" />
@@ -178,11 +177,11 @@ const enableModal = reactive({ cancel: false, viewPayment: false })
 // * COMPUTEDS
 
 const paymentsCountTitle = computed(() => `Pagamentos selecionados: ${countPayments.value}`)
-const hasPaymentSuccessFul = computed(() => payments.value.some((payment) => payment.enviado_externo && payment.identificacao_externa))
+const hasPaymentSuccessFul = computed(() => payments.value.some((payment) => payment.enviado_externo && payment.codigo_lancamento_omie))
 
 const modalActions = computed(() => [
-  { title: 'Fechar', icon: 'mdi-close', color: 'grey', type: "cancel", click: () => (enableModal.cancel = false) },
-  { title: 'Confirmar', icon: 'mdi-check', color: 'green', type: "success", click: cancelPayment, loading: loading.value }
+  { title: 'Fechar', icon: 'mdi-close', color: 'grey', type: 'cancel', click: () => (enableModal.cancel = false) },
+  { title: 'Confirmar', icon: 'mdi-check', color: 'green', type: 'success', click: cancelPayment, loading: loading.value }
 ])
 
 // * METHODS
@@ -222,16 +221,29 @@ const getPaymentByClient = async () => {
 const sendOmie = async () => {
   if (countPayments.value === 0) return $toast.error('Selecione ao menos um pagamento')
 
-  let errorCount = 0, successCount = 0
+  let errorCount = 0,
+    successCount = 0
 
   const paymentsToSend = payments.value.filter((payment) => payment.selectedOmie)
 
   for await (const payment of paymentsToSend) {
+    let codigo = ''
     try {
-      const response = await sendPaymentsToOmie(payment.id)
-      if (!response.data.success) throw new Error(response.message)
+      const { success, message, data, faultcode } = await sendPaymentsToOmie(payment.id)
+      if (!success) {
+        codigo = faultcode ?? ''
+        throw new Error(message)
+      }
+
+      payment.codigo_lancamento_omie = data.codigo_lancamento_omie
+      payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso' }
+      payment.enviado_externo = true
+
       successCount++
     } catch (error) {
+      payment.retorno_externo = { codigo_status: '0', descricao_status: error.message, codigo_status: codigo }
+      payment.enviado_externo = true
+
       errorCount++
       console.error(error.message)
     }
@@ -248,7 +260,7 @@ const sendOmie = async () => {
 const sendPaidPayments = async () => {
   loading.value = true
 
-  const paymentsToSend = payments.value.filter((payment) => payment.enviado_externo && payment.identificacao_externa).map((payment) => payment.id)
+  const paymentsToSend = payments.value.filter((payment) => payment.enviado_externo && payment.codigo_lancamento_omie).map((payment) => payment.id)
 
   try {
     const { success, message } = await postStatus({ id: paymentsToSend, status: 6 }) // * Pago
@@ -268,7 +280,6 @@ const sendPaidPayments = async () => {
 
 const cancelPayment = async () => {
   try {
-
     if (!justificativa.value) return $toast.error('Justificativa é obrigatória')
 
     const { success, message } = await postStatus({ id: [selectedPayment.value.id], status: 7, justificativa: justificativa.value }) // ! Cancelado
@@ -302,10 +313,10 @@ const isBoleto = (type) => type === 'Boleto'
 const isPagOnline = (type) => type === 'Pagamento Online'
 const isCartao = (type) => type === 'Cartão de crédito' || type === 'Cartão de débito'
 
-const editPayment = (id) => router.push({ path: `../pagamento/${id}`});
+const editPayment = (id) => router.push({ path: `../pagamento/${id}` })
 
-const sentAndError = (payment) => payment.enviado_externo && !payment.identificacao_externa
-const sentWithSuccess = (payment) => payment.enviado_externo && payment.identificacao_externa
+const sentAndError = (payment) => payment.enviado_externo && !payment.codigo_lancamento_omie
+const sentWithSuccess = (payment) => payment.enviado_externo && payment.codigo_lancamento_omie
 
 const confirmCancelPayment = async (id) => {
   selectedPayment.value = payments.value.find((payment) => payment.id === id)
@@ -323,9 +334,9 @@ const selectPayment = (id) => {
 const formatPaymentData = (payment) => {
   payment.data_vencimento = new Date(payment.data_vencimento).toLocaleDateString()
 
-  if(typeof payment.dados_bancarios === 'string') payment.dados_bancarios = JSON.parse(payment.dados_bancarios)
-  if(typeof payment.retorno_externo === 'string') payment.retorno_externo = JSON.parse(payment.retorno_externo)
-  
+  if (typeof payment.dados_bancarios === 'string') payment.dados_bancarios = JSON.parse(payment.dados_bancarios)
+  if (typeof payment.retorno_externo === 'string') payment.retorno_externo = JSON.parse(payment.retorno_externo)
+
   payment.selectedOmie = false
   return payment
 }
@@ -336,7 +347,7 @@ const paymentSelectedOrNot = (selected) => {
 }
 
 const colorDependingOnReturn = (payment) => {
-  if (payment.enviado_externo && !payment.identificacao_externa) return '#e75c51'
+  if (payment.enviado_externo && !payment.codigo_lancamento_omie) return '#e75c51'
   else return 'green'
 }
 

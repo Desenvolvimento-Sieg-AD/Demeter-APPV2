@@ -30,7 +30,6 @@
         v-model="formValue.projeto_id"
         @blur="findProject"
         append-inner-icon="mdi-briefcase-plus-outline"
-        return-object
       />
     </v-col>
   </v-row>

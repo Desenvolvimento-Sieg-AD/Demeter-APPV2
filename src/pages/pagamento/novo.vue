@@ -8,8 +8,16 @@
 
     <LayoutForm class="mb-12">
       <v-form ref="formValidate">
+        <v-card class="pt-2 card-pagamento" flat>
+          <CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
+          <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
+        </v-card>
+
+        <v-divider class="mt-2 mb-2" />
+
         <v-card flat class="card-pagamento">
-          <v-row no-gutters justify="space-between" align="center" class="mt-2 mb-n7 mr-2">
+          <v-row no-gutters justify="space-between" align="center" class="mb-n7 mr-2">
             <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
             <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" />
           </v-row>
@@ -22,14 +30,6 @@
           <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
 
           <ModalPagamentoCategoria v-model:form="form" />
-        </v-card>
-
-        <v-divider class="mt-2 mb-2" />
-
-        <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
-          <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
@@ -67,11 +67,12 @@
 // * IMPORTS
 
 import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
+import { useAuthStore } from '~/store/auth'
 
 const { $toast } = useNuxtApp()
 
 const dayjs = useDayjs()
-const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
+const { user } = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -170,6 +171,7 @@ const sendForm = async () => {
     }
 
     const formData = buildFormData()
+    console.log('formData', formData)
     const { success, message } = await postPagamento(formData)
 
     if (!success) throw new Error(message)
@@ -289,6 +291,7 @@ function initFormState() {
   return {
     fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null },
     empresa_id: null,
+    setor_id: user.setores.length <= 1 ? user.setores[0].id : null,
     nf: [],
     doc: [],
     tipo_id: null,
