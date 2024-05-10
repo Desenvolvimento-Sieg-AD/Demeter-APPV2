@@ -4,7 +4,7 @@
       <LayoutLoading v-if="loading" />
 
       <v-col v-else-if="pagamento">
-        <v-row align="center" class="px-3 mb-2">
+        <v-row align="center" class="mb-2">
           <v-col cols="9" class="d-flex align-center justify-start pb-0">
             <h3 style="color: #118b9f">Dados do Pagamento</h3>
           </v-col>
@@ -16,19 +16,20 @@
 
         <v-row class="my-2" v-if="statusCancelados">
           <v-col>
-            <v-alert
-              density="compact"
-              :color="ultimaMovimentacao.status_pagamento.cor"
-              variant="tonal"
+            <CustomInput
               icon="mdi-cancel"
               type="textarea"
               v-model="pagamento.observacao"
-              :text="ultimaMovimentacao.justificativa"
+              label="Motivo do Cancelamento"
+              :value="ultimaMovimentacao.justificativa ?? ultimaMovimentacao.justificativa_solicitante"
               hide-details
-              :rows="2"
+              disabled
+              :rows="1"
             />
           </v-col>
         </v-row>
+
+        <v-divider class="mb-6" />
 
         <v-row align="center">
           <v-col cols="4">
@@ -121,7 +122,7 @@
             <CustomInput disabled :label="labelDataPayment" hide-details v-model="outhers" />
           </v-col>
 
-          <v-divider class="mx-3" />
+          <v-divider class="mx-4" />
 
           <v-col cols="12">
             <CustomInput type="textarea" disabled label="Motivo do Pagamento" hide-details :rows="2" v-model="pagamento.motivo" />
@@ -136,7 +137,7 @@
           </v-col>
         </v-row>
 
-        <v-divider class="my-5" v-if="pagamento?.anexos_pagamento?.length > 0" />
+        <v-divider class="my-6" v-if="pagamento?.anexos_pagamento?.length > 0" />
 
         <v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
           <v-col cols="12">
@@ -242,7 +243,15 @@ const isInternacional = computed(() => pagamento.value.fornecedor.internacional)
 
 const isInternacionalText = computed(() => (pagamento.value.fornecedor.internacional ? 'Sim' : 'Não'))
 
-const actions = computed(() => [{ title: 'Fechar', icon: 'mdi-close', tooltip: 'Fechar', type: 'cancel', click: () => (enableValue.value = false) }])
+const actions = computed(() => [
+  {
+    title: 'Fechar',
+    icon: 'mdi-close',
+    tooltip: 'Fechar',
+    type: 'cancel',
+    click: () => (enableValue.value = false)
+  }
+])
 
 //* METHODS
 

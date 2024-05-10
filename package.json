@@ -8,12 +8,14 @@
   "scripts": {
     "dev": "nuxt dev -o",
     "build": "nuxt generate",
+    "builde": "nuxt generate && node build",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && electron-builder install-app-deps",
     "transpile-electron": "tsc -p ./electron --outDir .output/electron",
     "dev:electron:lin": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
     "dev:electron": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
-    "build:electron": "yarn build && yarn transpile-electron && node build.js"
+    "build:electron": "yarn build && yarn transpile-electron && node build.js",
+    "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite"
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",
@@ -44,6 +46,7 @@
     "devextreme-vue": "^23.2.5",
     "electron-is-dev": "^3.0.1",
     "electron-log": "^5.0.0-beta.16",
+    "electron-packager": "^17.1.2",
     "electron-updater": "^6.1.8",
     "express": "^4.18.2",
     "maska": "1.5.2",
@@ -65,14 +68,13 @@
     "directories": {
       "output": "build"
     },
-    "files": [
-      "dist/electron/**/*"
-    ],
     "win": {
-      "icon": "build/icons/icon.ico",
-      "publish": [
-        "github"
+      "target": [
+        "portable"
       ]
+    },
+    "portable": {
+      "artifactName": "${productName}-portable-${version}.${ext}"
     }
   }
 }

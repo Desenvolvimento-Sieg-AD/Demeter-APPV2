@@ -15,6 +15,7 @@ export default function (mainWindow: BrowserWindow) {
   if (!isProduction) return mainWindow.loadURL('http://localhost:3000/')
   const app = express()
   app.use('/', serveStatic(path.join(__dirname, '../public')))
+
   const listener = app.listen(8079, 'localhost', () => {
     const port = (listener.address() as any).port
     console.log('Dynamic-Renderer Listening on', port)

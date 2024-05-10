@@ -28,10 +28,10 @@ function createWindow() {
     minHeight: 676,
     backgroundColor: '#FFF',
     webPreferences: {
-      devTools: !isProduction,
+      devTools: true, // !isProduction,
       nodeIntegration: true,
-      contextIsolation: false,
-      preload: path.join(__dirname, 'preload.js')
+      contextIsolation: false
+      // preload: path.join(__dirname, 'preload.js')
     },
     titleBarStyle: 'hiddenInset',
     autoHideMenuBar: true,
@@ -47,10 +47,10 @@ function createWindow() {
   if (singleInstance(app, mainWindow)) return
 
   // Open the DevTools.
-  !isProduction &&
-    mainWindow.webContents.openDevTools({
-      mode: 'detach'
-    })
+  // !isProduction &&
+  mainWindow.webContents.openDevTools({
+    mode: 'detach'
+  })
 
   return mainWindow
 }
@@ -58,15 +58,6 @@ function createWindow() {
 // App events
 // ==========
 app.whenReady().then(async () => {
-  if (!isProduction) {
-    try {
-      await session.defaultSession.loadExtension(path.join(__dirname, '../..', '__extensions', 'vue-devtools'))
-    } 
-    catch (err) {
-      console.log('[Electron::loadExtensions] An error occurred: ', err)
-    }
-  }
-
   const mainWindow = createWindow()
   if (!mainWindow) return
 
@@ -78,8 +69,7 @@ app.whenReady().then(async () => {
   modules.forEach((module) => {
     try {
       module(mainWindow)
-    } 
-    catch (err: any) {
+    } catch (err: any) {
       console.log('[!] Module error: ', err.message || err)
     }
   })

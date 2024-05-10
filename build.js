@@ -9,58 +9,29 @@ const Platform = builder.Platform
 const options = {
   appId: 'com.sieg.pagamentos',
   productName: 'SIEG Pagamentos',
-  // protocols: {
-  // name: 'Your deeplink',
-  // - Don't forget to set `MimeType: "x-scheme-handler/deeplink"` for `linux.desktop` entry!
-  // schemes: ['deeplink']
-  // },
-  // - Electron auto-updater config
-//   owner: SIEG AD - Tecnologia
-// repo: 'https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2',
-// provider: github
-  publish: [
-    {
-      provider: 'github',
-      owner: 'SIEG AD - Tecnologia',
-      repo: 'https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2',
-    },
-  ],
-  // ],
-
-  // "store" | "normal" | "maximum" - For testing builds, use 'store' to reduce build time significantly.
   compression: 'maximum',
   removePackageScripts: true,
-
   nodeGypRebuild: false,
   buildDependenciesFromSource: false,
-
   directories: {
-    output: 'sieg-pagamentos'
+    output: '.output'
   },
   win: {
-    // eslint-disable-next-line no-template-curly-in-string
     artifactName: '${productName}-Setup-${version}.${ext}',
-    icon: 'electron/assets/favicon.ico',
+    // icon: 'public/favicon.ico',
     target: [
+      {
+        target: 'portable',
+        arch: ['x64', 'ia32']
+      },
       {
         target: 'nsis',
         arch: ['x64', 'ia32']
       }
     ]
   },
-  nsis: {
-    deleteAppDataOnUninstall: true
-  },
-  mac: {
-    category: 'public.app-category.entertainment',
-    hardenedRuntime: false,
-    gatekeeperAssess: false,
-    target: [
-      {
-        target: 'default',
-        arch: ['x64', 'arm64']
-      }
-    ]
+  portable: {
+    artifactName: '${productName}-Portable-${version}.${ext}'
   },
   linux: {
     maintainer: 'SIEG AD - Tecnologia',

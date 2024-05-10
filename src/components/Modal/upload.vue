@@ -1,179 +1,171 @@
 <template>
-	<LazyModal
-		v-model:enable="enableValue"
-		:actions="Actions"
-		:title="type == 'NF' ? 'Anexar NF' : 'Anexar documento'"
-		width="600"
-	>
-		<template #content>
-			<v-container>
-				<div class="d-flex justify-center">
-					<CustomText title="Dados do pagamento" class="ml-2" color="#118B9F" size="20" :bold="true" />
-				</div>
-				<v-form ref="formValidate">
-					<v-row no-gutters class="mt-5 ga-2">
-						<v-col>
-							<CustomInput label="Fornecedor" v-model="item.fornecedor.nome_fantasia" disabled/>
-						</v-col>
-						<v-col>
-							<CustomInput label="Categoria" v-model="item.categoria.nome" disabled/>
-						</v-col>
-					</v-row>
+  <LazyModal v-model:enable="enableValue" :actions="Actions" title="Anexar arquivo" width="600">
+    <template #content>
+      <v-container>
+        <div class="d-flex justify-center">
+          <CustomText title="Dados do pagamento" class="ml-2" color="#118B9F" size="20" :bold="true" />
+        </div>
+        <v-form ref="formValidate">
+          <v-row no-gutters class="mt-5 ga-2">
+            <v-col>
+              <CustomInput label="Fornecedor" v-model="item.fornecedor.nome_fantasia" disabled />
+            </v-col>
+            <v-col>
+              <CustomInput label="Categoria" v-model="item.categoria.nome" disabled />
+            </v-col>
+          </v-row>
 
-					<v-row no-gutters class="ga-2">
-						<v-col>
-							<CustomInput label="Empresa Pagadora" v-model="item.empresa.apelido" disabled/>
-						</v-col>
-						<v-col>
-							<CustomInput label="Valor" v-model="item.valor_total" disabled mask="money"/>
-						</v-col>
-					</v-row>
+          <v-row no-gutters class="ga-2">
+            <v-col>
+              <CustomInput label="Empresa Pagadora" v-model="item.empresa.apelido" disabled />
+            </v-col>
+            <v-col>
+              <CustomInput label="Valor" v-model="item.valor_total" disabled mask="money" />
+            </v-col>
+          </v-row>
 
-					<v-row no-gutters>
-						<v-col>
-							<CustomInput label="Motivo" v-model="item.motivo" disabled/>
-						</v-col>
-					</v-row>
+          <v-row no-gutters>
+            <v-col>
+              <CustomInput label="Motivo" v-model="item.motivo" disabled />
+            </v-col>
+          </v-row>
 
-					<v-row no-gutters>
+          <v-row no-gutters> </v-row>
 
-					</v-row>
+          <v-row no-gutters justify="center">
+            <p class="text-body-2 text-center text-grey">
+              {{ nameFile }}
+            </p>
+          </v-row>
 
-					<v-row no-gutters justify="center">
-						<p class="text-body-2 text-center text-grey">
-							{{ nameFile }}
-						</p>
-					</v-row>
-
-					<v-row no-gutters class="w-100 mt-5">
-						<v-col>
-							<CustomInput
-								type="file"
-								:label="tipo_anexo_id == 3 ? 'Anexar NF' : 'Anexar documento'"
-								v-model="anexo"
-								hide-details
-								prependInnerIcon="mdi-paperclip"
-								accept="image/*,application/pdf"
-							>
-								<template #selection="{ fileNames }">
-									<span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
-								</template>
-							</CustomInput>
-						</v-col>
-					</v-row>
-				</v-form>
-				
-			</v-container>
-		</template>
-	</LazyModal>
+          <v-row no-gutters class="w-100 mt-5">
+            <v-col>
+              <CustomInput
+                type="file"
+                :label="tipo_anexo_id == 3 ? 'Anexar NF' : 'Anexar documento'"
+                v-model="anexo"
+                hide-details
+                prependInnerIcon="mdi-paperclip"
+                accept="image/*,application/pdf"
+              >
+                <template #selection="{ fileNames }">
+                  <span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
+                </template>
+              </CustomInput>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-container>
+    </template>
+  </LazyModal>
 </template>
 
 <script setup>
 //* IMPORTS
-import { postUpload } from '@api';
-const { $toast } = useNuxtApp();
+import { postUpload } from '@api'
+const { $toast } = useNuxtApp()
 
 const dayjs = useDayjs()
 
 //* PROPS
 const props = defineProps({
-	enable: { type: Boolean, default: false },
-	message: { type: String, default: '' },
-	title: { type: String, default: 'Upload NF' },
-	item: { type: Object, required: true },
-	tipo_anexo_id: { type: String, default: null },
-});
+  enable: { type: Boolean, default: false },
+  message: { type: String, default: '' },
+  title: { type: String, default: 'Upload NF' },
+  item: { type: Object, required: true },
+  tipo_anexo_id: { type: String, default: null }
+})
 
 //* REFS
-const anexo = ref(null);
-const loading = ref(false);
+const anexo = ref(null)
+const loading = ref(false)
 const formValidate = ref(null)
 
 //* COMPUTED
 const Actions = computed(() => [
-	{
-		icon: 'mdi-close',
-		title: 'Fechar',
-		type: 'grey',
-		click: async () => {
-			await formValidate.value.reset()
-			enableValue.value = false
-		},
-	},
-	{
-		icon: 'mdi-check',
-		title: 'Enviar',
-		type: 'success',
-		loading: loading.value,
-		click: () => sendUpload(),
-	},
-]);
+  {
+    icon: 'mdi-close',
+    title: 'Fechar',
+    type: 'grey',
+    click: async () => {
+      await formValidate.value.reset()
+      enableValue.value = false
+    }
+  },
+  {
+    icon: 'mdi-check',
+    title: 'Enviar',
+    type: 'success',
+    loading: loading.value,
+    click: () => sendUpload()
+  }
+])
 
 //* EMITS
 
-const emit = defineEmits(['close', 'update', 'nameFile']);
+const emit = defineEmits(['close', 'update', 'nameFile'])
 
 //* METHODS
 
 const nameFile = computed(() => {
-	return `${dayjs().format('YYYYMMDD')} - ${props.item.fornecedor.nome_fantasia} - ${formatCurrency(props.item.valor_total)} - ${props.item.tipo_pagamento.nome} `
+  return `${dayjs().format('YYYYMMDD')} - ${props.item.fornecedor.nome_fantasia} - ${formatCurrency(props.item.valor_total)} - ${props.item.tipo_pagamento.nome} `
 })
 
 const sendUpload = async () => {
-	if (!anexo.value) {
-		$toast.error('Selecione um arquivo para enviar');
-		return;
-	}
+  if (!anexo.value) {
+    $toast.error('Selecione um arquivo para enviar')
+    return
+  }
 
-	loading.value = true;
+  loading.value = true
 
-	try {
-		const formData = new FormData();
+  try {
+    const formData = new FormData()
 
-		formData.append('file', anexo.value);
-		formData.append('name_file', nameFile.value)
+    formData.append('file', anexo.value)
+    formData.append('name_file', nameFile.value)
 
-		formData.append('tipo_anexo_id', props.tipo_anexo_id);
+    formData.append('tipo_anexo_id', props.tipo_anexo_id)
 
-		const { success, message } = await postUpload(formData, props.item.id);
+    const { success, message } = await postUpload(formData, props.item.id)
 
-		if (!success) throw new Error(message) 
+    if (!success) throw new Error(message)
 
-		$toast.success('Arquivo enviado com sucesso');
+    $toast.success('Arquivo enviado com sucesso')
 
-		loading.value = false;
-		enableValue.value = false;
+    loading.value = false
+    enableValue.value = false
 
-		emit('update');
-
-	} catch (error) {
-		console.log(error.message)
-		$toast.error(error.message)
-	} 
-	
-};
+    emit('update')
+  } catch (error) {
+    console.log(error.message)
+    $toast.error(error.message)
+  }
+}
 
 const enableValue = computed({
-	get: () => props.enable,
-	set: (value) => emit('update:enable', value),
-});
+  get: () => props.enable,
+  set: (value) => emit('update:enable', value)
+})
 
 // * Definir o titulo do arquivo pois se deixar o tamanho original e for maior que tamanho 20, o nome ultrapassa o tamanho do input
 const defineFileTitle = (fileName) => {
-	if (fileName.length > 20) {
-		return fileName.replace(/.\w+$/g, '');
-	}
-	return fileName;
-};
+  if (fileName.length > 20) {
+    return fileName.replace(/.\w+$/g, '')
+  }
+  return fileName
+}
 
-watch(() => props.enable, (value) => {
-	if (!value) anexo.value = null;
-});
-
+watch(
+  () => props.enable,
+  (value) => {
+    if (!value) anexo.value = null
+  }
+)
 </script>
 
 <style scoped>
 .txt-center {
-	text-align: center;
+  text-align: center;
 }
 </style>
