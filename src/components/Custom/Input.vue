@@ -479,7 +479,7 @@ const dayjs = useDayjs()
 const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur'])
 
 const onChange = (attrs) => {
-  emit('change', attrs)
+  emit('change', attrs, enableValue.value)
 }
 
 const onFocus = (attrs) => {

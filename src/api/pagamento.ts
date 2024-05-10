@@ -92,23 +92,12 @@ export async function postPagamento(formData: FormData) {
 }
 
 export async function sendPaymentsToOmie(payment_id: number) {
-  let codigo = ''
+  const { success, message, data } = await useApi(`/pagamento/omie`, {
+    method: 'POST',
+    body: { payment_id }
+  })
 
-  try {
-    //@ts-ignore
-    const { success, message, data, faultcode } = await useApi(`/pagamento/omie`, {
-      method: 'POST',
-      body: { payment_id }
-    })
-
-    if (!success) {
-      codigo = faultcode ?? ''
-      throw new Error(message)
-    }
-    return { success, message, data }
-  } catch (error) {
-    return { success: false, message: error, data: null, codigo: codigo }
-  }
+  return { success, message, data }
 }
 
 export async function existNFEqual(numero_nf: string, fornecedor_id: string) {
@@ -148,7 +137,7 @@ export async function postUpload(formData: FormData, id: Number) {
 
 export async function postStatus(status: StatusManage) {
   try {
-    const { success, message, data } = await useApi(`/pagamento/status`, {
+    const { success, message, data } = await useApi(`/pagamento/pagamento/status`, {
       method: 'POST',
       body: status
     })

@@ -292,6 +292,7 @@ function initFormState() {
     fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null },
     empresa_id: null,
     setor_id: user.setores.length <= 1 ? user.setores[0].id : null,
+    conta_id: null,
     nf: [],
     doc: [],
     tipo_id: null,
