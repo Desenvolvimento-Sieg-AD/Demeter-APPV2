@@ -1,5 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { build } = require('electron-builder')
 const builder = require('electron-builder')
 const Platform = builder.Platform
 
@@ -34,7 +33,7 @@ const options = {
     artifactName: '${productName}-Portable-${version}.${ext}'
   },
   linux: {
-    maintainer: 'SIEG AD - Tecnologia',
+    maintainer: 'Your Name',
     desktop: {
       StartupNotify: 'false',
       Encoding: 'UTF-8',
@@ -44,14 +43,13 @@ const options = {
   }
 }
 
-const platform = 'WINDOWS' // "MAC" | "LINUX" | "WINDOWS" - Change this to build for other platforms
-builder
-  .build({
-    targets: Platform[platform].createTarget(),
-    config: options
-  })
-  .then((result) => {
-    console.log('----------------------------')
-    console.log('Platform:', platform)
-    console.log('Output:', JSON.stringify(result, null, 2))
-  })
+const platform = 'WINDOWS'
+
+builder.build({
+  targets: Platform[platform].createTarget(),
+  config: options
+}).then((result) => {
+  console.log('----------------------------')
+  console.log('Platform:', platform)
+  console.log('Output:', JSON.stringify(result, null, 2))
+})

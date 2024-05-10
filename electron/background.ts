@@ -34,7 +34,7 @@ function createWindow() {
       // preload: path.join(__dirname, 'preload.js')
     },
     titleBarStyle: 'hiddenInset',
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     transparent: false,
     // frame: platform === 'darwin',
     frame: true, // <= Remove this line if you wanted to implement your own title bar
@@ -42,6 +42,9 @@ function createWindow() {
     title: 'SIEG Pagamentos',
     icon: path.join(__dirname, '../..', 'public', 'favicon.ico')
   })
+
+  if (process.env.VITE_DEV_SERVER_URL) mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+	else mainWindow.loadFile(path.join('.output/public/', 'index.html'));
 
   // Lock app to single instance
   if (singleInstance(app, mainWindow)) return
@@ -61,6 +64,9 @@ app.whenReady().then(async () => {
   const mainWindow = createWindow()
   if (!mainWindow) return
 
+  if (process.env.VITE_DEV_SERVER_URL) mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+	else mainWindow.loadFile(path.join('.output/public/', 'index.html'));
+
   // Load renderer process
   dynamicRenderer(mainWindow)
 
@@ -77,10 +83,11 @@ app.whenReady().then(async () => {
   console.log('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30))
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     // if (BrowserWindow.getAllWindows().length === 0) createWindow()
+
     mainWindow.show()
+
+    // Lock app to single instance
   })
 })
 

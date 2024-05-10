@@ -91,12 +91,15 @@ const fornecedores = ref([])
 
 const verifyFornecedor = async () => {
   try {
+
+    const documento = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
+
     if (formValue.value.fornecedor.nome) {
       const fornecedor = fornecedores.value.find((f) => f.razao_social === formValue.value.fornecedor.nome)
       if (!fornecedor) return
       getDataFornecedor(fornecedor)
-    } else if (formValue.value.fornecedor.documento) {
-      const fornecedor = fornecedores.value.find((f) => f.documento === formValue.value.fornecedor.documento)
+    } else if (documento) {
+      const fornecedor = fornecedores.value.find((f) => f.documento === documento)
       if (!fornecedor) return
       getDataFornecedor(fornecedor)
     }

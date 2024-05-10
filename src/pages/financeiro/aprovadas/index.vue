@@ -120,10 +120,10 @@
                       <v-tooltip text="Visualizar pagamento" activator="parent" location="top" />
                     </v-btn>
 
-                    <!-- <v-btn flat icon @click.stop="editPayment(payment.id)" variant="plain" color="primary" size="40">
+                    <v-btn flat icon @click.stop="editPayment(payment.id)" variant="plain" color="primary" size="40">
                       <v-icon>mdi-pencil</v-icon>
                       <v-tooltip text="Editar pagamento" activator="parent" location="top" />
-                    </v-btn> -->
+                    </v-btn>
 
                     <v-btn flat icon @click.stop="confirmCancelPayment(payment.id)" variant="plain" color="red" size="40">
                       <v-icon>mdi-cancel</v-icon>

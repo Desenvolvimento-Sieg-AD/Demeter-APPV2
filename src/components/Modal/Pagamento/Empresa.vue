@@ -71,14 +71,6 @@ const formValue = computed({
   set: (value) => emit('update:form', value)
 })
 
-watch(
-  () => formValue.value,
-  (value) => {
-    if (!value) return
-    console.log(formValue.value)
-  }
-)
-
 const defineFileTitle = (fileName) => {
   if (fileName && fileName.length > 20) return fileName.replace(/.\w+$/g, '')
   return fileName
