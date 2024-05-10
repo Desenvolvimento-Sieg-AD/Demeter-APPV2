@@ -391,7 +391,7 @@ const pushData = async () => {
 
     if (!success) throw new Error(message)
 
-    data.map((item) => (item.setor = item.usuario.setores[0].sigla))
+    // data.map((item) => (item.setor = item.usuario.setores[0].sigla))
 
     itens.value = data
   } catch (error) {

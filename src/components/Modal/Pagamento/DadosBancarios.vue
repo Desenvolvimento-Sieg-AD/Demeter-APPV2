@@ -72,7 +72,7 @@
 
   <v-row class="pa-3 mt-n12" v-else>
     <v-col>
-      <CustomInput type="autocomplete" label="Cartão" v-model="formValue.dados_bancarios.outhers" required :items="cards" itemTitle="descricao" itemValue="id" />
+      <CustomInput type="autocomplete" label="Cartão" v-model="formValue.conta_id" required :items="cards" itemTitle="descricao" itemValue="id" />
     </v-col>
   </v-row>
 

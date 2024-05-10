@@ -4,10 +4,21 @@
     <v-form ref="form">
       <v-card class="card-box d-flex align-center" flat>
         <v-col cols="4">
-          <CustomText class="mb-4" title="Cliente" color="#118B9F" size="20" :bold="true" />
-          <CustomInput label="Selecione o cliente" type="autocomplete" v-model="selectedClient" :items="clients" itemValue="id" itemTitle="apelido" />
+          <CustomText title="Cliente" color="#118B9F" size="20" :bold="true" />
+          <CustomInput
+            label="Selecione o cliente"
+            type="autocomplete"
+            v-model="selectedClient"
+            :items="clients"
+            itemValue="id"
+            itemTitle="apelido"
+            class="mt-4"
+            hide-details="auto"
+          />
         </v-col>
       </v-card>
+
+      <v-divider />
 
       <LayoutLoading v-if="loadingPayments" />
 
@@ -24,109 +35,116 @@
           </div>
         </v-row>
 
-        <v-card
-          v-for="(payment, index) in payments"
-          :key="`${payment}-${index}`"
-          :class="{ 'card-payment-box': true, 'selected-box': payment.selectedOmie, 'approved-box': payment.codigo_lancamento_omie }"
-          flat
-          @click="selectPayment(payment.id)"
-          :disabled="payment.codigo_lancamento_omie"
-        >
-          <v-row justify="space-between">
-            <v-col cols="11">
-              <v-row>
-                <v-col cols="5">
-                  <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" color="#118B9F" disabled hide-details />
-                </v-col>
+        <v-card height="calc(100vh - 345px)" style="overflow-y: auto">
+          <v-card
+            v-for="(payment, index) in payments"
+            :key="`${payment}-${index}`"
+            :class="{
+              'card-payment-box': true,
+              'approved-box': payment.codigo_lancamento_omie,
+              'error-box': payment.enviado_externo && !payment.codigo_lancamento_omie,
+              'selected-box': payment.selectedOmie
+            }"
+            flat
+            @click="selectPayment(payment.id)"
+            :disabled="payment.codigo_lancamento_omie"
+          >
+            <v-row justify="space-between">
+              <v-col cols="10">
+                <v-row>
+                  <v-col cols="5">
+                    <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="2">
-                  <CustomInput label="Valor" v-model="payment.valor_total" color="#118B9F" disabled mask="money" hide-details />
-                </v-col>
+                  <v-col cols="2">
+                    <CustomInput label="Valor" v-model="payment.valor_total" color="#118B9F" disabled mask="money" hide-details />
+                  </v-col>
 
-                <v-col cols="2">
-                  <CustomInput label="Data de Vencimento" v-model="payment.data_vencimento" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="2">
+                    <CustomInput label="Vencimento" v-model="payment.data_vencimento" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="1">
-                  <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="2">
+                    <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="2">
-                  <CustomInput label="Data de Vencimento" v-model="payment.projeto.nome" color="#118B9F" disabled hide-details v-if="payment.projeto" />
-                </v-col>
+                  <v-col cols="5" v-if="payment.projeto">
+                    <CustomInput label="Projeto" v-model="payment.projeto.nome" color="#118B9F" disabled hide-details v-if="payment.projeto" />
+                  </v-col>
 
-                <v-col cols="2">
-                  <CustomInput label="Projeto" v-model="payment.tipo_pagamento.nome" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="2">
+                    <CustomInput label="Método" v-model="payment.tipo_pagamento.nome" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
+                    <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Agência" v-model="payment.dados_bancarios.agencia" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
+                    <CustomInput label="Agência" v-model="payment.dados_bancarios.agencia" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Conta" v-model="payment.dados_bancarios.conta" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
+                    <CustomInput label="Conta" v-model="payment.dados_bancarios.conta" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="3" v-if="isPIX(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Chave PIX" v-model="payment.dados_bancarios.chave_pix" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="3" v-if="isPIX(payment.tipo_pagamento.nome)">
+                    <CustomInput label="Chave PIX" v-model="payment.dados_bancarios.chave_pix" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="6" v-if="isBoleto(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Código de Barras" v-model="payment.dados_bancarios.codigo_barras" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="6" v-if="isBoleto(payment.tipo_pagamento.nome)">
+                    <CustomInput label="Código de Barras" v-model="payment.dados_bancarios.codigo_barras" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="6" v-if="isPagOnline(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Link de Pagamento" v-model="payment.dados_bancarios.outhers" color="#118B9F" disabled hide-details />
-                </v-col>
+                  <v-col cols="6" v-if="isPagOnline(payment.tipo_pagamento.nome)">
+                    <CustomInput label="Link de Pagamento" v-model="payment.dados_bancarios.outhers" color="#118B9F" disabled hide-details />
+                  </v-col>
 
-                <v-col cols="2" v-if="isCartao(payment.tipo_pagamento.nome)">
-                  <CustomInput label="Número do Cartão" v-model="payment.dados_bancarios.numero_cartao" color="#118B9F" disabled hide-details />
-                </v-col>
-              </v-row>
-            </v-col>
+                  <v-col cols="2" v-if="isCartao(payment.tipo_pagamento.nome) && payment.conta_empresa">
+                    <CustomInput label="Número do Cartão" v-model="payment.conta_empresa.descricao" color="#118B9F" disabled hide-details />
+                  </v-col>
+                </v-row>
+              </v-col>
 
-            <v-col cols="1">
-              <v-row align="end" style="flex-direction: column; align-items: center; justify-content: center" justify="center">
-                <v-col cols="auto">
-                  <v-chip v-if="sentWithSuccess(payment)" color="green" text="Enviado com sucesso" />
-                  <v-chip v-else-if="sentAndError(payment)" color="red" text="Erro ao enviar" />
-                  <v-chip v-else color="gray" text="Não enviado" />
-                </v-col>
+              <v-col cols="2">
+                <v-row align="end" style="flex-direction: column" justify="center">
+                  <v-col cols="auto">
+                    <v-chip v-if="sentWithSuccess(payment)" color="green" text="Enviado com sucesso" />
+                    <v-chip v-else-if="sentAndError(payment)" color="red" text="Erro ao enviar" />
+                    <v-chip v-else color="gray" text="Não enviado" />
+                  </v-col>
 
-                <v-col cols="auto">
-                  <v-btn flat icon @click.stop="viewPayment(payment.id)" variant="plain" color="primary" size="40">
-                    <v-icon>mdi-eye</v-icon>
-                    <v-tooltip text="Visualizar pagamento" activator="parent" location="top" />
-                  </v-btn>
+                  <v-col cols="auto">
+                    <v-btn flat icon @click.stop="viewPayment(payment.id)" variant="plain" color="primary" size="40">
+                      <v-icon>mdi-eye</v-icon>
+                      <v-tooltip text="Visualizar pagamento" activator="parent" location="top" />
+                    </v-btn>
 
-                  <v-btn flat icon @click.stop="editPayment(payment.id)" variant="plain" color="primary" size="40">
-                    <v-icon>mdi-pencil</v-icon>
-                    <v-tooltip text="Editar pagamento" activator="parent" location="top" />
-                  </v-btn>
+                    <!-- <v-btn flat icon @click.stop="editPayment(payment.id)" variant="plain" color="primary" size="40">
+                      <v-icon>mdi-pencil</v-icon>
+                      <v-tooltip text="Editar pagamento" activator="parent" location="top" />
+                    </v-btn> -->
 
-                  <v-btn flat icon @click.stop="confirmCancelPayment(payment.id)" variant="plain" color="red" size="40">
-                    <v-icon>mdi-cancel</v-icon>
-                    <v-tooltip text="Cancelar pagamento" activator="parent" location="top" />
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
+                    <v-btn flat icon @click.stop="confirmCancelPayment(payment.id)" variant="plain" color="red" size="40">
+                      <v-icon>mdi-cancel</v-icon>
+                      <v-tooltip text="Cancelar pagamento" activator="parent" location="top" />
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
 
-          <v-row justify="start">
-            <v-col v-if="payment.enviado_externo && payment.retorno_externo.codigo_status !== '0'" cols="auto">
-              <v-alert :text="payment.retorno_externo.codigo_status" :color="colorDependingOnReturn(payment)" density="compact" />
-              <v-tooltip activator="parent" text="Código de erro do sistema Omie" />
-            </v-col>
-            <v-col v-if="payment.enviado_externo" cols="auto">
-              <v-alert :text="payment.retorno_externo.descricao_status" :color="colorDependingOnReturn(payment)" density="compact" />
-              <v-tooltip activator="parent" text="Mensagem de erro do sistema Omie" />
-            </v-col>
-          </v-row>
+            <v-row justify="start">
+              <v-col v-if="payment.enviado_externo" cols="auto">
+                <v-alert :text="payment.retorno_externo?.codigo_status" :color="payment.retorno_externo?.color" density="compact" />
+                <v-tooltip activator="parent" text="Código de erro do sistema Omie" />
+              </v-col>
+              <v-col v-if="payment.enviado_externo" cols="auto">
+                <v-alert :text="payment.retorno_externo?.descricao_status" :color="payment.retorno_externo?.color" density="compact" />
+                <v-tooltip activator="parent" text="Mensagem de erro do sistema Omie" />
+              </v-col>
+            </v-row>
+          </v-card>
         </v-card>
       </v-card>
 
@@ -230,18 +248,20 @@ const sendOmie = async () => {
     let codigo = ''
     try {
       const { success, message, data, faultcode } = await sendPaymentsToOmie(payment.id)
-      if (!success) {
-        codigo = faultcode ?? ''
-        throw new Error(message)
+      if (!success) throw new Error(message)
+
+      if (data.faultcode) {
+        codigo = data.faultcode
+        throw new Error(data.message)
       }
 
       payment.codigo_lancamento_omie = data.codigo_lancamento_omie
-      payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso' }
+      payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso', color: 'green' }
       payment.enviado_externo = true
 
       successCount++
     } catch (error) {
-      payment.retorno_externo = { codigo_status: '0', descricao_status: error.message, codigo_status: codigo }
+      payment.retorno_externo = { codigo_status: codigo, descricao_status: error.message, codigo_status: codigo, color: '#e75c51' }
       payment.enviado_externo = true
 
       errorCount++
@@ -249,7 +269,7 @@ const sendOmie = async () => {
     }
   }
 
-  await getPaymentByClient()
+  // await getPaymentByClient()
 
   loading.value = false
 
@@ -414,11 +434,15 @@ watch(selectedClient, async () => {
   background-color: #118b9f;
 }
 
-.selected-box {
-  background-color: #ddffff;
-}
-
 .approved-box {
   background-color: #ddffdd;
+}
+
+.error-box {
+  background-color: #ffdddd;
+}
+
+.selected-box {
+  background-color: #ddffff;
 }
 </style>

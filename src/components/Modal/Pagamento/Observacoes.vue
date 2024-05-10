@@ -26,7 +26,7 @@
         item-title="nome"
         type="combobox"
         v-model="formValue.projeto_id"
-        @blur="findProject"
+        @change="findProject"
         append-inner-icon="mdi-briefcase-plus-outline"
       />
     </v-col>
@@ -53,7 +53,7 @@ const formValue = computed({
   set: (value) => emit('update:form', value)
 })
 
-const findProject = async (search) => {
+const findProject = async (attrs, search) => {
   try {
     if (typeof search !== 'string') return
     if (search.length < 6) throw new Error('Digite pelo menos 6 caracteres para buscar um projeto')
@@ -62,9 +62,6 @@ const findProject = async (search) => {
     if (data.length === 0) throw new Error('Nenhum projeto encontrado com esse nome')
 
     projetos.value = data
-  } catch (error) {
-    console.error(error)
-    $toast.error(error.message)
-  }
+  } catch (error) {}
 }
 </script>
