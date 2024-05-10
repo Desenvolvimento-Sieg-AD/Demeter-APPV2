@@ -23,7 +23,7 @@
     "@types/express": "^4.17.17",
     "@types/mime": "^4.0.0",
     "concurrently": "^8.0.1",
-    "electron": "^30.0.2",
+    "electron": "20.0.0",
     "electron-builder": "^23.6.0",
     "eslint": "^8.37.0",
     "eslint-config-prettier": "^8.8.0",
@@ -60,18 +60,26 @@
     "releaseType": "release"
   },
   "build": {
-    "productName": "Your App Name",
+    "productName": "SiegPagamentos",
     "appId": "com.sieg.pagamentos",
     "directories": {
       "output": "build"
     },
     "files": [
-      "dist/electron/**/*"
+      ".output/electron/**/*"
     ],
     "win": {
       "icon": "build/icons/icon.ico",
       "publish": [
         "github"
+      ],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     }
   }

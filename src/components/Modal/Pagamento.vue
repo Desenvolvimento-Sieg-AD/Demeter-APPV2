@@ -5,10 +5,10 @@
 
       <v-col v-else-if="pagamento">
         <v-row align="center" class="px-3 mb-2">
-          <v-col cols="9" class="d-flex align-center justify-start pb-0">
+          <v-col cols="8" class="d-flex align-center justify-start pb-0">
             <h3 style="color: #118b9f">Dados do Pagamento</h3>
           </v-col>
-          <v-col cols="3" class="d-flex align-center justify-end pb-0">
+          <v-col cols="4" class="d-flex align-center justify-end pb-0">
             <v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
             <v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1" />
           </v-col>

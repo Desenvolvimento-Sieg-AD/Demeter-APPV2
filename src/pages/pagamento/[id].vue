@@ -67,6 +67,8 @@
 
 import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
 
+import { useAuthStore } from '../../store/auth'
+
 const { $toast } = useNuxtApp()
 
 const dayjs = useDayjs()
@@ -201,12 +203,21 @@ function formatPaymentData(data) {
   const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC)
   const { file: nf, folder: pathNF } = createFileFromAnexo(fileNF)
 
+
   form.value = {
     nf: nf ? [nf] : null,
     doc: doc ? [doc] : null,
     pathNF,
     ...data,
     pathDoc,
+    fornecedor: {
+      id: data.fornecedor.id,
+      nome: data.fornecedor.razao_social,
+      apelido: data.fornecedor.nome_fantasia,
+      documento: data.fornecedor.documento,
+      tipo: data.fornecedor.tipo,
+      internacional: data.fornecedor.internacional
+    },
     projeto_id: data.projeto_id,
     categoria_id: data.categoria.id,
     grupo_id: data.categoria.grupo.id,
@@ -214,6 +225,9 @@ function formatPaymentData(data) {
     dados_bancarios: formatBankingData(data),
     data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
   }
+  console.log(data);
+
+  console.log(form.value);
 }
 
 function formatBankingData(data) {
@@ -222,13 +236,16 @@ function formatBankingData(data) {
     case 1:
       dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '')
       break
-    case 3:
+    case 2:
       dadosBancarios = { banco, agencia, conta, digito, ...dadosBancarios }
       break
     default:
       break
   }
-  return JSON.parse(dadosBancarios)
+
+  dadosBancarios = typeof dadosBancarios === 'string' ? JSON.parse(dadosBancarios) : dadosBancarios
+
+  return dadosBancarios
 }
 
 const getPagamento = async (id) => {

@@ -1,5 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { build } = require('electron-builder')
 const builder = require('electron-builder')
 const Platform = builder.Platform
 
@@ -7,40 +6,18 @@ const Platform = builder.Platform
  * @type {import('electron-builder').Configuration}
  */
 const options = {
-  appId: 'com.sieg.pagamentos',
-  productName: 'SIEG Pagamentos',
-  // protocols: {
-  // name: 'Your deeplink',
-  // - Don't forget to set `MimeType: "x-scheme-handler/deeplink"` for `linux.desktop` entry!
-  // schemes: ['deeplink']
-  // },
-  // - Electron auto-updater config
-//   owner: SIEG AD - Tecnologia
-// repo: 'https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2',
-// provider: github
-  publish: [
-    {
-      provider: 'github',
-      owner: 'SIEG AD - Tecnologia',
-      repo: 'https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2',
-    },
-  ],
-  // ],
-
-  // "store" | "normal" | "maximum" - For testing builds, use 'store' to reduce build time significantly.
+  appId: 'com.app.siegpagamentos',
+  productName: 'Pagamentos',
   compression: 'maximum',
   removePackageScripts: true,
-
   nodeGypRebuild: false,
   buildDependenciesFromSource: false,
-
   directories: {
-    output: 'sieg-pagamentos'
+    output: 'electron-dist'
   },
   win: {
     // eslint-disable-next-line no-template-curly-in-string
     artifactName: '${productName}-Setup-${version}.${ext}',
-    icon: 'electron/assets/favicon.ico',
     target: [
       {
         target: 'nsis',
@@ -63,7 +40,7 @@ const options = {
     ]
   },
   linux: {
-    maintainer: 'SIEG AD - Tecnologia',
+    maintainer: 'Your Name',
     desktop: {
       StartupNotify: 'false',
       Encoding: 'UTF-8',
@@ -73,14 +50,13 @@ const options = {
   }
 }
 
-const platform = 'WINDOWS' // "MAC" | "LINUX" | "WINDOWS" - Change this to build for other platforms
-builder
-  .build({
-    targets: Platform[platform].createTarget(),
-    config: options
-  })
-  .then((result) => {
-    console.log('----------------------------')
-    console.log('Platform:', platform)
-    console.log('Output:', JSON.stringify(result, null, 2))
-  })
+const platform = 'WINDOWS'
+
+builder.build({
+  targets: Platform[platform].createTarget(),
+  config: options
+}).then((result) => {
+  console.log('----------------------------')
+  console.log('Platform:', platform)
+  console.log('Output:', JSON.stringify(result, null, 2))
+})
