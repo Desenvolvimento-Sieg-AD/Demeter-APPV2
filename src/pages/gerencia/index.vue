@@ -278,7 +278,7 @@ const openFile = async (filePath) => {
 const openFiles = (anexos) => {
   const statusAllowed = [3, 4]
 
-  const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.status_pagamento_id))
+  const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
   openFile(`${path}${anexo.caminho}`)
 }
