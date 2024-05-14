@@ -1,10 +1,11 @@
 {
   "name": "sieg-pagamentos",
-  "author": "SIEG AD - Tecnologia",
-  "description": "Sistema de Pagamentos - SIEG",
   "version": "1.0.0",
   "private": false,
+  "author": "SIEG AD - Tecnologia",
+  "description": "Sistema de Pagamentos - SIEG",
   "main": ".output/electron/background.js",
+  "license": "MIT",
   "scripts": {
     "dev": "nuxt dev -o",
     "build": "nuxt generate",
@@ -15,7 +16,8 @@
     "dev:electron:lin": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
     "dev:electron": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
     "build:electron": "yarn build && yarn transpile-electron && node build.js",
-    "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite"
+    "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite",
+    "dist": "yarn build && yarn transpile-electron && node build.js "
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",
@@ -41,6 +43,7 @@
     "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
     "@pinia/nuxt": "0.4.11",
     "@types/electron-is-dev": "^1.1.1",
+    "axios": "^1.6.8",
     "dayjs-nuxt": "^2.1.9",
     "devextreme": "^23.2.5",
     "devextreme-vue": "^23.2.5",
@@ -54,10 +57,7 @@
     "vue-currency-input": "^3.1.0",
     "vue3-toastify": "^0.2.1"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2/"
-  },
+  "repository": "https://github.com/Desenvolvimento-Sieg-AD/Demeter-APPV2",
   "publish": {
     "provider": "github",
     "owner": "Desenvolvimento-Sieg-AD",
@@ -70,6 +70,11 @@
       "output": "build"
     },
     "win": {
+      "publish":[
+        {
+          "provider": "github"
+        }
+      ],
       "target": [
         "portable"
       ]

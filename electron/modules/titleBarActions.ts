@@ -39,7 +39,7 @@ export default (mainWindow: BrowserWindow) => {
     return mainWindow.isVisible()
   })
 
-  ipcMain.handle('reload:app', (event) => {
+  ipcMain.handle('reload', (event) => {
     const win = getWindowFromEvent(event)
     if (!win) return
     win.reload()

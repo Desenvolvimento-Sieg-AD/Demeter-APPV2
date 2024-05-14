@@ -39,6 +39,9 @@ const login = async () => {
 	try {
 		const user = await useOs().getUser();
 		const sigla = user?.username?.toUpperCase();
+		const token = localStorage.getItem('token');
+
+		await useElectron().titleBarActions.sendToken(token);
 	
 		const { success, message } = await authenticateUser(sigla);
 		if (!success) throw new Error(message);
@@ -54,9 +57,15 @@ await login();
 
 const reload = async () => {
 	loading.value = true;
-	await useElectron().reload();
+
+	console.log(useElectron());
+	await useElectron().titleBarActions.reload();
 	loading.value = false;
-};
+}
+
+reload();
+
+
 </script>
 
 <style scoped>

@@ -9,7 +9,16 @@ const Platform = builder.Platform
 const options = {
   appId: 'com.sieg.pagamentos',
   productName: 'SIEG Pagamentos',
-  compression: 'maximum', // 'store' | 'normal' | 'maximum',
+  compression: 'normal',
+  publish: [
+    {
+      provider: "github",
+      owner: "Desenvolvimento-Sieg-AD",
+      repo: "Demeter-APPV2",
+      releaseType: "release"
+    }
+  ],
+
   removePackageScripts: true,
   nodeGypRebuild: false,
   buildDependenciesFromSource: false, // default: false
@@ -57,6 +66,7 @@ const options = {
 }
 
 const platform = 'WINDOWS' // "MAC" | "LINUX" | "WINDOWS" - Change this to build for other platforms
+
 builder
   .build({
     targets: Platform[platform].createTarget(),

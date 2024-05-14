@@ -1,7 +1,5 @@
 import { type ProgressInfo } from 'electron-updater'
 
-import {ipcRenderer} from 'electron'
-
 type UpdaterStatus = 'idle' | 'check-for-update' | 'update-available' | 'update-not-available' | 'update-error' | 'downloading' | 'update-downloaded'
 
 const currentStatus = ref<UpdaterStatus>('idle')

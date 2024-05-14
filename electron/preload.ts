@@ -1,6 +1,7 @@
+import { contextBridge, ipcRenderer } from 'electron';
 
-// import { contextBridge } from 'electron'
-
-// process.once('loaded', () => {
-//   contextBridge.exposeInMainWorld('versions', process.env)
-// })
+contextBridge.exposeInMainWorld('electronAPI', {
+  getUser: () => ipcRenderer.invoke('os:getUser'),
+  openFile: (filePath: any) => ipcRenderer.invoke('os:openFile', filePath),
+  copyFilePath: (filePath: any) => ipcRenderer.invoke('os:copyFilePath', filePath)
+});

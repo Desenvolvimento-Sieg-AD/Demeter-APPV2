@@ -1,16 +1,26 @@
+interface Windows extends Window {
+  electronAPI: {
+    getUser: () => Promise<any>,
+    openFile: (filePath: string) => Promise<any>,
+    copyFilePath: (filePath: string) => Promise<any>
+  }
+}
+
+declare var window: Windows
+
 export default function useOs() {
-  const electron = window.require('electron')
 
   const getUser = async () => {
-    return await electron.ipcRenderer.invoke('os:getUser')
+    return await window.electronAPI.getUser()
   }
 
   const openFile = async (filePath: string) => {
-    return await electron.ipcRenderer.invoke('os:openFile', filePath)
+    return await window.electronAPI.openFile(filePath)
   }
 
   const copyFilePath = async (filePath: string) => {
-    return await electron.ipcRenderer.invoke('os:copyFilePath', filePath)
+    console.log('copyFilePath', filePath)
+    return await window.electronAPI.copyFilePath(filePath)
   }
 
   return { getUser, openFile, copyFilePath }
