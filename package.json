@@ -60,7 +60,8 @@
   },
   "publish": {
     "provider": "github",
-    "releaseType": "release"
+    "owner": "Desenvolvimento-Sieg-AD",
+    "repo": "Demeter-APPV2"
   },
   "build": {
     "productName": "SiegPagamentos",

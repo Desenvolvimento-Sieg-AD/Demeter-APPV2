@@ -16,9 +16,21 @@ const options = {
   directories: {
     output: '.output'
   },
+  publish: {
+    provider: 'github',
+  },
   win: {
     artifactName: '${productName}-Setup-${version}.${ext}',
     // icon: 'public/favicon.ico',
+    publish: [
+      {
+
+        repo: "Demeter-APPV2",
+        provider: 'github',
+        owner: 'Desenvolvimento-Sieg-AD',
+        releaseType: 'release',
+      }
+    ],
     target: [
       {
         target: 'portable',
@@ -48,10 +60,13 @@ const platform = 'WINDOWS' // "MAC" | "LINUX" | "WINDOWS" - Change this to build
 builder
   .build({
     targets: Platform[platform].createTarget(),
-    config: options
+    config: options,
+    // publish: 'always', // ? Config to publish the build
   })
   .then((result) => {
     console.log('----------------------------')
     console.log('Platform:', platform)
     console.log('Output:', JSON.stringify(result, null, 2))
+  }).catch((error) => {
+    console.error('Error:', error)
   })
