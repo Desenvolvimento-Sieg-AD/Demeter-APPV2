@@ -331,19 +331,26 @@ const messageConfirmAllStatus = computed(() => {
 // * METHODS
 
 const openFile = (filePath) => {
-  // window.electronAPI.openFile(filePath).then((response) => {
-  // 	if (!response.success) {
-  // 		console.error('Erro ao abrir arquivo:', response.message);
-  // 	}
-  // }); //? APP
+  try {
+      // window.electronAPI.openFile(filePath).then((response) => {
+      // 	if (!response.success) {
+      // 		console.error('Erro ao abrir arquivo:', response.message);
+      // 	}
+      // }); //? APP
 
-  useOs().openFile(filePath) //? Template
+      useOs().openFile(filePath) //? Template
+
+  } catch (error) {
+    console.log(error)
+    $toast.error('Erro ao abrir arquivo')
+  }
+
 }
 
 const openFiles = (anexos) => {
   const statusAllowed = [3, 4]
 
-  const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.status_pagamento_id))
+  const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
   openFile(`${path}${anexo.caminho}`)
 }
