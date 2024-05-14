@@ -16,20 +16,20 @@
 
         <v-divider class="mt-2 mb-2" />
 
+        <v-card class="card-pagamento" flat>
+          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
+
+          <ModalPagamentoCategoria v-model:form="form" />
+        </v-card>
+
+        <v-divider class="mt-2 mb-2" />
+
         <v-card flat class="card-pagamento">
           <v-row no-gutters justify="space-between" align="center" class="mb-n7 mr-2">
             <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
             <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" />
           </v-row>
           <ModalPagamentoFornecedor v-model:form="form" />
-        </v-card>
-
-        <v-divider class="mt-2 mb-2" />
-
-        <v-card class="card-pagamento" flat>
-          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
-          <ModalPagamentoCategoria v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />

@@ -9,10 +9,10 @@ const Platform = builder.Platform
 const options = {
   appId: 'com.sieg.pagamentos',
   productName: 'SIEG Pagamentos',
-  compression: 'maximum',
+  compression: 'maximum', // 'store' | 'normal' | 'maximum',
   removePackageScripts: true,
   nodeGypRebuild: false,
-  buildDependenciesFromSource: false,
+  buildDependenciesFromSource: false, // default: false
   directories: {
     output: '.output'
   },
@@ -22,11 +22,11 @@ const options = {
     target: [
       {
         target: 'portable',
-        arch: ['x64', 'ia32']
+        arch: ['x64']
       },
       {
         target: 'nsis',
-        arch: ['x64', 'ia32']
+        arch: ['x64']
       }
     ]
   },

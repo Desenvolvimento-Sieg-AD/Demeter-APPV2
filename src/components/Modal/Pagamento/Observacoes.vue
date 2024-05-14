@@ -1,27 +1,19 @@
 <template>
   <v-row class="pa-2">
     <v-col cols="12" md="4">
-      <CustomInput
-        required
-        label="Motivo"
-        type="textarea"
-        :rows="3"
-        :counter="300"
-        v-model="formValue.motivo"
-        append-inner-icon="mdi-chat-question-outline"
-      />
+      <CustomInput required label="Motivo" type="textarea" :rows="3" :counter="300" v-model="formValue.motivo" append-inner-icon="mdi-chat-question-outline" hide-details />
     </v-col>
 
     <v-col cols="8">
-      <CustomInput type="textarea" :counter="300" no-resize :rows="3" label="Observações" v-model="formValue.dados_complementares" />
+      <CustomInput type="textarea" :counter="300" no-resize :rows="3" label="Observações" v-model="formValue.dados_complementares" hide-details />
     </v-col>
 
-    <v-col cols="12" v-if="!requer_projeto">
+    <v-col cols="12">
       <CustomInput
         hide-details
         item-value="id"
         label="Projeto"
-        :required="!requer_projeto"
+        :required="requer_projeto"
         :items="projetos"
         item-title="nome"
         type="combobox"
