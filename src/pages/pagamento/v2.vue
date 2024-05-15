@@ -91,7 +91,6 @@ function buildFormData() {
   const formData = new FormData()
 
   for (const key in form.value) {
-    console.log('key', key, form.value[key])
     if (key === 'fornecedor') {
       formData.append('fornecedor_id', form.value.fornecedor.id)
       formData.append('fornecedor_nome', form.value.fornecedor.nome)

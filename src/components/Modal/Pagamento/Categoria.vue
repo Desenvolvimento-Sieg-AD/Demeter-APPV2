@@ -1,7 +1,17 @@
 <template>
   <v-row class="pa-3">
     <v-col cols="2" md="3">
-      <CustomInput required hide-details itemValue="id" v-model="formValue.grupo_id" :items="grupos" itemTitle="nome" type="autocomplete" label="Grupo do pedido" />
+      <CustomInput 
+        required
+        hide-details
+        itemValue="id"
+        v-model="formValue.grupo_id" 
+        :items="grupos" 
+        itemTitle="nome" 
+        type="autocomplete" 
+        label="Grupo do pedido" 
+        :disabled="!formValue.setor_id"
+      />
     </v-col>
 
     <v-col cols="4" md="3">
@@ -143,6 +153,10 @@ const defineFileTitle = (fileName) => {
   return fileName
 }
 
+watch(() => formValue.value.setor_id, async (value) => {
+  if(value) loadCategorias(value)
+},{ immediate: true })
+
 watch(
   () => formValue.value.nf,
   async (value) => {
@@ -161,19 +175,19 @@ watch(
   { immediate: true }
 )
 
-const loadCategorias = async () => {
+const loadCategorias = async (setor_id) => {
   try {
-    const { success, message, data } = await getCategoriasUsuario()
+    const { success, message, data } = await getCategoriasUsuario(setor_id)
     if (!success) throw new Error(message)
 
     const tempGrupos = []
 
-    for (const categoria of data) {
+    for (const categoria of data) { 
       if (!tempGrupos.find((grupo) => grupo.id === categoria.grupo_id)) {
-        tempGrupos.push({
-          id: categoria.grupo_id,
-          nome: categoria.grupo.nome
-        })
+          tempGrupos.push({
+              id: categoria.grupo_id,
+              nome: categoria.grupo.nome
+            })
       }
     }
 
@@ -185,5 +199,7 @@ const loadCategorias = async () => {
   }
 }
 
-loadCategorias()
+onMounted(() => {
+  if (formValue.value.setor_id) loadCategorias(formValue.value.setor_id)
+})
 </script>

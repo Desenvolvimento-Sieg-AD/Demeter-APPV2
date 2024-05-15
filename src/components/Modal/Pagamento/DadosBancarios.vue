@@ -83,8 +83,7 @@
   </v-row>
 </template>
 <script setup>
-import { getPagamentoTipo, getTiposChavePix, getCard } from '@api'
-import { getContasDisponiveis } from '~/api'
+import { getPagamentoTipo, getTiposChavePix, getCard, getContasDisponiveis } from '@api'
 
 const dayjs = useDayjs()
 
@@ -165,10 +164,8 @@ const dateRules = (v) => {
   return true
 }
 
-watch(
-  () => formValue.value.tipo_id,
-  (value) => {
-    if (formValue.value.tipo_id == 5 || formValue.value.tipo_id == 6) {
+watch(() => formValue.value.tipo_id, (value) => {
+    if (value == 5 || value == 6) {
       try {
         getCards()
       } catch (error) {

@@ -171,7 +171,6 @@ const sendForm = async () => {
     }
 
     const formData = buildFormData()
-    console.log('formData', formData)
     const { success, message } = await postPagamento(formData)
 
     if (!success) throw new Error(message)

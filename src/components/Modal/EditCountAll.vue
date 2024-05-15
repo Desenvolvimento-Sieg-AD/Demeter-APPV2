@@ -106,7 +106,6 @@ const verifyConta = () => {
 const alter = async () => {
 	
 	const ids = props.items.map((item) => item.id);
-	console.log(ids)
 
 	loading.value = true;
 	const cont = conta_id.value.id ?? conta_id.value;

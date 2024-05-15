@@ -9,9 +9,9 @@ export async function getCategorias() {
   }
 }
 
-export async function getCategoriasUsuario() {
+export async function getCategoriasUsuario(setor_id: number) {
   try {
-    const { success, message, data } = await useApi(`/categoria/usuario`)
+    const { success, message, data } = await useApi(`/categoria/usuario/${setor_id}`)
     if (!success) throw new Error(message)
 
     return { success, message, data }

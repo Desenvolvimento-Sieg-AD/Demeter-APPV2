@@ -19,7 +19,6 @@ export default function useOs() {
   }
 
   const copyFilePath = async (filePath: string) => {
-    console.log('copyFilePath', filePath)
     return await window.electronAPI.copyFilePath(filePath)
   }
 

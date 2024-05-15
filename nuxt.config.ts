@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+// const API_URL = 'http://192.168.1.43:8000/api'
 const API_URL = 'http://localhost:8000/api'
 import { resolve } from 'path'
 

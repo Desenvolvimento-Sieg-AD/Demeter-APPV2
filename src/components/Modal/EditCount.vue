@@ -148,7 +148,6 @@ const getPayment = async () => {
 const getContasDisp = async () => {
   try {
     const { data } = await getContasDisponiveis(payment.value.empresa_id, payment.value.tipo_id)
-    console.log('contas', data)
     contasEmpresa.value = data
   } catch (error) {
     console.log(error.message)
@@ -159,7 +158,6 @@ const getContasDisp = async () => {
 const getEmpresas = async () => {
   try {
     const { data } = await getEmpresa()
-    console.log('empresas', data)
     empresas.value = data
   } catch (error) {
     console.log(error.message)
@@ -185,7 +183,6 @@ const getCategsUsuario = async () => {
     gruposCategoria.value = tempGrupos
     categorias.value = data
 
-    console.log(gruposCategoria.value, categorias.value)
   } catch (error) {
     console.log(error.message)
     $toast.error(error.message)

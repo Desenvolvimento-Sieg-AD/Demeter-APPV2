@@ -19,9 +19,9 @@ autoUpdater.disableWebInstaller = true;
 
 (autoUpdater.logger as typeof log).transports.file.level = 'info'
 
-log.transports.file.resolvePathFn = () => path.join('C:/Projetos/Demeter-APPV2', './logs/main.log');
+log.transports.file.resolvePathFn = () => path.join('A:/Dev TI/Demeter', './logs/main.log');
 
-const caminho_log = 'C:/Projetos/Demeter-APPV2/logs/main.log';
+const caminho_log = 'A:/Dev TI/Demeter/logs/main.log';
 
 function sendStatusToWindow(text: string, teste?: any) {
   log.info(text, teste);
@@ -134,7 +134,6 @@ ipcMain.handle('reload:app', () => {
 
 ipcMain.handle('sendToken:app', (event, token) => {
   tokenAPI = token
-  log.info('Token received:', token)
 })
 
 app.on('ready', function()  {
@@ -143,6 +142,7 @@ app.on('ready', function()  {
 
 autoUpdater.setFeedURL({
   provider: "github",
+
   owner: "Desenvolvimento-Sieg-AD",
   repo: "Demeter-APPV2",
   private: false,
@@ -202,7 +202,7 @@ ipcMain.on('check-for-update', () => {
 async function sendStatusToDEV(resultado: string, versao_atualizada: string, mensagem?: string){
 	try {
 
-		const url = 'http://localhost:8000/api/public/auto-updater';
+		const url = 'http://192.168.1.43:8000/api/public/auto-updater';
 		const headers = { 'Content-Type': 'application/json', Authorization: `${tokenAPI}` };
 
 		const response = await axios.post(url, {

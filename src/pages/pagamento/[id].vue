@@ -225,9 +225,6 @@ function formatPaymentData(data) {
     dados_bancarios: formatBankingData(data),
     data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
   }
-  console.log(data);
-
-  console.log(form.value);
 }
 
 function formatBankingData(data) {
