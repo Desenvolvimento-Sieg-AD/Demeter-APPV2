@@ -41,7 +41,11 @@ const login = async () => {
 		const sigla = user?.username?.toUpperCase();
 		const token = localStorage.getItem('token');
 
-		await useElectron().titleBarActions.sendToken(token);
+		await useElectron().actions.sendToken(token);
+
+		const electron = useElectron();
+
+		console.log(electron);
 	
 		const { success, message } = await authenticateUser(sigla);
 		if (!success) throw new Error(message);
@@ -58,12 +62,10 @@ await login();
 const reload = async () => {
 	loading.value = true;
 
+	await useElectron().actions.reload();
 	console.log(useElectron());
-	await useElectron().titleBarActions.reload();
 	loading.value = false;
 }
-
-reload();
 
 
 </script>

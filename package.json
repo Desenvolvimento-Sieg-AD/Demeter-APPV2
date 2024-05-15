@@ -16,8 +16,7 @@
     "dev:electron:lin": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
     "dev:electron": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
     "build:electron": "yarn build && yarn transpile-electron && node build.js",
-    "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite",
-    "dist": "yarn build && yarn transpile-electron && node build.js "
+    "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite"
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",

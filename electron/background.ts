@@ -35,6 +35,7 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
 let globalVersion  = ''
 let mainWindow: BrowserWindow
+let tokenAPI = ''
 
 const isProduction = process.env.NODE_ENV !== 'development'
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
@@ -127,8 +128,12 @@ app.on('window-all-closed', () => {
   }
 })
 
-ipcMain.on('sendToken:app', (event, token) => {
-  console.log('Token received:', token)
+ipcMain.handle('reload:app', () => {
+  mainWindow?.reload()
+})
+
+ipcMain.handle('sendToken:app', (event, token) => {
+  tokenAPI = token
   log.info('Token received:', token)
 })
 
@@ -198,9 +203,7 @@ async function sendStatusToDEV(resultado: string, versao_atualizada: string, men
 	try {
 
 		const url = 'http://localhost:8000/api/public/auto-updater';
-
-		const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwic2lnbGEiOiJCU0MiLCJub21lIjoiQnJlbm5vIEVkdWFyZG8gZGUgU291emEgQ29zdGEiLCJlbWFpbCI6ImJzY0BzaWVnLWFkLmNvbS5iciIsInNldG9yIjp7ImlkIjoyLCJub21lIjoiTGljaXRhw6fDo28iLCJleGliaXJfcHJvamV0b3MiOnRydWV9LCJpYXQiOjE3MTUyODM2NzMsImV4cCI6MTcxNzg3NTY3M30.8N9uPGd8d5Zrkrb6OVCMb2hLVUtIc-eSc7avqzILmBg'
-		const headers = { 'Content-Type': 'application/json', Authorization: `${token}` };
+		const headers = { 'Content-Type': 'application/json', Authorization: `${tokenAPI}` };
 
 		const response = await axios.post(url, {
 				resultado,
