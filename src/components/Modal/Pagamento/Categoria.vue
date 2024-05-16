@@ -10,7 +10,7 @@
         itemTitle="nome" 
         type="autocomplete" 
         label="Grupo do pedido" 
-        :disabled="!formValue.setor_id"
+        :disabled="!formValue.setor_id || !formValue.empresa_id"
       />
     </v-col>
 
@@ -82,10 +82,7 @@ function setFornecedorDocumentData(cpf_emitente, cnpj_emitente) {
   } else if (cnpj_emitente) {
     formValue.value.fornecedor.documento = cnpj_emitente
     formValue.value.fornecedor.tipo = 'juridico'
-  } else {
-    formValue.value.fornecedor.documento = null
-    formValue.value.fornecedor.tipo = null
-  }
+  } 
 }
 
 const processNfFile = async (file) => {

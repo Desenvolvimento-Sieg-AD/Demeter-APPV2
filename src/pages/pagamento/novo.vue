@@ -139,10 +139,20 @@ function buildFormData() {
       formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
       continue
     }
-    if (key === 'nf' && form.value.nf.length > 0) {
+
+    console.log('chave_nf', form.value.chave_nf.length)
+
+    if ((key === 'nf' && form.value.nf.length > 0) && form.value.chave_nf.length === 44) {
       formData.append('nf', form.value.nf[0])
       continue
+    } 
+    
+    if ((key === 'nf' && form.value.nf.length > 0) && form.value.chave_nf.length > 44) {
+      console.log('entrou aqui')
+      formData.append('doc', form.value.nf[0])
+      continue
     }
+
     if (key === 'doc' && form.value.doc.length > 0) {
       for (let i = 0; i < form.value.doc.length; i++) {
         formData.append('doc', form.value.doc[i])
@@ -357,9 +367,7 @@ watch(
   }
 )
 
-watch(
-  () => form.value.valor_total_dolar,
-  (nv, oV) => {
+watch(() => form.value.valor_total_dolar, (nv, oV) => {
     if (nv) form.value.valor_total = priceNow.value * nv
   }
 )

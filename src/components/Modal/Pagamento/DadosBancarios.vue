@@ -176,10 +176,8 @@ watch(() => formValue.value.tipo_id, (value) => {
   { immediate: true }
 )
 
-watch(
-  () => formValue.value.empresa_id,
-  (value) => {
-    if (formValue.value.tipo_id == 5 || formValue.value.tipo_id == 6) {
+watch(() => formValue.value.empresa_id, (value) => {
+    if (value == 5 || value == 6) {
       try {
         getCards()
       } catch (error) {
@@ -219,15 +217,19 @@ const getCards = async () => {
 
 await getTiposChave()
 
-watch(
-  () => formValue.value.tipo_id,
-  async (nv, oV) => {
-    if (nv !== oV) {
-      if (route?.query?.id) return
+watch(() => formValue.value.tipo_id, async (nv, oV) => {
       formValue.value.tipo_chave_pix = null
-      formValue.value.descricao = null
-    }
-  },
-  { immediate: true }
-)
+      formValue.value.dados_bancarios.codigo_barras = null
+      formValue.value.dados_bancarios.outhers = null
+      formValue.value.dados_bancarios.banco = null
+      formValue.value.dados_bancarios.agencia = null
+      formValue.value.dados_bancarios.conta = null
+      formValue.value.dados_bancarios.digito = null
+
+},{ immediate: true })
+
+watch(() => formValue.value.tipo_chave_pix, async (nv, oV) => {
+      formValue.value.dados_bancarios.outhers = null
+},{ immediate: true })
+
 </script>

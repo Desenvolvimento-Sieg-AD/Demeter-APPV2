@@ -49,7 +49,7 @@
     </v-col>
 
     <v-col cols="12" md="9">
-      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="48" mask="number" />
+      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="number" />
     </v-col>
   </v-row>
 
@@ -169,9 +169,9 @@ const clearFornecedor = () => {
   }
 }
 
-watch(
-  () => formValue.value.fornecedor.internacional,
-  async (value) => {
+watch(() => formValue.value.fornecedor.internacional, async (value) => {
+    clearFornecedor()
+
     const { data } = await getFornecedor(value)
     fornecedores.value = data
   }

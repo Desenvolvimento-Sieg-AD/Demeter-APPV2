@@ -55,3 +55,14 @@ export async function getGrupos() {
     return { success: false, message: error, data: null }
   }
 }
+
+export async function existRelationSetorWithEmpresa(setor_id: number, empresa_id: number) {
+  try {
+    const { success, message, data } = await useApi(`/setor/${setor_id}/${empresa_id}`)
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error }
+  }
+}

@@ -1,19 +1,5 @@
 <template>
   <v-row class="pa-3">
-    <v-col cols="3">
-      <CustomInput
-        required
-        type="select"
-        hide-details
-        itemValue="id"
-        itemTitle="nome"
-        :items="setores"
-        label="Setor"
-        v-model="formValue.setor_id"
-        append-inner-icon="mdi-domain"
-        :disabled="setores.length <= 1"
-      />
-    </v-col>
 
     <v-col cols="6">
       <CustomInput
@@ -26,6 +12,22 @@
         label="Empresa pagadora"
         v-model="formValue.empresa_id"
         append-inner-icon="mdi-domain"
+      />
+    </v-col>
+
+    <v-col cols="3">
+      <CustomInput
+        required
+        type="autocomplete"
+        hide-details
+        itemValue="id"
+        itemTitle="nome"
+        :itemProps="itemProps"
+        :items="setores"
+        label="Setor"
+        v-model="formValue.setor_id"
+        append-inner-icon="mdi-domain"
+        :disabled="setores.length <= 1 || !formValue.empresa_id"
       />
     </v-col>
 
@@ -52,14 +54,20 @@
   </v-row>
 </template>
 <script setup>
-import { getEmpresa } from '@api'
+import { getEmpresa, existRelationSetorWithEmpresa } from '@api'
 import { useAuthStore } from '~/store/auth'
 
 const { data: empresas } = await getEmpresa()
 
 const { user } = useAuthStore()
 
+const { $toast } = useNuxtApp()
+
 const setores = computed(() => user.setores)
+
+const itemProps = (item) => {
+  return { disabled: item.disabled, subtitle: item.disabled ? 'Setor não relacionado com a empresa' : ''}
+}
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -85,5 +93,29 @@ const openFile = async (folder) => {
     $toast.error('Erro ao abrir arquivo')
   }
 }
+
+const existRelation = async () => {
+  try {
+
+    if(!formValue.value.empresa_id) return
+
+    for await (const setor of setores.value) {
+
+      const { data } = await existRelationSetorWithEmpresa(setor.id, formValue.value.empresa_id)
+
+      setor.disabled = false
+      if (!data) setor.disabled = true
+
+    }
+
+  } catch (error) {
+    console.error(error)
+    $toast.error('Erro ao verificar relação entre setor e empresa')
+  }
+}
+
+watch(() => formValue.value.empresa_id, existRelation)
+
+
 </script>
 <style scoped></style>
