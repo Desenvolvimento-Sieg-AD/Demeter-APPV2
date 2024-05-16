@@ -78,7 +78,7 @@
             <CustomInput disabled label="Chave de Acesso" hide-details v-model="chave_nf" />
           </v-col>
 
-          <v-col cols="12">
+          <v-col cols="12" v-if="pagamento.projeto"> 
             <CustomInput disabled label="Projeto" hide-details v-model="pagamento.projeto.nome" />
           </v-col>
 

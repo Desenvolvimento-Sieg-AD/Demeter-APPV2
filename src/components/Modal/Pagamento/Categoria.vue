@@ -191,7 +191,7 @@ const loadCategorias = async (setor_id) => {
       }
     }
 
-    grupos.value = tempGrupos
+    grupos.value = tempGrupos.sort((a, b) => a.nome.localeCompare(b.nome))
     categorias.value = data
   } catch (error) {
     console.error('Erro ao buscar categorias:', error.message)

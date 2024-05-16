@@ -26,10 +26,10 @@
         <v-row no-gutters class="row-text" justify="space-between">
           <CustomText title="Pagamentos" color="#118B9F" size="20" :bold="true" />
           <div>
-            <v-btn color="green" variant="text" v-if="hasPaymentSuccessFul" @click="sendPaidPayments">
+            <!-- <v-btn color="green" variant="text" v-if="hasPaymentSuccessFul" @click="sendPaidPayments">
               Pagar
               <v-tooltip text="Pagar os pagamentos que foram enviados com sucesso" activator="parent" location="top" />
-            </v-btn>
+            </v-btn> -->
             <CustomText class="mr-5" v-if="countPayments > 0" :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
             <v-chip color="#F68A1A" text="Pagamentos aprovados pela gerência"></v-chip>
           </div>
@@ -247,10 +247,10 @@ const sendOmie = async () => {
   for await (const payment of paymentsToSend) {
     let codigo = ''
     try {
-      const { success, message, data, faultcode } = await sendPaymentsToOmie(payment.id)
+      const { success, message, data } = await sendPaymentsToOmie(payment.id)
       if (!success) throw new Error(message)
 
-      if (data.faultcode) {
+      if (!data.success) {
         codigo = data.faultcode
         throw new Error(data.message)
       }
@@ -443,6 +443,6 @@ watch(selectedClient, async () => {
 }
 
 .selected-box {
-  background-color: #ddffff;
+  background-color: #cae9ca;
 }
 </style>
