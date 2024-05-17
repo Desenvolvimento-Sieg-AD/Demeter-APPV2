@@ -43,10 +43,6 @@ const login = async () => {
 
 		await useElectron().actions.sendToken(token);
 
-		const electron = useElectron();
-
-		console.log(electron);
-	
 		const { success, message } = await authenticateUser(sigla);
 		if (!success) throw new Error(message);
 
@@ -63,7 +59,6 @@ const reload = async () => {
 	loading.value = true;
 
 	await useElectron().actions.reload();
-	console.log(useElectron());
 	loading.value = false;
 }
 

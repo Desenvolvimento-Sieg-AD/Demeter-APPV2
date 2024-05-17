@@ -203,6 +203,9 @@ function formatPaymentData(data) {
   const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC)
   const { file: nf, folder: pathNF } = createFileFromAnexo(fileNF)
 
+  const dados_bancarios = data.dados_bancarios ? JSON.parse(data.dados_bancarios) : {}
+
+  dados_bancarios.outhers
 
   form.value = {
     nf: nf ? [nf] : null,
@@ -211,38 +214,32 @@ function formatPaymentData(data) {
     ...data,
     pathDoc,
     fornecedor: {
-      id: data.fornecedor.id,
+      id: data.fornecedor_id,
       nome: data.fornecedor.razao_social,
-      apelido: data.fornecedor.nome_fantasia,
+      apelido: data.fornecedor.razao_social,
       documento: data.fornecedor.documento,
       tipo: data.fornecedor.tipo,
-      internacional: data.fornecedor.internacional
+      internacional: data.fornecedor_internacional
+    },
+    dados_bancarios: {
+      banco: dados_bancarios?.banco,
+      agencia: dados_bancarios?.agencia,
+      conta: dados_bancarios?.conta,
+      digito: dados_bancarios?.digito,
+      outhers: dados_bancarios?.outhers,
+      codigo_barras: dados_bancarios?.codigo_barras,
+      numero_cartao: dados_bancarios?.numero_cartao,
+      chave_pix: dados_bancarios?.chave_pix,
+      link_online: dados_bancarios?.link_online
     },
     projeto_id: data.projeto_id,
     categoria_id: data.categoria.id,
     grupo_id: data.categoria.grupo.id,
     tipo_chave_pix: data.tipo_chave_pix_id,
-    dados_bancarios: formatBankingData(data),
     data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
   }
-}
 
-function formatBankingData(data) {
-  let dadosBancarios = JSON.parse(data.dados_bancarios)
-  switch (form.value.tipo_id) {
-    case 1:
-      dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '')
-      break
-    case 2:
-      dadosBancarios = { banco, agencia, conta, digito, ...dadosBancarios }
-      break
-    default:
-      break
-  }
-
-  dadosBancarios = typeof dadosBancarios === 'string' ? JSON.parse(dadosBancarios) : dadosBancarios
-
-  return dadosBancarios
+  console.log( form.value)
 }
 
 const getPagamento = async (id) => {
@@ -294,7 +291,11 @@ function initFormState() {
       agencia: null,
       conta: null,
       digito: null,
-      outhers: null
+      outhers: null,
+      codigo_barras: null,
+      numero_cartao: null,
+      chave_pix: null,
+      link_online: null
     }
   }
 }
@@ -325,15 +326,11 @@ const getPriceDollar = async () => {
   }
 }
 
-onBeforeUnmount(() => {
-  form.value = initFormState()
-})
+onBeforeUnmount(() => form.value = initFormState())
 
 // * Watchers
 
-watch(
-  () => form.value.fornecedor.internacional,
-  async (nv, oV) => {
+watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
     if (nv) {
       paymentsType.value = paymentsType.value.filter((type) => type.internacional)
       await getPriceDollar()
@@ -342,9 +339,7 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => form.value.valor_total_dolar,
-  (nv, oV) => {
+watch(() => form.value.valor_total_dolar, (nv, oV) => {
     if (nv) form.value.valor_total = priceNow.value * nv
   }
 )

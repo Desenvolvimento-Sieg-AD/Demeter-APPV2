@@ -217,19 +217,9 @@ const getCards = async () => {
 
 await getTiposChave()
 
-watch(() => formValue.value.tipo_id, async (nv, oV) => {
-      formValue.value.tipo_chave_pix = null
-      formValue.value.dados_bancarios.codigo_barras = null
-      formValue.value.dados_bancarios.outhers = null
-      formValue.value.dados_bancarios.banco = null
-      formValue.value.dados_bancarios.agencia = null
-      formValue.value.dados_bancarios.conta = null
-      formValue.value.dados_bancarios.digito = null
-
-},{ immediate: true })
-
 watch(() => formValue.value.tipo_chave_pix, async (nv, oV) => {
-      formValue.value.dados_bancarios.outhers = null
+  if(route.params.id) return
+  formValue.value.dados_bancarios.outhers = null
 },{ immediate: true })
 
 </script>

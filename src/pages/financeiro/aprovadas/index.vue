@@ -156,7 +156,7 @@
         <CustomText title="Selecione um cliente primeiro" color="#118B9F" size="20" :bold="true" class="text-center" />
       </v-row>
 
-      <v-btn color="green" class="btn-send" icon size="75" @click="sendOmie" :loading="loading">
+      <v-btn color="green" class="btn-send" icon size="75" @click="sendOmie" :loading="loading" :disabled="countPayments === 0">
         <v-icon>mdi-send</v-icon>
         <v-tooltip text="Enviar pagamentos para o Omie" activator="parent" location="left" />
       </v-btn>
@@ -185,8 +185,6 @@ const loadingPayments = ref(false)
 const showPayments = ref(false)
 const notExistPayments = ref(false)
 
-const countPayments = ref(0)
-
 const justificativa = ref(null)
 
 const selectedClient = ref(null)
@@ -195,6 +193,7 @@ const enableModal = reactive({ cancel: false, viewPayment: false })
 
 // * COMPUTEDS
 
+const countPayments = computed(() => payments.value.filter((payment) => payment.selectedOmie).length)
 const paymentsCountTitle = computed(() => `Pagamentos selecionados: ${countPayments.value}`)
 const hasPaymentSuccessFul = computed(() => payments.value.some((payment) => payment.enviado_externo && payment.codigo_lancamento_omie))
 
@@ -259,6 +258,10 @@ const sendOmie = async () => {
       }
 
       payment.codigo_lancamento_omie = data.codigo_lancamento_omie
+
+      const findPayment = payments.value.find((p) => p.id === payment.id)
+      findPayment.selectedOmie = false
+      
       payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso', color: 'green' }
       payment.enviado_externo = true
 
@@ -353,6 +356,7 @@ const selectPayment = (id) => {
   payment.selectedOmie = !payment.selectedOmie
   countPayments.value = payments.value.filter((payment) => payment.selectedOmie).length
 }
+
 
 const formatPaymentData = (payment) => {
   payment.data_vencimento = dayjs(payment.data_vencimento).format('DD/MM/YYYY')

@@ -18,7 +18,7 @@
             </v-row>
             <v-row class="mt-n5">
                 <v-col>
-                    <CustomInput v-model="updateMessage" label="Justificativa" type="text" :rows="3" required :maxLength="300"/>
+                    <CustomInput v-model="updateMessage" label="Justificativa" type="text" :rows="3" required :maxLength="300" />
                 </v-col>
             </v-row>
 		</template>
