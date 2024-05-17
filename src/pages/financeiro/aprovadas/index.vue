@@ -169,6 +169,7 @@
 <script setup>
 // * IMPORTS
 
+import dayjs from '#build/dayjs.imports.mjs'
 import { getEmpresa, getClientByPayment, getPagamentoByClient, sendPaymentsToOmie, postStatus } from '@api'
 
 const router = useRouter()
@@ -249,6 +250,8 @@ const sendOmie = async () => {
     try {
       const { success, message, data } = await sendPaymentsToOmie(payment.id)
       if (!success) throw new Error(message)
+      
+      console.log("🚀 ~ forawait ~ data:", data)
 
       if (!data.success) {
         codigo = data.faultcode
@@ -352,7 +355,7 @@ const selectPayment = (id) => {
 }
 
 const formatPaymentData = (payment) => {
-  payment.data_vencimento = new Date(payment.data_vencimento).toLocaleDateString()
+  payment.data_vencimento = dayjs(payment.data_vencimento).format('DD/MM/YYYY')
 
   if (typeof payment.dados_bancarios === 'string') payment.dados_bancarios = JSON.parse(payment.dados_bancarios)
   if (typeof payment.retorno_externo === 'string') payment.retorno_externo = JSON.parse(payment.retorno_externo)

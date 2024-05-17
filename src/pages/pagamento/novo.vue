@@ -140,19 +140,11 @@ function buildFormData() {
       continue
     }
 
-    console.log('chave_nf', form.value.chave_nf.length)
-
-    if ((key === 'nf' && form.value.nf.length > 0) && form.value.chave_nf.length === 44) {
+    if (key === 'nf' && form.value.nf.length > 0) {
       formData.append('nf', form.value.nf[0])
       continue
     } 
     
-    if ((key === 'nf' && form.value.nf.length > 0) && form.value.chave_nf.length > 44) {
-      console.log('entrou aqui')
-      formData.append('doc', form.value.nf[0])
-      continue
-    }
-
     if (key === 'doc' && form.value.doc.length > 0) {
       for (let i = 0; i < form.value.doc.length; i++) {
         formData.append('doc', form.value.doc[i])
@@ -191,7 +183,7 @@ const sendForm = async () => {
     await definePaymentImportant()
     reset()
   } catch (error) {
-    console.error(error.message)
+    console.error(error)
     $toast.error(error.message)
   }
 }
