@@ -176,7 +176,7 @@ const updatePayment = async (id, data) => {
     setTimeout(() => router.push('/financeiro/aprovadas'), 750)
   } catch (error) {
     console.log('Erro ao atualizar pagamento', error)
-    $toast.error('Erro ao atualizar pagamento')
+    $toast.error('Erro ao atualizar pagamento', error)
   }
 }
 
@@ -215,8 +215,6 @@ function formatPaymentData(data) {
 
   dados_bancarios.outhers
 
-  console.log(data)
-
   form.value = {
     nf: nf ? [nf] : null,
     doc: doc ? [doc] : null,
@@ -249,7 +247,6 @@ function formatPaymentData(data) {
     data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
   }
 
-  console.log( form.value)
 }
 
 const getPagamento = async (id) => {

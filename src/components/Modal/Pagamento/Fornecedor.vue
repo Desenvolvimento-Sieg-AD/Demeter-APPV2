@@ -9,7 +9,7 @@
         v-model="formValue.fornecedor.documento"
         append-inner-icon="mdi-content-copy"
         @click:append-inner="pasteFromClipboard"
-        @blur="verifyFornecedor()"
+        @blur="verifyFornecedor('documento')"
         :mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
       />
     </v-col>
@@ -38,7 +38,7 @@
         :items="fornecedores"
         itemValue="razao_social"
         itemTitle="razao_social"
-        @blur="verifyFornecedor()"
+        @blur="verifyFornecedor('nome')"
         v-model="formValue.fornecedor.nome"
         append-inner-icon="mdi-shopping-outline"
       />
@@ -88,22 +88,31 @@ const formValue = computed({
 })
 const fornecedores = ref([])
 
-const verifyFornecedor = async () => {
+const verifyFornecedor= async (type) => {
   try {
-
-    const nome = formValue.value.fornecedor.nome
     const documento = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
+    const nome = formValue.value.fornecedor.nome
 
-    if (nome) {
+    if(nome && formValue.value.fornecedor.id) {
+      const fornecedor = fornecedores.value.find((f) => f.razao_social === nome)
+      await getDataFornecedor(fornecedor)
+    }
 
-      const fornecedor = fornecedores.value.find((f) => f.razao_social === formValue.value.fornecedor.nome)
-      if (!fornecedor) return
-      getDataFornecedor(fornecedor)
-    } else if (documento) {
-      const fornecedor = fornecedores.value.find((f) => f.documento === documento)
-      if (!fornecedor) return
-      getDataFornecedor(fornecedor)
-    } 
+    if(type === 'documento'){
+      const { data } = await getFornecedorByDocumentOrName(documento, null, formValue.value.fornecedor.internacional)
+
+      if(data) {
+        await getDataFornecedor(data)
+      }
+
+    } else if(type === 'nome'){
+      const { data } = await getFornecedorByDocumentOrName(null, nome, formValue.value.fornecedor.internacional)
+
+      if(data){ 
+        await getDataFornecedor(data)
+      }
+    }
+
   } catch (error) {
     console.error('Erro ao buscar fornecedor:', error)
     $toast.error('Erro ao buscar fornecedor')

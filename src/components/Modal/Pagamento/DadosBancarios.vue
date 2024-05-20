@@ -112,7 +112,8 @@ const tiposNormalize = [2, 5, 6]
 const isExpired = computed(() => dayjs(formValue.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')))
 
 const maskDescriptionPIX = computed(() => {
-  const tipo = chavesPix?.value.find((chave) => chave?.id === formValue.value.tipo_chave_pix)
+  const tipo = chavesPix?.value.find((chave) => chave?.id === formValue.value.tipo_chave_pix_id)
+  console.log(tipo)
   return tipo?.mask
 })
 
@@ -217,9 +218,13 @@ const getCards = async () => {
 
 await getTiposChave()
 
-watch(() => formValue.value.tipo_chave_pix, async (nv, oV) => {
-  if(route.params.id) return
-  formValue.value.dados_bancarios.outhers = null
-},{ immediate: true })
+watch(() => formValue.value.tipo_chave_pix_id, async (newValue, oldValue) => {
+
+  console.log(chavesPix.value)
+
+  if(newValue !== oldValue && oldValue) {
+    formValue.value.dados_bancarios.outhers = null
+  }
+}, { immediate: true })
 
 </script>

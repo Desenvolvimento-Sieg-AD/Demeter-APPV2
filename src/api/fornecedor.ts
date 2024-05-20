@@ -11,11 +11,11 @@ export async function getFornecedor(internacional: boolean = false) {
 }
 
 
-export async function getFornecedorByDocumentOrName(documento?: string, name?: string) {
+export async function getFornecedorByDocumentOrName(documento: any = null, name: any = null, internacional: boolean = false) {
 	try {
 		const { success, message, data } = await useApi(`/fornecedor/one`, {
 			method: 'POST',
-			body: JSON.stringify({ documento, name }),
+			body: JSON.stringify({ documento, name, internacional }),
 		});
 		if (!success) throw new Error(message);
 		return { success, message, data };
