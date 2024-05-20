@@ -34,7 +34,7 @@
 
   <v-row class="pa-3 mt-n12" v-if="!tiposNormalize.includes(form.tipo_id)">
     <v-col v-if="formValue.tipo_id === 1" cols="3">
-      <CustomInput v-model="formValue.tipo_chave_pix" append-inner-icon="mdi-key" type="select" required :items="chavesPix" itemTitle="nome" itemValue="id" label="Tipo de Chave" />
+      <CustomInput v-model="formValue.tipo_chave_pix_id" append-inner-icon="mdi-key" type="select" required :items="chavesPix" itemTitle="nome" itemValue="id" label="Tipo de Chave" />
     </v-col>
 
     <v-col>

@@ -119,21 +119,29 @@ const actionsForm = [
 function buildFormData() {
   const formData = new FormData()
 
-  const deleteKeys = ['conta_empresa', 'empresa', 'usuario', 'categoria', 'tipo_pagamento', 'anexos_pagamento', 'movimentacoes_pagamento']
+  const deleteKeys = ['fornecedor_id', 'conta_empresa', 'empresa', 'usuario', 'categoria', 'tipo_pagamento', 'anexos_pagamento', 'movimentacoes_pagamento']
+
+  console.log(form.value)
 
   for (const key in form.value) {
     if (deleteKeys.includes(key)) continue
 
+
     if (key === 'fornecedor') {
-      if (!formData.get('fornecedor_id')) {
-        formData.append('fornecedor_id', form.value.fornecedor.id)
+
+      console.log(form.value.fornecedor)
+
+      if(!form.value.fornecedor.id) {
         formData.append('fornecedor_nome', form.value.fornecedor.nome)
-        formData.append('fornecedor_apelido', form.value.fornecedor.apelido)
         formData.append('fornecedor_documento', form.value.fornecedor.documento)
         formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
         formData.append('fornecedor_internacional', form.value.fornecedor.internacional)
         continue
       }
+
+      if(!formData.get('fornecedor_id') && form.value.fornecedor.id) formData.append('fornecedor_id', form.value.fornecedor.id)
+
+      continue
     }
     if (key === 'dados_bancarios') {
       formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
@@ -207,6 +215,8 @@ function formatPaymentData(data) {
 
   dados_bancarios.outhers
 
+  console.log(data)
+
   form.value = {
     nf: nf ? [nf] : null,
     doc: doc ? [doc] : null,
@@ -235,7 +245,7 @@ function formatPaymentData(data) {
     projeto_id: data.projeto_id,
     categoria_id: data.categoria.id,
     grupo_id: data.categoria.grupo.id,
-    tipo_chave_pix: data.tipo_chave_pix_id,
+    tipo_chave_pix_id: data.tipo_chave_pix_id,
     data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
   }
 

@@ -9,7 +9,7 @@
         v-model="formValue.fornecedor.documento"
         append-inner-icon="mdi-content-copy"
         @click:append-inner="pasteFromClipboard"
-        @change="verifyFornecedor()"
+        @blur="verifyFornecedor()"
         :mask="form.fornecedor.tipo === 'fisico' ? 'cpf' : 'cnpj'"
       />
     </v-col>
@@ -38,7 +38,7 @@
         :items="fornecedores"
         itemValue="razao_social"
         itemTitle="razao_social"
-        @change="verifyFornecedor()"
+        @blur="verifyFornecedor()"
         v-model="formValue.fornecedor.nome"
         append-inner-icon="mdi-shopping-outline"
       />
@@ -91,9 +91,11 @@ const fornecedores = ref([])
 const verifyFornecedor = async () => {
   try {
 
+    const nome = formValue.value.fornecedor.nome
     const documento = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
 
-    if (formValue.value.fornecedor.nome) {
+    if (nome) {
+
       const fornecedor = fornecedores.value.find((f) => f.razao_social === formValue.value.fornecedor.nome)
       if (!fornecedor) return
       getDataFornecedor(fornecedor)
@@ -101,7 +103,7 @@ const verifyFornecedor = async () => {
       const fornecedor = fornecedores.value.find((f) => f.documento === documento)
       if (!fornecedor) return
       getDataFornecedor(fornecedor)
-    }
+    } 
   } catch (error) {
     console.error('Erro ao buscar fornecedor:', error)
     $toast.error('Erro ao buscar fornecedor')

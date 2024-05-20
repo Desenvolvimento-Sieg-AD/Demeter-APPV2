@@ -245,7 +245,7 @@ function formatPaymentData(data) {
     projeto_id: data.projeto_id,
     categoria_id: data.categoria.id,
     grupo_id: data.categoria.grupo.id,
-    tipo_chave_pix: data.tipo_chave_pix_id,
+    tipo_chave_pix_id: data.tipo_chave_pix_id,
     dados_bancarios: formatBankingData(data),
     data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
   }

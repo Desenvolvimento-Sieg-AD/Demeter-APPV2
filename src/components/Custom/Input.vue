@@ -486,8 +486,8 @@ const onFocus = (attrs) => {
   emit('focus', attrs)
 }
 
-const onBlur = () => {
-  emit('blur', enableValue.value)
+const onBlur = (attrs) => {
+  emit('blur', attrs)
 }
 
 import { useCurrencyInput } from 'vue-currency-input'
