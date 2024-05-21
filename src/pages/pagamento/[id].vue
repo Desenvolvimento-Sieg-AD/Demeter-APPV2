@@ -9,41 +9,30 @@
     <LayoutForm class="mb-12">
       <v-form ref="formValidate">
         <v-card flat class="card-pagamento">
-          <v-row no-gutters justify="space-between" align="center" class="mt-2 mb-n7 mr-2">
-            <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
-          </v-row>
           <ModalPagamentoFornecedor v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="card-pagamento" flat>
-          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoCategoria v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoObservacoes v-model:form="form" :user="user" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
         </v-card>
 
@@ -124,21 +113,16 @@ function buildFormData() {
   for (const key in form.value) {
     if (deleteKeys.includes(key)) continue
 
-
     if (key === 'fornecedor') {
-
-      if(!form.value.fornecedor.id) {
-        formData.append('fornecedor_nome', form.value.fornecedor.nome)
-        formData.append('fornecedor_documento', form.value.fornecedor.documento)
-        formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
-        formData.append('fornecedor_internacional', form.value.fornecedor.internacional)
-        continue
-      }
-
-      if(!formData.get('fornecedor_id') && form.value.fornecedor.id) formData.append('fornecedor_id', form.value.fornecedor.id)
-
+      formData.append('fornecedor_id', form.value.fornecedor.id)
+      formData.append('fornecedor_nome', form.value.fornecedor.nome)
+      formData.append('fornecedor_apelido', form.value.fornecedor.apelido)
+      formData.append('fornecedor_documento', form.value.fornecedor.documento)
+      formData.append('fornecedor_tipo', form.value.fornecedor.tipo)
+      formData.append('fornecedor_internacional', form.value.fornecedor.internacional)
       continue
     }
+    
     if (key === 'dados_bancarios') {
       formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
       continue

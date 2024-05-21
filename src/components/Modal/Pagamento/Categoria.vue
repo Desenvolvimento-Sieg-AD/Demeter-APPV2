@@ -136,6 +136,7 @@ const clearFornecedor = () => {
 const defineFileTitle = (fileName) => fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName
 
 watch(() => formValue.value.nf, async (value) => {
+    if(route.params.id) return
     if (value && value.length > 0) await processNfFile(value[0])
   }
 )
@@ -149,9 +150,12 @@ watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
 
 },{ immediate: true })
 
-const loadCategorias = async (setor_id) => {
+const loadCategorias = async (setor_id, internacional) => {
   try {
-    const { success, message, data } = await getCategoriasUsuario(setor_id)
+
+    if(!setor_id) return
+
+    const { success, message, data } = await getCategoriasUsuario(setor_id, internacional)
     if (!success) throw new Error(message)
 
     const tempGrupos = []
@@ -172,6 +176,7 @@ const loadCategorias = async (setor_id) => {
     $toast.error(error.message)
   }
 }
+
 watch(() => formValue.value.setor_id, async (value) => {
   if(value) loadCategorias(value)
 },{ immediate: true })
@@ -179,4 +184,10 @@ watch(() => formValue.value.setor_id, async (value) => {
 onMounted(() => {
   if (formValue.value.setor_id) loadCategorias(formValue.value.setor_id)
 })
+
+watch(() => formValue.value.fornecedor.internacional, async (value) => {
+  if (value) loadCategorias(formValue.value.setor_id, value)
+  else loadCategorias(formValue.value.setor_id)
+},{ immediate: true })
+
 </script>

@@ -63,6 +63,12 @@
 
         <DxItem name="removingFilter" v-if="filterOn" locate-in-menu="auto" location="before" template="removingFilter" />
 
+        <DxItem name="editPayment" locate-in-menu="auto" location="after" template="editPayment" v-if="paymentsSelecteds && page == 'financeiro'"/>
+
+        <DxItem name="disapprovePayment" locate-in-menu="auto" location="after" template="disapprovePayment" v-if="paymentsSelecteds"/>
+
+        <DxItem name="approvePayment" locate-in-menu="auto" location="after" template="approvePayment" v-if="paymentsSelecteds"/>
+
         <DxItem name="groupPanel" v-if="allowGroupingColumns" locate-in-menu="auto" location="before" />
 
         <DxItem name="searchPanel" v-if="searchable" locate-in-menu="auto" location="after" />
@@ -81,7 +87,7 @@
       </template>
 
       <template #resetTable>
-        <v-btn @click="resetTable" class="dx-button dx-button-mode-contained" color="red" flat variant="outlined">
+        <v-btn @click="resetTable" class="dx-button dx-button-mode-contained" color="red" flat variant="plain">
           <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" start />
           <v-tooltip activator="parent" location="bottom" :text="`Remover filtro`" />
           Resetar
@@ -89,10 +95,34 @@
       </template>
 
       <template #removingFilter>
-        <v-btn @click="clearFiltersAndRefreshToolbar" class="dx-button dx-button-mode-contained" color="orange" flat variant="outlined">
+        <v-btn @click="clearFiltersAndRefreshToolbar" class="dx-button dx-button-mode-contained" color="orange" flat variant="plain">
           <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" start />
           <v-tooltip activator="parent" location="bottom" :text="`Remover filtro`" />
           Remover filtro
+        </v-btn>
+      </template>
+
+      <template #editPayment>
+        <v-btn class="dx-button dx-button-mode-contained" color="primary" flat @click="editPayment" variant="plain">
+          <v-icon size="small" :icon="`mdi mdi-pencil`" start />
+          <v-tooltip activator="parent" location="bottom" :text="`Editar pagamentos`" />
+          Editar pagamentos
+        </v-btn>
+      </template>
+
+      <template #disapprovePayment>
+        <v-btn class="dx-button dx-button-mode-contained" color="red" flat @click="disapprovePayment" variant="plain">
+          <v-icon size="small" :icon="`mdi mdi-close`" start />
+          <v-tooltip activator="parent" location="bottom" :text="`Reprovar pagamentos`" />
+          Reprovar pagamentos
+        </v-btn>
+      </template>
+
+      <template #approvePayment>
+        <v-btn class="dx-button dx-button-mode-contained" color="success" flat @click="approvePayment" variant="plain">
+          <v-icon size="small" :icon="`mdi mdi-check`" start />
+          <v-tooltip activator="parent" location="bottom" :text="`Aprovar pagamentos`" />
+          Aprovar pagamentos
         </v-btn>
       </template>
 
@@ -251,12 +281,14 @@ const props = defineProps({
   detail: { type: Boolean, default: false },
   editing: { type: Boolean, default: false },
   createTitle: { type: String, default: 'Adicionar' },
-  createText: { type: String, default: 'Adicionar' }
+  createText: { type: String, default: 'Adicionar' },
+  paymentsSelecteds: { type: Boolean, default: false },
+  page: { type: String, default: ''}
 })
 
 // Initialization
 
-const emit = defineEmits(['focusRow', 'add', 'selectionChanged'])
+const emit = defineEmits(['focusRow', 'add', 'selectionChanged', 'editPayment', 'disapprovePayment', 'approvePayment'])
 
 let tablePageSize = ref(
   !props.pageSize ? (props.allowedPageSizes[props.allowedPageSizes.length - 1] == 'all' ? 0 : props.allowedPageSizes[props.allowedPageSizes.length - 1]) : props.pageSize
@@ -269,6 +301,19 @@ const render = ref(true)
 const toolbarKey = ref(0)
 
 const checkBoxesMode = ref(themes.current().startsWith('material') ? 'always' : 'onClick')
+
+const editPayment = () => {
+  emit('editPayment')
+}
+
+const disapprovePayment = () => {
+  emit('disapprovePayment')
+}
+
+const approvePayment = () => {
+  emit('approvePayment')
+}
+
 
 defineExpose({
   updateDimentions: () => {

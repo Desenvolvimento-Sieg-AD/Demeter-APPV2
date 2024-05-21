@@ -20,6 +20,10 @@
         pager
         store-state
         key-stored="gerencia"
+        page="gerencia"
+        :paymentsSelecteds="idsSelect.length > 0"
+        @disapprovePayment="openDisapprovePayment"
+        @approvePayment="openApprovePayment"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -105,13 +109,6 @@
         </template>
       </CustomTableSelect>
 
-      <v-row>
-        <v-col cols="12" class="ga-2 btn-container">
-          <v-btn v-for="(action, index) of buttonsFooter" :key="`${action}-${index}`" :disabled="action.disabled" :color="action.color" @click="action.onClick()">
-            {{ action.title }}
-          </v-btn>
-        </v-col>
-      </v-row>
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="pushData()" />
@@ -243,27 +240,6 @@ const modalActionsConfirmAll = computed(() => [
       const status_id = confirm.value === 'approve' ? 4 : 9
       sendStatus(status_id, idsSelect.value)
     }
-  }
-])
-
-const buttonsFooter = computed(() => [
-  {
-    title: 'Reprovar',
-    disabled: !idsSelect.value.length,
-    onClick: () => {
-      confirm.value = 'disapprove'
-      enableModal.allConfirm = true
-    },
-    color: 'red'
-  },
-  {
-    title: 'Aprovar',
-    disabled: !idsSelect.value.length,
-    onClick: () => {
-      confirm.value = 'approve'
-      enableModal.allConfirm = true
-    },
-    color: 'success'
   }
 ])
 

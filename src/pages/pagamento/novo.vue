@@ -6,7 +6,7 @@
       </v-btn>
     </CustomHeader>
 
-    <LayoutForm class="mb-12">
+    <LayoutForm class="mb-12" height="calc(100vh - 165px)">
       <v-form ref="formValidate">
         <v-card class="card-pagamento" flat>
           <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
@@ -14,14 +14,14 @@
 
         <v-divider class="mt-2 mb-2" />
 
-        <v-card class="card-pagamento" flat>
-          <ModalPagamentoCategoria v-model:form="form" />
+        <v-card flat class="card-pagamento">
+          <ModalPagamentoFornecedor v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
-        <v-card flat class="card-pagamento">
-          <ModalPagamentoFornecedor v-model:form="form" />
+        <v-card class="card-pagamento" flat>
+          <ModalPagamentoCategoria v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
@@ -37,7 +37,7 @@
         </v-card>
 
         <v-row class="mt-n4 d-flex justify-center align-center ga-2">
-          <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()" width="150" height="40">
+          <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()" width="200" height="43" :loading="action.loading">
             <v-icon size="large" :icon="action.icon" />
             <v-tooltip :text="action.title" location="bottom" activator="parent" />
           </v-btn>
@@ -58,6 +58,7 @@
 
 import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
 import { useAuthStore } from '~/store/auth'
+import { set } from '~~/node_modules/nuxt/dist/app/compat/capi'
 
 const { $toast } = useNuxtApp()
 
@@ -83,7 +84,7 @@ const formValidate = ref(null)
 const routeId = computed(() => route.query.id)
 
 const documentRequired = computed(() => {
-  if (form.value.fornecedor.internacional) return false
+  if (form.value.fornecedor.internacional || !form.value.tipo_id) return false
   const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
   return type?.requer_documento
 })
@@ -94,7 +95,7 @@ const validDateToCard = computed(() => isExpired.value && form.value.tipo_id !==
 
 const actionsForm = [
   {
-    title: 'Limpar',
+    title: 'Limpar campos',
     icon: 'mdi-trash-can-outline',
     color: 'red',
     onClick: () => reset()
@@ -106,7 +107,8 @@ const actionsForm = [
     onClick: () => {
       if (routeId.value) updatePayment(Number(routeId.value), form.value)
       else sendForm()
-    }
+    },
+    loading: loading.value
   }
 ]
 
@@ -169,9 +171,11 @@ const sendForm = async () => {
 
     $toast.success(message)
 
-    loading.value = false
     await definePaymentImportant()
     reset()
+
+    loading.value = false
+
   } catch (error) {
     console.error(error)
     $toast.error(error.message)

@@ -18,6 +18,11 @@
         :allowed-page-sizes="[5, 15, 10, 25]"
         @selectionChanged="handleSelectionChange"
         noDataText="Não há nenhuma solicitação de pagamento"
+        :paymentsSelecteds="itemsSelects.length > 0"
+        page="financeiro"
+        @editPayment="openEditPayment"
+        @disapprovePayment="openDisapprovePayment"
+        @approvePayment="openApprovePayment"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -133,14 +138,6 @@
         </template>
       </CustomTableSelect>
 
-      <v-row>
-        <v-col class="btn-container ga-2" cols="12">
-          <v-btn v-for="(action, index) in actionsButton" :key="`${action}-${index}`" :disabled="action.disabled" :color="action.color" @click="action.onClick()">
-            {{ action.title }}
-            <v-icon small="small" :icon="action.icon"></v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
@@ -203,38 +200,20 @@ const enableModal = reactive({
 
 // * COMPUTED && MODALS ACTIONS
 
-const actionsButton = computed(() => [
-  {
-    title: 'Editar',
-    color: 'primary',
-    icon: 'mdi-pencil',
-    disabled: !itemsSelects.value.length,
-    onClick: () => {
-      viewPayment.value = itemsSelects.value
-      enableModal.allEdit = true
-    }
-  },
-  {
-    title: 'Reprovar',
-    color: 'red',
-    disabled: !itemsSelects.value.length,
-    icon: 'mdi-close',
-    onClick: () => {
-      confirm.value = 'disapprove'
-      enableModal.allConfirm = true
-    }
-  },
-  {
-    title: 'Aprovar',
-    color: 'success',
-    icon: 'mdi-check',
-    disabled: !itemsSelects.value.length,
-    onClick: () => {
-      confirm.value = 'approve'
-      enableModal.allConfirm = true
-    }
-  }
-])
+const openApprovePayment = () => {
+    confirm.value = 'approve'
+    enableModal.allConfirm = true
+}
+
+const openDisapprovePayment = () => {
+    confirm.value = 'disapprove'
+    enableModal.allConfirm = true
+}
+
+const openEditPayment = () => {
+    viewPayment.value = itemsSelects.value
+    enableModal.allEdit = true
+}
 
 const actions = computed(() => [
   {

@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { autoUpdater } from 'electron-updater'
 import * as os from 'os'
-import { app, BrowserWindow, ipcMain, ipcRenderer, webContents } from 'electron'
+import { app, BrowserWindow, ipcMain, ipcRenderer, shell, webContents } from 'electron'
 import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
@@ -134,6 +134,10 @@ ipcMain.handle('reload:app', () => {
 
 ipcMain.handle('sendToken:app', (event, token) => {
   tokenAPI = token
+})
+
+ipcMain.handle('sendLink:app', (event, link) => {
+  shell.openExternal(link)
 })
 
 app.on('ready', function()  {

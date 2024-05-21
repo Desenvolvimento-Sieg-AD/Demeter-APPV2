@@ -1,7 +1,7 @@
 <template>
   <v-row no-gutters justify="space-between" align="center" class="mb-n14 mr-2">
     <CustomText title="Fornecedor" class="ml-2 mb-n5 mt-n10" color="#118B9F" size="18" :bold="true" />
-    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" class="custom-checkbox" />
+    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" class="custom-checkbox" :disabled="route.params.id" />
   </v-row>
   <v-row class="pa-2 mb-n10" v-if="!formValue.fornecedor.internacional">
     <v-col cols="12" md="3" >
@@ -84,6 +84,8 @@ const { $toast } = useNuxtApp()
 const props = defineProps({
   form: { type: Object, required: true }
 })
+
+const route = useRoute()
 
 const formValue = computed({
   get: () => props.form,

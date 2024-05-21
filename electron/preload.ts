@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   copyFilePath: (filePath: any) => ipcRenderer.invoke('os:copyFilePath', filePath),
   reload: () => ipcRenderer.invoke('reload:app', null),
   sendToken: (token: string) => ipcRenderer.invoke('sendToken:app', token),
+  sendLink: (link: string) => ipcRenderer.invoke('sendLink:app', link),
 });

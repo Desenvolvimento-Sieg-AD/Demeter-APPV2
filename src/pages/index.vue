@@ -59,7 +59,7 @@
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </v-btn>
 
-            <v-btn flat icon variant="plain" v-else>
+            <v-btn flat icon variant="plain" v-else :disabled="item.status !== 'Pendente'">
               <v-icon color="#118B9F" class="cursor-pointer" @click="uploadFile(item, 3)" icon="mdi-paperclip-plus" />
 
               <v-tooltip text="Anexar arquivo" activator="parent" location="top" />
@@ -83,7 +83,7 @@
               </div>
             </v-btn>
 
-            <v-btn flat icon variant="plain" v-else>
+            <v-btn flat icon variant="plain" v-else :disabled="item.status !== 'Pendente'">
               <div>
                 <v-icon class="cursor-pointer" color="#118B9F" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
 

@@ -2,7 +2,8 @@ interface Windows extends Window {
   electronAPI: {
     getUser: () => Promise<any>,
     openFile: (filePath: string) => Promise<any>,
-    copyFilePath: (filePath: string) => Promise<any>
+    copyFilePath: (filePath: string) => Promise<any>,
+    sendLink: (link: string) => Promise<any>,
   }
 }
 
@@ -22,5 +23,9 @@ export default function useOs() {
     return await window.electronAPI.copyFilePath(filePath)
   }
 
-  return { getUser, openFile, copyFilePath }
+  const sendLink = async (link: string) => {
+    return await window.electronAPI.sendLink(link)
+  }
+
+  return { getUser, openFile, copyFilePath, sendLink }
 }

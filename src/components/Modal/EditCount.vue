@@ -37,7 +37,15 @@
         </v-row>
         <v-row>
           <v-col cols="12" md="6">
-            <CustomInput type="autocomplete" required label="Grupo de categoria" :items="gruposCategoria" v-model="form.grupo_id" itemValue="id" itemTitle="nome" />
+            <CustomInput 
+              type="autocomplete"
+              required
+              label="Grupo de categoria" 
+              :items="gruposCategoria" 
+              v-model="form.grupo_id" 
+              itemValue="id" 
+              itemTitle="nome"
+            />
           </v-col>
 
           <v-col>
@@ -61,8 +69,7 @@
 <script setup>
 //* IMPORTS
 
-import { updatePagamento, getOnePayment } from '@api'
-import { getCategoriasUsuarioById, getContasDisponiveis, getEmpresa } from '~/api'
+import { updatePagamento, getOnePayment, getCategoriasUsuario, getContasDisponiveis, getEmpresa } from '@api'
 const { $toast } = useNuxtApp()
 
 //* PROPS
@@ -87,7 +94,8 @@ const form = reactive({
   empresa_id: null,
   conta_id: null,
   grupo_id: null,
-  categoria_id: null
+  categoria_id: null,
+  setor_id: null, 
 })
 
 //* EMITS
@@ -135,6 +143,7 @@ const getPayment = async () => {
     form.conta_id = data.conta_id
     form.grupo_id = data.categoria.grupo.id
     form.categoria_id = data.categoria_id
+    form.setor_id = data.setor_id
 
     getContasDisp()
     getCategsUsuario()
@@ -167,7 +176,7 @@ const getEmpresas = async () => {
 
 const getCategsUsuario = async () => {
   try {
-    const { data } = await getCategoriasUsuarioById(payment.value.usuario_id)
+    const { data } = await getCategoriasUsuario(form.setor_id)
 
     const tempGrupos = []
 
