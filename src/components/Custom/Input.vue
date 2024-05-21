@@ -419,7 +419,7 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   readonly: { type: Boolean, default: false },
-  counter: { type: [Boolean, Number], default: 30 },
+  counter: { type: [Boolean, Number], default: 300 },
   backgroundColor: { type: String, default: '#FFF' },
   hideDetails: { default: false },
   mask: { type: String, default: 'default' },

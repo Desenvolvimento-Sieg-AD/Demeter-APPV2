@@ -40,7 +40,7 @@
 						</v-col>
 				</v-row>
 
-				<v-row v-if="page === 'gerencia' && confirm === 'disapprove'">
+				<!-- <v-row v-if="page === 'gerencia' && confirm === 'disapprove'">
 					<v-col cols="12">
 						<CustomInput
 							v-model="permiteEditar"
@@ -50,7 +50,7 @@
 							hide-details
 						/>
 					</v-col>
-				</v-row>
+				</v-row> -->
 				
 			</div>
 		</template>

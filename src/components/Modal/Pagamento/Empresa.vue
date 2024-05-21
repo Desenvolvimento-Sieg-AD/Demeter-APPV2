@@ -1,6 +1,6 @@
 <template>
-  <v-row class="pa-3">
-
+  <CustomText title="Empresa" class="ml-3" color="#118B9F" size="18" :bold="true" />
+  <v-row class="pa-3 mb-n6">
     <v-col cols="6">
       <CustomInput
         required

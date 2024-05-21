@@ -7,7 +7,7 @@ export const formatDate = (dateString: string | null) => {
 	dayjs.extend(timezone);
 
 	const date = dayjs(dateString).tz('America/Bahia');
-	return date.format('DD/MM/YYYY');
+	return date.format('DD/MM/YYYY HH:mm');
 };
 
 export const formatDateTime = (dateString: string | null, format = 'DD/MM/YYYY HH:mm') => {

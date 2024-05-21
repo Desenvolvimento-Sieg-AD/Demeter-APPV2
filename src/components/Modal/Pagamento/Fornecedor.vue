@@ -1,6 +1,10 @@
 <template>
-  <v-row class="pa-3" v-if="!formValue.fornecedor.internacional">
-    <v-col cols="12" md="3">
+  <v-row no-gutters justify="space-between" align="center" class="mb-n14 mr-2">
+    <CustomText title="Fornecedor" class="ml-2 mb-n5 mt-n10" color="#118B9F" size="18" :bold="true" />
+    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" class="custom-checkbox" />
+  </v-row>
+  <v-row class="pa-2 mb-n10" v-if="!formValue.fornecedor.internacional">
+    <v-col cols="12" md="3" >
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         type="text"
@@ -24,7 +28,6 @@
         label="Tipo fornecedor"
         :items="tiposFornecedor"
         v-model="formValue.fornecedor.tipo"
-        :disabled="formValue.fornecedor.nome !== null"
         append-inner-icon="mdi-card-account-details-outline"
       />
     </v-col>
@@ -90,10 +93,11 @@ const fornecedores = ref([])
 
 const verifyFornecedor= async (type) => {
   try {
+
     const documento = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
     const nome = formValue.value.fornecedor.nome
 
-    if(nome && formValue.value.fornecedor.id) {
+    if(nome && formValue.value.fornecedor.id && type === 'nome') {
       const fornecedor = fornecedores.value.find((f) => f.razao_social === nome)
       await getDataFornecedor(fornecedor)
     }
@@ -103,6 +107,9 @@ const verifyFornecedor= async (type) => {
 
       if(data) {
         await getDataFornecedor(data)
+      } else {
+        formValue.value.fornecedor.nome = null
+        formValue.value.fornecedor.id = null 
       }
 
     } else if(type === 'nome'){
@@ -110,6 +117,8 @@ const verifyFornecedor= async (type) => {
 
       if(data){ 
         await getDataFornecedor(data)
+      } else {
+        formValue.value.fornecedor.id = null 
       }
     }
 
@@ -118,6 +127,8 @@ const verifyFornecedor= async (type) => {
     $toast.error('Erro ao buscar fornecedor')
   }
 }
+
+
 
 const getDataFornecedor = async (fornecedor) => {
   for (const key in formValue.value.fornecedor) {
@@ -187,3 +198,5 @@ watch(() => formValue.value.fornecedor.internacional, async (value) => {
   }
 )
 </script>
+<style scoped>
+</style>

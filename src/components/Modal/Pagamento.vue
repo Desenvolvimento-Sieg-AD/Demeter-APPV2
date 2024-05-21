@@ -23,7 +23,7 @@
               label="Motivo do Cancelamento"
               :value="ultimaMovimentacao.justificativa ?? ultimaMovimentacao.justificativa_solicitante"
               hide-details
-              disabled
+              readonly
               :rows="1"
             />
           </v-col>
@@ -33,116 +33,118 @@
 
         <v-row align="center">
           <v-col cols="4">
-            <CustomInput disabled label="Solicitante" hide-details v-model="pagamento.usuario.nome" />
+            <CustomInput readonly label="Solicitante" hide-details v-model="pagamento.usuario.nome" />
           </v-col>
 
           <v-col cols="2">
-            <CustomInput disabled label="Setor" hide-details v-model="pagamento.setor.sigla" />
+            <CustomInput readonly label="Setor" hide-details v-model="pagamento.setor.sigla" />
           </v-col>
 
           <v-col cols="4">
-            <CustomInput disabled label="Data Solicitação" hide-details :value="dataSolitacao" v-model="dataSolitacao" />
+            <CustomInput readonly label="Data Solicitação" hide-details :value="dataSolitacao" v-model="dataSolitacao" />
           </v-col>
 
           <v-col cols="2">
-            <CustomInput disabled label="Internacional" hide-details v-model="isInternacionalText" />
+            <CustomInput readonly label="Internacional" hide-details v-model="isInternacionalText" />
           </v-col>
 
           <v-divider class="mx-3" />
 
           <v-col cols="3">
-            <CustomInput disabled label="Empresa Pagadora" hide-details v-model="pagamento.empresa.apelido" />
+            <CustomInput readonly label="Empresa Pagadora" hide-details v-model="pagamento.empresa.apelido" />
           </v-col>
 
           <v-col cols="4">
-            <CustomInput disabled label="Grupo" hide-details v-model="pagamento.categoria.grupo.nome" />
+            <CustomInput readonly label="Grupo" hide-details v-model="pagamento.categoria.grupo.nome" />
           </v-col>
 
           <v-col cols="5">
-            <CustomInput disabled label="Categoria" hide-details v-model="pagamento.categoria.nome" />
+            <CustomInput readonly label="Categoria" hide-details v-model="pagamento.categoria.nome" />
           </v-col>
 
           <v-col cols="8">
-            <CustomInput disabled label="Fornecedor" hide-details v-model="pagamento.fornecedor.razao_social" />
+            <CustomInput readonly label="Fornecedor" hide-details v-model="pagamento.fornecedor.razao_social" />
           </v-col>
 
           <v-col cols="4" v-if="!isInternacional">
-            <CustomInput disabled label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
+            <CustomInput readonly label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
           </v-col>
 
           <v-col cols="3">
-            <CustomInput disabled :label="isInternacional ? 'Invoice' : 'Número NF'" hide-details v-model="pagamento.numero_nf" />
+            <CustomInput readonly :label="isInternacional ? 'Invoice' : 'Número NF'" hide-details v-model="pagamento.numero_nf" />
           </v-col>
 
           <v-col cols="9" v-if="!isInternacional">
-            <CustomInput disabled label="Chave de Acesso" hide-details v-model="chave_nf" />
+            <CustomInput readonly label="Chave de Acesso" hide-details v-model="chave_nf" />
           </v-col>
 
           <v-col cols="12" v-if="pagamento.projeto"> 
-            <CustomInput disabled label="Projeto" hide-details v-model="pagamento.projeto.nome" />
+            <CustomInput readonly label="Projeto" hide-details v-model="pagamento.projeto.nome" />
           </v-col>
 
           <v-col v-if="isInternacional" cols="3">
-            <CustomInput disabled label="Valor em Dólar" hide-details mask="money" currency="USD" v-model="pagamento.valor_total_dolar" />
+            <CustomInput readonly label="Valor em Dólar" hide-details mask="money" currency="USD" v-model="pagamento.valor_total_dolar" />
           </v-col>
 
           <v-col cols="3">
-            <CustomInput disabled :label="isInternacional ? 'Valor em Reais' : 'Valor total'" hide-details mask="money" v-model="pagamento.valor_total" />
+            <CustomInput readonly :label="isInternacional ? 'Valor em Reais' : 'Valor total'" hide-details mask="money" v-model="pagamento.valor_total" />
           </v-col>
 
           <v-col cols="2">
-            <CustomInput disabled label="Vencimento" hide-details v-model="dataVencimento" :value="dataVencimento" />
+            <CustomInput readonly label="Vencimento" hide-details v-model="dataVencimento" :value="dataVencimento" />
           </v-col>
 
           <v-col cols="4">
-            <CustomInput disabled label="Forma de Pagamento" hide-details v-model="pagamento.tipo_pagamento.nome" />
+            <CustomInput readonly label="Forma de Pagamento" hide-details v-model="pagamento.tipo_pagamento.nome" />
           </v-col>
 
           <v-col cols="3" v-if="pagamento.conta_empresa">
-            <CustomInput disabled label="Conta" hide-details v-model="pagamento.conta_empresa.descricao" />
+            <CustomInput readonly label="Conta" hide-details v-model="pagamento.conta_empresa.descricao" />
           </v-col>
 
           <v-col v-if="pagamento.tipo_pagamento.nome === 'PIX'" cols="2">
-            <CustomInput disabled label="Tipo de Chave" hide-details v-model="pagamento.tipo_chave_pix.nome" />
+            <CustomInput readonly label="Tipo de Chave" hide-details v-model="pagamento.tipo_chave_pix.nome" />
           </v-col>
 
           <v-col cols="4" v-if="isTED">
-            <CustomInput disabled label="Banco" hide-details v-model="dados_bancarios.banco" />
+            <CustomInput readonly label="Banco" hide-details v-model="dados_bancarios.banco" />
           </v-col>
 
           <v-col cols="4" v-if="isTED">
-            <CustomInput disabled label="Agência" hide-details v-model="dados_bancarios.agencia" />
+            <CustomInput readonly label="Agência" hide-details v-model="dados_bancarios.agencia" />
           </v-col>
 
           <v-col cols="4" v-if="isTED">
-            <CustomInput disabled label="Conta" hide-details v-model="dados_conta" />
+            <CustomInput readonly label="Conta" hide-details v-model="dados_conta" />
           </v-col>
 
           <v-col v-else>
-            <CustomInput disabled :label="labelDataPayment" hide-details v-model="outhers" />
+            <CustomInput readonly :label="labelDataPayment" hide-details v-model="outhers" />
           </v-col>
 
           <v-divider class="mx-4" />
 
           <v-col cols="12">
-            <CustomInput type="textarea" disabled label="Motivo do Pagamento" hide-details :rows="2" v-model="pagamento.motivo" />
+            <CustomInput type="textarea" readonly label="Motivo do Pagamento" hide-details :rows="2" v-model="pagamento.motivo" />
           </v-col>
 
           <v-col cols="12">
-            <CustomInput type="textarea" disabled label="Observações" hide-details :rows="2" v-model="pagamento.dados_complementares" />
+            <CustomInput type="textarea" readonly label="Observações" hide-details :rows="2" v-model="pagamento.dados_complementares" />
           </v-col>
 
           <v-col v-if="pagamento.urgente">
-            <CustomInput type="textarea" disabled label="Justificativa Urgência" hide-details :rows="2" v-model="pagamento.justificativa_urgente" />
+            <CustomInput type="textarea" readonly label="Justificativa Urgência" hide-details :rows="2" v-model="pagamento.justificativa_urgente" />
           </v-col>
         </v-row>
 
         <v-divider class="my-6" v-if="pagamento?.anexos_pagamento?.length > 0" />
 
         <v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
+
           <v-col cols="12">
             <h3 style="color: #118b9f">Arquivos</h3>
           </v-col>
+
           <v-row class="d-flex flex-wrap mr-2" no-gutters>
             <div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id" class="d-flex align-center mb-2 mr-2">
               <v-card flat color="#F7F5F5" @click="openFile(anexo.caminho)" class="d-flex flex-row align-center mr-2" width="450px">
@@ -157,6 +159,7 @@
               </v-card>
             </div>
           </v-row>
+          
         </v-row>
       </v-col>
     </template>

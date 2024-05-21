@@ -60,7 +60,7 @@ export const useApi = async <T>(path: string, options?: any): Promise<ApiRespons
 		const response: ApiResponse = data as unknown as ApiResponse;
 
 		if (!response.hasOwnProperty('success'))
-			return { success: false, message: 'Erro na consulta com a api', data: null };
+			return { success: false, message: 'Erro ao conectar com o servidor', data: null };
 
 		if (!response.success) console.error(path, response.message);
 
@@ -69,11 +69,11 @@ export const useApi = async <T>(path: string, options?: any): Promise<ApiRespons
 	catch (error) {
 		if (error?.value?.statusCode === 401) {
 			await logUserOut();
-			return { success: false, message: 'Unauthorized', data: null };
+			return { success: false, message: 'Acesso não autorizado', data: null };
 		}
 		return {
 			success: false,
-			message: 'Erro na consulta com a api',
+			message: 'Erro ao conectar com o servidor',
 			data: null,
 		};
 	}

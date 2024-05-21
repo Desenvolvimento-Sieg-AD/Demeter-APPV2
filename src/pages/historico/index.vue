@@ -38,13 +38,11 @@
 
         <template #item-status="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <CustomText
-              :title="item.movimentacoes_pagamento[0].status_pagamento.nome"
-              class="ml-2"
-              :color="item.movimentacoes_pagamento[0].status_pagamento.cor"
-              size="14"
-              :bold="true"
-            />
+            <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
+              <p class="font-weight-bold">
+                {{ item.movimentacoes_pagamento[0].status_pagamento.label }}
+              </p>
+            </v-chip>
           </div>
         </template>
 

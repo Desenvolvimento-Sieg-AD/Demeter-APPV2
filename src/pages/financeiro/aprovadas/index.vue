@@ -250,8 +250,6 @@ const sendOmie = async () => {
       const { success, message, data } = await sendPaymentsToOmie(payment.id)
       if (!success) throw new Error(message)
       
-      console.log("🚀 ~ forawait ~ data:", data)
-
       if (!data.success) {
         codigo = data.faultcode
         throw new Error(data.message)

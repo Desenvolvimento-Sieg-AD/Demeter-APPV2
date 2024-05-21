@@ -8,58 +8,48 @@
 
     <LayoutForm class="mb-12">
       <v-form ref="formValidate">
-        <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Empresa" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
+        <v-card class="card-pagamento" flat>
           <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="card-pagamento" flat>
-          <CustomText title="Categoria" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoCategoria v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card flat class="card-pagamento">
-          <v-row no-gutters justify="space-between" align="center" class="mb-n7 mr-2">
-            <CustomText title="Fornecedor" class="ml-2" color="#118B9F" size="18" :bold="true" />
-            <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" />
-          </v-row>
           <ModalPagamentoFornecedor v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoObservacoes v-model:form="form" :user="user" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="pt-2 card-pagamento" flat>
-          <CustomText title="Pagamento" class="ml-2" color="#118B9F" size="18" :bold="true" />
-
           <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
         </v-card>
 
-        <div class="pt-2 mt-6 mb-2 w-full d-flex justify-end align-center ga-2">
-          <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()">
-            {{ action.title }}
-            <v-icon size="small" :icon="action.icon" />
+        <v-row class="mt-n4 d-flex justify-center align-center ga-2">
+          <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()" width="150" height="40">
+            <v-icon size="large" :icon="action.icon" />
+            <v-tooltip :text="action.title" location="bottom" activator="parent" />
           </v-btn>
-        </div>
+        </v-row>
       </v-form>
     </LayoutForm>
+
     <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
       <v-icon>mdi-arrow-left</v-icon>
       <v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
     </v-btn>
+    
   </div>
 </template>
 
@@ -111,7 +101,7 @@ const actionsForm = [
   },
   {
     title: routeId.value ? 'Atualizar' : 'Salvar',
-    icon: 'mdi-currency-usd',
+    icon: 'mdi-content-save',
     color: 'green',
     onClick: () => {
       if (routeId.value) updatePayment(Number(routeId.value), form.value)
@@ -290,7 +280,7 @@ const reset = () => {
 
 function initFormState() {
   return {
-    fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null },
+    fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null, internacional: false},
     empresa_id: null,
     setor_id: user.setores.length <= 1 ? user.setores[0].id : null,
     conta_id: null,
@@ -385,4 +375,6 @@ watch(() => form.value.valor_total_dolar, (nv, oV) => {
   left: 70px;
   scale: 1.5;
 }
+
+
 </style>

@@ -1,5 +1,6 @@
 <template>
-  <v-row class="pa-3">
+  <CustomText title="Pagamento" class="ml-3" color="#118B9F" size="18" :bold="true" />
+  <v-row class="pa-3 mb-n5">
     <v-col cols="3">
       <CustomInput
         append-inner-icon="mdi-cash-clock"
@@ -52,7 +53,7 @@
     </v-col>
   </v-row>
 
-  <v-row class="pa-3 mt-n12" v-else-if="form.tipo_id === 2">
+  <v-row class="pa-3 mt-n11" v-else-if="form.tipo_id === 2">
     <v-col>
       <CustomInput type="text" mask="number" label="Banco" v-model="formValue.dados_bancarios.banco" required :maxLength="3" />
     </v-col>
@@ -70,13 +71,13 @@
     </v-col>
   </v-row>
 
-  <v-row class="pa-3 mt-n12" v-else>
+  <v-row class="pa-3 mt-n11" v-else>
     <v-col>
       <CustomInput type="autocomplete" label="Cartão" v-model="formValue.conta_id" required :items="cards" itemTitle="descricao" itemValue="id" />
     </v-col>
   </v-row>
 
-  <v-row v-if="formValue.urgente" class="pa-3 mt-n12">
+  <v-row v-if="formValue.urgente" class="pa-3 mt-n11">
     <v-col>
       <CustomInput type="textarea" :required="formValue.urgente" :rows="1" label="Justificativa da urgência" v-model="formValue.justificativa_urgente" :counter="600" />
     </v-col>
@@ -113,7 +114,6 @@ const isExpired = computed(() => dayjs(formValue.value.data_vencimento).isBefore
 
 const maskDescriptionPIX = computed(() => {
   const tipo = chavesPix?.value.find((chave) => chave?.id === formValue.value.tipo_chave_pix_id)
-  console.log(tipo)
   return tipo?.mask
 })
 
@@ -165,30 +165,6 @@ const dateRules = (v) => {
   return true
 }
 
-watch(() => formValue.value.tipo_id, (value) => {
-    if (value == 5 || value == 6) {
-      try {
-        getCards()
-      } catch (error) {
-        console.error(error.message)
-      }
-    }
-  },
-  { immediate: true }
-)
-
-watch(() => formValue.value.empresa_id, (value) => {
-    if (value == 5 || value == 6) {
-      try {
-        getCards()
-      } catch (error) {
-        console.error(error.message)
-      }
-    }
-  },
-  { immediate: true }
-)
-
 const getTiposChave = async () => {
   try {
     const { success, message, data } = await getTiposChavePix()
@@ -204,7 +180,9 @@ const getTiposChave = async () => {
 
 const getCards = async () => {
   try {
-    if (!formValue.value.empresa_id || !formValue.value.tipo_id) return
+    
+    if (!formValue.value.empresa_id) return $toast.error('Selecione uma empresa')
+    if (!formValue.value.tipo_id) return $toast.error('Selecione um tipo de pagamento')
 
     const { success, message, data } = await getContasDisponiveis(formValue.value.empresa_id, formValue.value.tipo_id)
     if (!success) throw new Error(message)
@@ -220,11 +198,32 @@ await getTiposChave()
 
 watch(() => formValue.value.tipo_chave_pix_id, async (newValue, oldValue) => {
 
-  console.log(chavesPix.value)
-
   if(newValue !== oldValue && oldValue) {
     formValue.value.dados_bancarios.outhers = null
   }
 }, { immediate: true })
+
+watch(() => formValue.value.tipo_id, (value) => {
+    if (value == 5 || value == 6) {
+      try {
+        getCards()
+      } catch (error) {
+        console.error(error.message)
+      }
+    }
+  },{ immediate: true }
+)
+
+watch(() => formValue.value.empresa_id, (value) => {
+  if (value == 5 || value == 6) {
+    try {
+      getCards()
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
+  },{ immediate: true }
+)
+
 
 </script>

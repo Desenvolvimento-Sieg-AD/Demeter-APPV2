@@ -1,8 +1,8 @@
 <template>
   <v-container class="ajust" fluid>
-    <v-form ref="customForm" @submit.prevent="submit">
-      <v-col cols="12">
-        <v-card class="backgroundimg" style="overflow-y: auto" height="calc(100vh - 140px)">
+    <v-form ref="customForm" @submit.prevent="submit" class="d-flex justify-center">
+      <v-col cols="12" >
+        <v-card class="backgroundimg" style="overflow-y: auto" height="calc(100vh - 165px)">
           <v-card-text class="card-box">
             <slot />
           </v-card-text>

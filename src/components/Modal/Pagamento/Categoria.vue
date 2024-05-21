@@ -1,5 +1,6 @@
 <template>
-  <v-row class="pa-3">
+  <CustomText title="Categoria" class="ml-3 " color="#118B9F" size="18" :bold="true" />
+  <v-row class="pa-3 mb-n6">
     <v-col cols="2" md="3">
       <CustomInput 
         required
@@ -71,37 +72,22 @@ const formValue = computed({
   set: (value) => emit('update:form', value)
 })
 
-const selectedCategories = computed(() => {
-  return categorias.value.filter((categoria) => categoria.grupo_id === formValue.value.grupo_id)
-})
-
-function setFornecedorDocumentData(cpf_emitente, cnpj_emitente) {
-  if (cpf_emitente) {
-    formValue.value.fornecedor.documento = cpf_emitente
-    formValue.value.fornecedor.tipo = 'fisico'
-  } else if (cnpj_emitente) {
-    formValue.value.fornecedor.documento = cnpj_emitente
-    formValue.value.fornecedor.tipo = 'juridico'
-  } 
-}
+const selectedCategories = computed(() => categorias.value.filter((categoria) => categoria.grupo_id === formValue.value.grupo_id))
 
 const processNfFile = async (file) => {
-  if (route.params.id) return
 
-  clearFornecedor()
   loadingProcessFile.value = true
   try {
     const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file)
 
     if (allIsNull) return $toast.error('Não foi possível ler o arquivo', { autoClose: 2500 })
 
-    setFornecedorDocumentData(cpf_emitente, cnpj_emitente)
-
     formValue.value.chave_nf = chave_acesso ?? null
     formValue.value.numero_nf = nf ?? null
     formValue.value.valor_total = parseFloat(valor_total)
 
-    validDocument()
+    validDocument(cpf_emitente, cnpj_emitente)
+
   } catch (error) {
     console.error('Erro ao processar arquivo NF:', error.message)
     $toast.error(error.message)
@@ -110,32 +96,34 @@ const processNfFile = async (file) => {
   }
 }
 
-const findFornecedorByDocumento = (documento) => {
+const findFornecedorByDocumento = async (documento) => {
   return fornecedores.find((fornecedor) => fornecedor.documento === documento)
 }
 
-const validDocument = () => {
-  if (!formValue.value.fornecedor.documento) {
-    formValue.value.fornecedor.tipo = null
-    return
-  }
+const validDocument = async (cpf_emitente, cnpj_emitente) => {
+  if (cpf_emitente || cnpj_emitente) {
 
-  const documento = formValue.value.fornecedor.documento.replace(/\D/g, '')
-  const find = findFornecedorByDocumento(documento)
+    let documento = cpf_emitente ?? cnpj_emitente
 
-  if (find) {
-    formValue.value.fornecedor.id = find.id
-    formValue.value.fornecedor.nome = find.razao_social
+    documento = documento.replace(/\D/g, '')
 
-    if (find.tipo === 'fisico') {
-      formValue.value.fornecedor.documento = maskCpf(find.documento)
-    } else {
-      formValue.value.fornecedor.documento = maskCnpj(find.documento)
+    const fornecedor = await findFornecedorByDocumento(documento)
+
+    if (find) {
+
+      const payload = {
+        id: fornecedor.id,
+        nome: fornecedor.razao_social,
+        apelido: fornecedor.nome_fantasia,  
+        documento: cpf_emitente ? maskCpf(cpf_emitente) : maskCnpj(cnpj_emitente),
+        tipo: cpf_emitente ? 'fisico' : 'juridico',
+        internacional: fornecedor.internacional
+      }
+
+      formValue.value.fornecedor = payload
     }
+  } 
 
-    formValue.value.fornecedor.tipo = find.internacional ? null : find.tipo
-    formValue.value.fornecedor.internacional = find.internacional
-  }
 }
 
 const clearFornecedor = () => {
@@ -145,32 +133,21 @@ const clearFornecedor = () => {
   }
 }
 
-const defineFileTitle = (fileName) => {
-  if (fileName.length > 20) return fileName.replace(/.\w+$/g, '')
-  return fileName
-}
+const defineFileTitle = (fileName) => fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName
 
-watch(() => formValue.value.setor_id, async (value) => {
-  if(value) loadCategorias(value)
-},{ immediate: true })
-
-watch(
-  () => formValue.value.nf,
-  async (value) => {
+watch(() => formValue.value.nf, async (value) => {
     if (value && value.length > 0) await processNfFile(value[0])
   }
 )
 
-watch(
-  () => formValue.value.grupo_id,
-  async (newValue, oldValue) => {
-    if (oldValue && newValue !== oldValue) {
-      formValue.value.categoria_id = null
-      await categoriaRef?.value?.click()
-    }
-  },
-  { immediate: true }
-)
+watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
+  
+  if (oldValue && newValue !== oldValue) {
+    formValue.value.categoria_id = null
+    await categoriaRef?.value?.click()
+  }
+
+},{ immediate: true })
 
 const loadCategorias = async (setor_id) => {
   try {
@@ -195,6 +172,9 @@ const loadCategorias = async (setor_id) => {
     $toast.error(error.message)
   }
 }
+watch(() => formValue.value.setor_id, async (value) => {
+  if(value) loadCategorias(value)
+},{ immediate: true })
 
 onMounted(() => {
   if (formValue.value.setor_id) loadCategorias(formValue.value.setor_id)

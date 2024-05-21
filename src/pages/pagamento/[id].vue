@@ -121,15 +121,11 @@ function buildFormData() {
 
   const deleteKeys = ['fornecedor_id', 'conta_empresa', 'empresa', 'usuario', 'categoria', 'tipo_pagamento', 'anexos_pagamento', 'movimentacoes_pagamento']
 
-  console.log(form.value)
-
   for (const key in form.value) {
     if (deleteKeys.includes(key)) continue
 
 
     if (key === 'fornecedor') {
-
-      console.log(form.value.fornecedor)
 
       if(!form.value.fornecedor.id) {
         formData.append('fornecedor_nome', form.value.fornecedor.nome)
