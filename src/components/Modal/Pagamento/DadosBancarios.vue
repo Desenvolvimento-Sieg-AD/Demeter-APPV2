@@ -55,11 +55,11 @@
 
   <v-row class="pa-3 mt-n11" v-else-if="form.tipo_id === 2">
     <v-col>
-      <CustomInput type="text" mask="number" label="Banco" v-model="formValue.dados_bancarios.banco" required :maxLength="3" />
+      <CustomInput type="text" mask="number" label="Banco" v-model="formValue.dados_bancarios.banco" required :max="3" />
     </v-col>
 
     <v-col>
-      <CustomInput type="text" mask="number" label="Agência" v-model="formValue.dados_bancarios.agencia" required :maxLength="4" />
+      <CustomInput type="text" mask="number" label="Agência" v-model="formValue.dados_bancarios.agencia" required :max="4" />
     </v-col>
 
     <v-col>
@@ -67,7 +67,7 @@
     </v-col>
 
     <v-col>
-      <CustomInput type="text" mask="number" label="Dígito" v-model="formValue.dados_bancarios.digito" required :maxLength="1" />
+      <CustomInput type="text" mask="number" label="Dígito" v-model="formValue.dados_bancarios.digito" required :max="1" />
     </v-col>
   </v-row>
 

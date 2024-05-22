@@ -243,6 +243,16 @@ const modalActionsConfirmAll = computed(() => [
   }
 ])
 
+const openApprovePayment = () => {
+  confirm.value = 'approve'
+  enableModal.allConfirm = true
+}
+
+const openDisapprovePayment = () => {
+  confirm.value = 'disapprove'
+  enableModal.allConfirm = true
+}
+
 const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
 const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)

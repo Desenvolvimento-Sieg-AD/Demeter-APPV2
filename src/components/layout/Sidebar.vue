@@ -159,7 +159,7 @@ watch(() => route.path, (value) => {
 .sidebar {
   display: flex;
   flex-direction: column;
-  height: 91%;
+  height: 90%;
 }
 .footer {
   margin-top: auto;
