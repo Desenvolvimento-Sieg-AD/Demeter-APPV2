@@ -9,7 +9,7 @@
     <LayoutForm class="mb-12" height="calc(100vh - 165px)">
       <v-form ref="formValidate">
         <v-card class="card-pagamento" flat>
-          <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
+          <ModalPagamentoEmpresa v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
@@ -21,7 +21,7 @@
         <v-divider class="mt-2 mb-2" />
 
         <v-card class="card-pagamento" flat>
-          <ModalPagamentoCategoria v-model:form="form" />
+          <ModalPagamentoCategoria v-model:form="form" :documentRequired="documentRequired" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />

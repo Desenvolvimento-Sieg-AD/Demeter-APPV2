@@ -3,8 +3,34 @@
     <CustomText title="Fornecedor" class="ml-2 mb-n5 mt-n10" color="#118B9F" size="18" :bold="true" />
     <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" class="custom-checkbox" :disabled="route.params.id" />
   </v-row>
-  <v-row class="pa-2 mb-n10" v-if="!formValue.fornecedor.internacional">
-    <v-col cols="12" md="3" >
+  <v-row class="pa-2" v-if="!formValue.fornecedor.internacional">
+
+    <v-col cols="12" md="3">
+      <CustomInput
+        type="file"
+        hide-details
+        v-model="formValue.nf"
+        :loading="loadingProcessFile"
+        :disabled="formValue.fornecedor.internacional || !formValue.setor_id || !formValue.empresa_id"
+        label="Nota fiscal/Cupom fiscal"
+        accept="image/*,application/pdf"
+        append-inner-icon="mdi-file-upload-outline"
+      >
+        <template #selection="{ fileNames }">
+          <span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
+        </template>
+      </CustomInput>
+    </v-col>
+
+    <v-col cols="12" md="3">
+      <CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" mask="numero-nf" />
+    </v-col>
+
+    <v-col cols="12" md="6">
+      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="number" />
+    </v-col>
+    
+    <v-col cols="12" md="3" class="mt-n7">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         type="text"
@@ -18,7 +44,7 @@
       />
     </v-col>
 
-    <v-col cols="12" md="3">
+    <v-col cols="12" md="3" class="mt-n7">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         hide-details
@@ -32,7 +58,7 @@
       />
     </v-col>
 
-    <v-col cols="12" md="6">
+    <v-col cols="12" md="6" class="mt-n7">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         hideDetails
@@ -47,17 +73,10 @@
       />
     </v-col>
 
-    <v-col cols="12" md="3">
-      <CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" mask="numero-nf" />
-    </v-col>
-
-    <v-col cols="12" md="9">
-      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="number" />
-    </v-col>
   </v-row>
 
-  <v-row v-else class="pa-3">
-    <v-col>
+  <v-row v-else class="pa-3 mb-n10" >
+    <v-col >
       <CustomInput
         required
         hideDetails
@@ -71,19 +90,18 @@
       />
     </v-col>
 
-    <v-col>
+    <v-col >
       <CustomInput type="text" label="Número Invoice" v-model="form.numero_nf" />
     </v-col>
   </v-row>
 </template>
 <script setup>
+import { getFileContent } from '@api/conversor'
 import { getFornecedor, getFornecedorByDocumentOrName } from '@api'
 
 const { $toast } = useNuxtApp()
 
-const props = defineProps({
-  form: { type: Object, required: true }
-})
+const props = defineProps({ form: { type: Object, required: true }})
 
 const route = useRoute()
 
@@ -92,6 +110,60 @@ const formValue = computed({
   set: (value) => emit('update:form', value)
 })
 const fornecedores = ref([])
+
+const loadingProcessFile = ref(false)
+
+const processNfFile = async (file) => {
+
+  loadingProcessFile.value = true
+  try {
+    const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file)
+
+    if (allIsNull) return $toast.error('Não foi possível ler o arquivo', { autoClose: 2500 })
+
+    formValue.value.chave_nf = chave_acesso ?? null
+    formValue.value.numero_nf = nf ?? null
+    formValue.value.valor_total = parseFloat(valor_total)
+
+    validDocument(cpf_emitente, cnpj_emitente)
+
+  } catch (error) {
+    console.error('Erro ao processar arquivo NF:', error.message)
+    $toast.error(error.message)
+  } finally {
+    loadingProcessFile.value = false
+  }
+}
+
+const validDocument = async (cpf_emitente, cnpj_emitente) => {
+  if (cpf_emitente || cnpj_emitente) {
+
+    let documento = cpf_emitente ?? cnpj_emitente
+
+    documento = documento.replace(/\D/g, '')
+
+    const fornecedor = await findFornecedorByDocumento(documento)
+
+    if (find) {
+
+      const payload = {
+        id: fornecedor.id,
+        nome: fornecedor.razao_social,
+        apelido: fornecedor.nome_fantasia,  
+        documento: cpf_emitente ? maskCpf(cpf_emitente) : maskCnpj(cnpj_emitente),
+        tipo: cpf_emitente ? 'fisico' : 'juridico',
+        internacional: fornecedor.internacional
+      }
+
+      formValue.value.fornecedor = payload
+    }
+  } 
+
+}
+
+const findFornecedorByDocumento = async (documento) => {
+  return fornecedores.value.find((fornecedor) => fornecedor.documento === documento)
+}
 
 const verifyFornecedor= async (type) => {
   try {
@@ -130,7 +202,7 @@ const verifyFornecedor= async (type) => {
   }
 }
 
-
+const defineFileTitle = (fileName) => fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName
 
 const getDataFornecedor = async (fornecedor) => {
   for (const key in formValue.value.fornecedor) {
@@ -155,9 +227,7 @@ const getFornecedores = async () => {
   }
 }
 
-onMounted(() => {
-  getFornecedores()
-})
+onMounted(() => getFornecedores())
 
 const documentFornecedor = computed(() => {
   const tipo = formValue.value.fornecedor?.tipo
@@ -199,6 +269,13 @@ watch(() => formValue.value.fornecedor.internacional, async (value) => {
     fornecedores.value = data
   }
 )
+
+watch(() => formValue.value.nf, async (value) => {
+    if(route.params.id) return
+    if (value && value.length > 0) await processNfFile(value[0])
+  }
+)
+
 </script>
 <style scoped>
 </style>

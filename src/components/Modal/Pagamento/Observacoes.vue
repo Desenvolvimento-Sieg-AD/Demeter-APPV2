@@ -9,20 +9,6 @@
       <CustomInput type="textarea" :counter="300" no-resize :rows="3" label="Observações" v-model="formValue.dados_complementares" hide-details />
     </v-col>
 
-    <v-col cols="12" class="mt-n2">
-      <CustomInput
-        hide-details
-        item-value="id"
-        label="Projeto"
-        :required="requer_projeto"
-        :items="projetos"
-        item-title="nome"
-        type="combobox"
-        v-model="formValue.projeto_id"
-        @change="findProject"
-        append-inner-icon="mdi-briefcase-plus-outline"
-      />
-    </v-col>
   </v-row>
 </template>
 

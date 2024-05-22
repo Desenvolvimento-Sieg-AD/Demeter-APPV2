@@ -30,27 +30,31 @@
       />
     </v-col>
 
-    <v-col cols="12" md="6">
+   <v-col cols="6">
       <CustomInput
         type="file"
-        hide-details
-        v-model="form.nf"
-        :loading="loadingProcessFile"
-        :disabled="!form.categoria_id || formValue.fornecedor.internacional"
-        label="Nota fiscal/Cupom fiscal"
+        persistent-hint
+        label="Documento"
+        v-model="formValue.doc"
+        :required="documentRequired"
         accept="image/*,application/pdf"
-        append-inner-icon="mdi-file-upload-outline"
+        hint="Ex: Boleto, Comprovante, Certidão"
+        :append-inner-icon="formValue.pathDoc ? 'mdi-paperclip' : 'mdi-file-outline'"
+        @click:append-inner.stop="openFile(formValue.pathDoc)"
+        hide-details="auto"
       >
         <template #selection="{ fileNames }">
-          <span class="text-truncate">{{ defineFileTitle(fileNames[0]) }}</span>
+          <span class="text-truncate">
+            {{ defineFileTitle(fileNames[0]) }}
+          </span>
         </template>
       </CustomInput>
     </v-col>
+
   </v-row>
 </template>
 
 <script setup>
-import { getFileContent } from '@api/conversor'
 import { getFornecedor, getCategoriasByGrupo, getCategoriasUsuario } from '@api'
 
 const route = useRoute()
@@ -63,9 +67,12 @@ const categorias = ref([])
 
 const emit = defineEmits(['update:form'])
 
-const props = defineProps({ form: { type: Object, required: true } })
+const props = defineProps({ 
+  form: { type: Object, required: true },
+  documentRequired: { type: Boolean, default: true }
+})
+
 const categoriaRef = ref(null)
-const loadingProcessFile = ref(false)
 
 const formValue = computed({
   get: () => props.form,
@@ -74,72 +81,7 @@ const formValue = computed({
 
 const selectedCategories = computed(() => categorias.value.filter((categoria) => categoria.grupo_id === formValue.value.grupo_id))
 
-const processNfFile = async (file) => {
-
-  loadingProcessFile.value = true
-  try {
-    const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file)
-
-    if (allIsNull) return $toast.error('Não foi possível ler o arquivo', { autoClose: 2500 })
-
-    formValue.value.chave_nf = chave_acesso ?? null
-    formValue.value.numero_nf = nf ?? null
-    formValue.value.valor_total = parseFloat(valor_total)
-
-    validDocument(cpf_emitente, cnpj_emitente)
-
-  } catch (error) {
-    console.error('Erro ao processar arquivo NF:', error.message)
-    $toast.error(error.message)
-  } finally {
-    loadingProcessFile.value = false
-  }
-}
-
-const findFornecedorByDocumento = async (documento) => {
-  return fornecedores.find((fornecedor) => fornecedor.documento === documento)
-}
-
-const validDocument = async (cpf_emitente, cnpj_emitente) => {
-  if (cpf_emitente || cnpj_emitente) {
-
-    let documento = cpf_emitente ?? cnpj_emitente
-
-    documento = documento.replace(/\D/g, '')
-
-    const fornecedor = await findFornecedorByDocumento(documento)
-
-    if (find) {
-
-      const payload = {
-        id: fornecedor.id,
-        nome: fornecedor.razao_social,
-        apelido: fornecedor.nome_fantasia,  
-        documento: cpf_emitente ? maskCpf(cpf_emitente) : maskCnpj(cnpj_emitente),
-        tipo: cpf_emitente ? 'fisico' : 'juridico',
-        internacional: fornecedor.internacional
-      }
-
-      formValue.value.fornecedor = payload
-    }
-  } 
-
-}
-
-const clearFornecedor = () => {
-  for (const key in formValue.value.fornecedor) {
-    if (key === 'internacional') continue
-    formValue.value.fornecedor[key] = null
-  }
-}
-
 const defineFileTitle = (fileName) => fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName
-
-watch(() => formValue.value.nf, async (value) => {
-    if(route.params.id) return
-    if (value && value.length > 0) await processNfFile(value[0])
-  }
-)
 
 watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
   
