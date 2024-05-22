@@ -21,6 +21,9 @@
 				Tentar novamente
 			</v-btn>
 		</div>
+
+		<LazyModalUpdateAvailable v-model:enable="enableModal.available" />
+
 	</v-app>
 </template>
 
@@ -34,6 +37,10 @@ const { $toast } = useNuxtApp()
 const logged = ref(false);
 const message = ref('');
 const loading = ref(false);
+
+const enableModal = reactive({
+	available: false,
+});
 
 const login = async () => {
 	try {
@@ -62,6 +69,16 @@ const reload = async () => {
 	loading.value = false;
 }
 
+const electron = useElectron();
+
+const getUpdateAvailable = async () => {
+	const updateAvailable = await electron.actions.updateAvailable();
+	if (updateAvailable) {
+		enableModal.available = true;
+	}
+}
+
+await getUpdateAvailable();
 
 </script>
 

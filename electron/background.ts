@@ -158,6 +158,7 @@ autoUpdater.on('checking-for-update', () => {
 });
 
 autoUpdater.on('update-available', (info) => {
+  mainWindow.webContents.send('updateAvailable:app', info.version);
 	sendStatusToWindow('Update available.');
 });
 
@@ -193,7 +194,7 @@ autoUpdater.on('update-downloaded', async (info) => {
       setTimeout(() => {
           autoUpdater.quitAndInstall(false, true);
           log.info('Quit and install...');
-        }, 5000);
+        }, 6500);
 
     }
 
