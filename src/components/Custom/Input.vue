@@ -252,7 +252,7 @@
     :item-title="itemTitle"
     :return-object="returnObject"
     :item-value="itemValue"
-    :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
+    :class="{ 'required-field field': required && (enableValue === null || enableValue.length === 0), 'field': true }"
     :delimiters="[',', ';', ' ']"
     @update:modelValue="onChange"
     @focus="onFocus"
@@ -292,7 +292,7 @@
     :hide-details="hideDetails"
     :append-inner-icon="appendInnerIcon"
     validate-on="lazy blur"
-    :class="required ? 'required-field' : ''"
+    :class="required ? 'required-field field' : 'field'"
   >
     <template #selection="{ fileNames, index }" v-if="$slots.selection">
       <slot name="selection" v-bind="{ fileNames, index }"> </slot>
@@ -350,7 +350,7 @@
     :item-title="itemTitle"
     :return-object="itemValue ? false : true"
     :item-value="itemValue"
-    :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
+    :class="{ 'required-field field': required && (enableValue === null || enableValue.length === 0) }"
     @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
@@ -390,7 +390,7 @@
     :item-props="itemProps"
     :return-object="itemValue ? false : true"
     :item-value="itemValue"
-    :class="{ 'required-field': required && (enableValue === null || enableValue.length === 0) }"
+    :class="{ 'required-field field': required && (enableValue === null || enableValue.length === 0) }"
     @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
@@ -747,6 +747,10 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
 
 .v-text-field input.v-field__input {
   min-height: 44px !important;
+}
+
+.field{
+  min-height: 48px !important;
 }
 
 .input-row {

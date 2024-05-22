@@ -1,7 +1,7 @@
 <template>
   <CustomText title="Empresa" class="ml-3" color="#118B9F" size="18" :bold="true" />
   <v-row class="pa-3 mb-n6">
-    <v-col cols="6">
+    <v-col cols="4">
       <CustomInput
         required
         type="select"
@@ -31,26 +31,22 @@
       />
     </v-col>
 
-    <v-col cols="3">
+    <v-col cols="5">
       <CustomInput
-        type="file"
-        persistent-hint
-        label="Documento"
-        v-model="formValue.doc"
-        :required="documentRequired"
-        accept="image/*,application/pdf"
-        hint="Ex: Boleto, Comprovante, Certidão"
-        :append-inner-icon="formValue.pathDoc ? 'mdi-paperclip' : 'mdi-file-outline'"
-        @click:append-inner.stop="openFile(formValue.pathDoc)"
-        hide-details="auto"
-      >
-        <template #selection="{ fileNames }">
-          <span class="text-truncate">
-            {{ defineFileTitle(fileNames[0]) }}
-          </span>
-        </template>
-      </CustomInput>
+        hide-details
+        item-value="id"
+        label="Projeto"
+        :required="requer_projeto"
+        :items="projetos"
+        item-title="nome"
+        type="combobox"
+        v-model="formValue.projeto_id"
+        @change="findProject"
+        append-inner-icon="mdi-briefcase-plus-outline"
+      />
     </v-col>
+
+    
   </v-row>
 </template>
 <script setup>
@@ -71,7 +67,6 @@ const itemProps = (item) => {
 
 const props = defineProps({
   form: { type: Object, required: true },
-  documentRequired: { type: Boolean, default: true }
 })
 
 const formValue = computed({
