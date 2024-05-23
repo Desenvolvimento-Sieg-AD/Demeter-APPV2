@@ -22,7 +22,7 @@
 			</v-btn>
 		</div>
 
-		<LazyModalUpdateAvailable v-model:enable="enableModal.available" />
+		<!-- <LazyModalUpdateAvailable v-model:enable="enableModal.available" /> -->
 
 	</v-app>
 </template>
@@ -71,14 +71,15 @@ const reload = async () => {
 
 const electron = useElectron();
 
-const getUpdateAvailable = async () => {
-	const updateAvailable = await electron.actions.updateAvailable();
-	if (updateAvailable) {
-		enableModal.available = true;
-	}
-}
+// const getUpdateAvailable = () => {
+//	electron.actions.updateAvailable((event, newVersion, version) => {
+//		if (newVersion) {
+//			enableModal.available = true;
+//		}
+//	});
+// };
 
-await getUpdateAvailable();
+// getUpdateAvailable();
 
 </script>
 
