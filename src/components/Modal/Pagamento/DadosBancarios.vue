@@ -118,7 +118,9 @@ const maskDescriptionPIX = computed(() => {
 })
 
 const maskDescriptionOuthers = computed(() => {
-  const tipo = props.paymentsType.find((tipo) => tipo.id === formValue.value.tipo_id)
+  const tipo = props.paymentsType.find((tipo) => {
+    return tipo.id === formValue.value.tipo_id
+  })
   return tipo?.mask
 })
 
@@ -200,6 +202,7 @@ watch(() => formValue.value.tipo_chave_pix_id, async (newValue, oldValue) => {
 
   if(newValue !== oldValue && oldValue) {
     formValue.value.dados_bancarios.outhers = null
+    
   }
 }, { immediate: true })
 

@@ -108,7 +108,9 @@ const menuOptions = ref([
 	{ title: 'Novo pagamento', icon: 'mdi-cash-plus', to: '/pagamento/novo', setores: ['ALL'] },
 	{ title: 'Financeiro', icon: 'mdi-account-cash-outline', to: '/financeiro', setores: ['FIN', 'GER', 'ADM'], tabs: [
        { title: 'Pendentes', icon: 'mdi-account-clock-outline', to: '/financeiro/pendentes', color: 'red' },
-	   { title: 'Aprovadas', icon: 'mdi-account-check-outline', to: '/financeiro/aprovadas', color: 'green' }]
+	   { title: 'Aprovadas', icon: 'mdi-account-check-outline', to: '/financeiro/aprovadas', color: 'green' },
+	   { title: 'Provisionados', icon: 'mdi-cash-sync', to: '/financeiro/provisionados', color: 'blue'} 
+	   ]
 	},
 	{ title: 'Gerência', icon: 'mdi-account-tie-outline', to: '/gerencia', setores: ['ALL'] },
 	{ title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['ALL'] },

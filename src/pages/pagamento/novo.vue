@@ -278,7 +278,7 @@ const reset = () => {
   form.value = initFormState()
   form.value.valor_total = null
   form.value.doc = []
-  form.value.tipo_chave_pix = null
+  form.value.tipo_chave_pix_id = null
   form.value.projeto_id = null
 }
 
