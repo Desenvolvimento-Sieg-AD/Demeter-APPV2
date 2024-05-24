@@ -13,8 +13,8 @@
         allowColumnResizing
         choose-columns
         allow-column-reordering
-        :allowed-page-sizes="[5, 15, 10, 25]"
-        :page-size="15"
+        :allowed-page-sizes="[5, 10, 15, 25]"
+        :page-size="10"
         enableAddButton
         createTitle="NOVO PAGAMENTO"
         createText="Ir para página de solicitação"
@@ -134,7 +134,7 @@
 
 <script setup>
 //* IMPORTS
-
+import CustomStore from 'devextreme/data/custom_store'
 import { getPagamentoByScope, postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const router = useRouter()
@@ -272,28 +272,75 @@ const cancelPayment = async (ids) => {
   justificativa.value = null
 }
 
-const pushData = async () => {
-  loadingTable.value = true
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
-  try {
-    const { success, message, data } = await getPagamentoByScope('usuario')
+function formatFilter(filterArray) {
+	const formattedFilters = [];
 
-    if (!success) throw new Error(message)
+	for (let i = 0; i < filterArray.length; i++) {
+    
+		if (filterArray[i] === 'or') continue;
 
-    data.map((item) => {
-      item.status = item.movimentacoes_pagamento[0].status_pagamento.label
-      item.lote = item.movimentacoes_pagamento.at().lote
-    })
+		const fieldName = filterArray[i][0];
+		const value = filterArray[i][2];
 
-    pagamentos.value = data
-    loadingTable.value = false
-  } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
-  }
+		formattedFilters.push({ fieldName, value });
+	}
+
+	return formattedFilters;
 }
+const getPage = async () => {
 
-onMounted(pushData)
+	pagamentos.value = new CustomStore({
+		key: 'id',
+		async load(loadOptions) {
+
+			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
+      
+			const queryString = paramsName
+				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
+				.map((paramName) => {
+					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
+					return { [paramName]: loadOptions[paramName] };
+				});
+
+			const mergedObject = queryString.reduce((acc, obj) => {
+				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
+				return acc;
+			}, {});
+
+			try {
+				const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
+					query: {
+						paging: true,
+						limit: mergedObject.take,
+						offset: mergedObject.skip,
+						sort: mergedObject.sort,
+						filter: JSON.stringify(mergedObject.filter),
+					},
+				});
+
+				if (!success) throw new Error(message);
+
+        data.data.map((item) => {
+          item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
+          item.lote = item.movimentacoes_pagamento.at().lote
+        })
+
+				return {
+					data: data.data,
+					totalCount: data.count,
+				};
+			} catch (error) {
+				console.log(error.message);
+				$toast.error(error.message);
+			}
+		},
+	});
+};
+
+await getPage();
+
 </script>
 
 <style scoped>

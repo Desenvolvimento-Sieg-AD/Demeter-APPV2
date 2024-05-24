@@ -8,17 +8,16 @@
         :items="itens"
         choose-columns
         selectionCheck
-        :page-size="15"
         :loading="loadingTable"
         :columns="colums"
         :actions="actions"
         allowColumnResizing
         allow-column-reordering
         key-stored="pagamentos-table"
-        :allowed-page-sizes="[5, 15, 10, 25]"
+        :allowed-page-sizes="[5, 10, 15, 25]"
         @selectionChanged="handleSelectionChange"
         noDataText="Não há nenhuma solicitação de pagamento"
-        :paymentsSelecteds="itemsSelects.length > 0"
+        :paymentsSelecteds="itemsSelects.length >= 1"
         page="financeiro"
         @editPayment="openEditPayment"
         @disapprovePayment="openDisapprovePayment"
@@ -151,9 +150,9 @@
       :actions="actionsModalConfirm"
     />
 
-    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="pushData" />
+    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPage" />
 
-    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="pushData" />
+    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPage" />
 
     <LazyModalConfirmAllStatus
       v-if="enableModal.allConfirm"
@@ -344,8 +343,9 @@ const classSetor = (item, index) => (smallerIndex(index, item.usuario.setores) ?
 
 const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
 
-const handleSelectionChange = (items) => (itemsSelects.value = items)
-
+const handleSelectionChange = (items) => {
+  itemsSelects.value = items
+}
 const validBeforeSend = async () => {
   const status_id = confirm.value === 'approve' ? 3 : 8
 
@@ -370,36 +370,82 @@ const sendStatus = async (status, id) => {
     loadingModal.value = false
     enableModal.confirm = false
     enableModal.allConfirm = false
-    await pushData()
+    await getPage()
   } catch (error) {
     console.error(error.message)
     $toast.error(error.message)
   }
 }
 
-const pushData = async () => {
-  loadingTable.value = true
-  try {
-    const { success, message, data } = await getPagamentoByScope('financeiroPendentes')
-    if (!success) throw new Error(message)
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
-    data.map((item) => {
-      // item.setor = item.usuario.setores[0].sigla
-      item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
-      item.lote = item.movimentacoes_pagamento.at().lote
-    })
+function formatFilter(filterArray) {
+	const formattedFilters = [];
 
-    itens.value = data
+	for (let i = 0; i < filterArray.length; i++) {
+    
+		if (filterArray[i] === 'or') continue;
 
-    loadingTable.value = false
-  } catch (error) {
-    console.error(error.message)
-    $toast.error('Erro ao buscar dados')
-    loadingTable.value = false
-  }
+		const fieldName = filterArray[i][0];
+		const value = filterArray[i][2];
+
+		formattedFilters.push({ fieldName, value });
+	}
+
+	return formattedFilters;
 }
+const getPage = async () => {
 
-await pushData()
+	itens.value = new CustomStore({
+		key: 'id',
+		async load(loadOptions) {
+
+			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
+      
+			const queryString = paramsName
+				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
+				.map((paramName) => {
+					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
+					return { [paramName]: loadOptions[paramName] };
+				});
+
+			const mergedObject = queryString.reduce((acc, obj) => {
+				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
+				return acc;
+			}, {});
+
+			try {
+				const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
+					query: {
+						paging: true,
+						limit: mergedObject.take,
+						offset: mergedObject.skip,
+						sort: mergedObject.sort,
+						filter: JSON.stringify(mergedObject.filter),
+					},
+				});
+
+				if (!success) throw new Error(message);
+
+        data.data.map((item) => {
+          item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
+          item.lote = item.movimentacoes_pagamento.at().lote
+        })
+
+				return {
+					data: data.data,
+					totalCount: data.count,
+				};
+			} catch (error) {
+				console.log(error.message);
+				$toast.error(error.message);
+			}
+		},
+	});
+};
+
+await getPage();
+
 </script>
 
 <style scoped>

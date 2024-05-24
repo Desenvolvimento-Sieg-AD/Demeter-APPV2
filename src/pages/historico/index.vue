@@ -14,7 +14,7 @@
         choose-columns
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25]"
-        :page-size="15"
+        :page-size="10"
         pager
       >
         <template #item-usuario="{ data: { data: item } }">
@@ -123,6 +123,7 @@
 </template>
 
 <script setup>
+import CustomStore from 'devextreme/data/custom_store'
 import { getPagamentoByScope } from '@api'
 
 const access = useRuntimeConfig()
@@ -167,26 +168,69 @@ const defineDocument = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(docu
 
 const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
 
-const pushData = async () => {
-  try {
-    const { success, message, data } = await getPagamentoByScope('geral')
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
-    if (!success) throw new Error(message)
+function formatFilter(filterArray) {
+	const formattedFilters = [];
 
-    data.map((item) => {
-      item.status = item.movimentacoes_pagamento.at().status_pagamento.nome
-      // item.setor = item.usuario.setores[0].sigla;
-      item.lote = item.movimentacoes_pagamento.at().lote
-    })
+	for (let i = 0; i < filterArray.length; i++) {
+    
+		if (filterArray[i] === 'or') continue;
 
-    itens.value = data
-  } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
-  }
+		const fieldName = filterArray[i][0];
+		const value = filterArray[i][2];
+
+		formattedFilters.push({ fieldName, value });
+	}
+
+	return formattedFilters;
 }
+const getPage = async () => {
 
-onMounted(async () => await pushData())
+	itens.value = new CustomStore({
+		key: 'id',
+		async load(loadOptions) {
+
+			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
+      
+			const queryString = paramsName
+				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
+				.map((paramName) => {
+					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
+					return { [paramName]: loadOptions[paramName] };
+				});
+
+			const mergedObject = queryString.reduce((acc, obj) => {
+				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
+				return acc;
+			}, {});
+
+			try {
+				const { success, message, data } = await useApi(`/pagamento/scope/geral`, {
+					query: {
+						paging: true,
+						limit: mergedObject.take,
+						offset: mergedObject.skip,
+						sort: mergedObject.sort,
+						filter: JSON.stringify(mergedObject.filter),
+					},
+				});
+
+				if (!success) throw new Error(message);
+
+				return {
+					data: data.data,
+					totalCount: data.count,
+				};
+			} catch (error) {
+				console.log(error.message);
+				$toast.error(error.message);
+			}
+		},
+	});
+};
+
+await getPage();
 </script>
 
 <style scoped>
