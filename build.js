@@ -10,6 +10,18 @@ const options = {
   appId: 'com.sieg.pagamentos',
   productName: 'SIEG Pagamentos',
   compression: 'normal',
+  nsis: {
+    createDesktopShortcut: true,
+    createStartMenuShortcut: true,
+    shortcutName: 'SIEG Pagamentos',
+    deleteAppDataOnUninstall: true,
+    artifactName: '${productName}-Setup-${version}.${ext}',
+    installerIcon: '.output/public/icon.ico',
+    uninstallerIcon: '.output/public/icon.ico',
+    installerHeaderIcon: '.output/public/icon.ico',
+    installerSidebar: '.output/public/logo-maior.bmp',
+    uninstallerSidebar: '.output/public/logo-maior.bmp',
+  },
   publish: [
     {
       provider: "github",
@@ -30,7 +42,7 @@ const options = {
   },
   win: {
     artifactName: '${productName}-Setup-${version}.${ext}',
-    // icon: 'public/favicon.ico',
+    icon: '.output/public/icon.ico',
     publish: [
       {
 

@@ -51,6 +51,24 @@ export async function getProjects(search: string) {
   }
 }
 
+export async function createProjectAPI(nome: string){
+
+  console.log(nome) 
+  try{
+    const { success, message, data } = await useApi(`/projeto`, {
+      method: 'POST',
+      body: { nome }
+    })
+
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+
+  } catch (error) {
+    return { success: false, message: error, data: null }
+  }
+}
+
 export async function getOnePayment(id: number, scope: string) {
   try {
     const { success, message, data } = await useApi(`/pagamento/${scope}/${id}`)

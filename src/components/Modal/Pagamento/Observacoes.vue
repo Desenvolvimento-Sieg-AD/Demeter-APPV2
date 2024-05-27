@@ -15,7 +15,6 @@
 <script setup>
 const { $toast } = useNuxtApp()
 
-import { getProjects } from '~/api'
 import { useAuthStore } from '~/store/auth'
 const { user } = useAuthStore()
 
@@ -25,22 +24,10 @@ const props = defineProps({
 })
 
 const projetos = ref([])
-const requer_projeto = computed(() => user?.setores?.some((setor) => setor.requer_projeto))
 
 const formValue = computed({
   get: () => props.form,
   set: (value) => emit('update:form', value)
 })
 
-const findProject = async (attrs, search) => {
-  try {
-    if (typeof search !== 'string') return
-    if (search.length < 6) throw new Error('Digite pelo menos 6 caracteres para buscar um projeto')
-
-    const { data } = await getProjects(search)
-    if (data.length === 0) throw new Error('Nenhum projeto encontrado com esse nome')
-
-    projetos.value = data
-  } catch (error) {}
-}
 </script>
