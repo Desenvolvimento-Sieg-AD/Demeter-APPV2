@@ -7,7 +7,6 @@
         store-state
         :items="itens"
         choose-columns
-        selectionCheck
         :page-size="15"
         :loading="loadingTable"
         :columns="colums"
@@ -16,13 +15,8 @@
         allow-column-reordering
         key-stored="pagamentos-table"
         :allowed-page-sizes="[5, 15, 10, 25]"
-        @selectionChanged="handleSelectionChange"
         noDataText="Não há nenhuma solicitação de pagamento"
-        :paymentsSelecteds="itemsSelects.length > 0"
         page="financeiro"
-        @editPayment="openEditPayment"
-        @disapprovePayment="openDisapprovePayment"
-        @approvePayment="openApprovePayment"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
