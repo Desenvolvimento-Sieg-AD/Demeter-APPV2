@@ -125,10 +125,10 @@
       </CustomTableSelect>
     </LayoutForm>
 
-    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id" :allowEdit="allowEdit" @getPagamento="pushData()" />
+    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id" :allowEdit="allowEdit" @getPagamento="getPage()" />
 
     <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :item="pagamento" :actions="modalActions" />
-    <LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="pushData" :tipo_anexo_id="tipo_anexo_id" />
+    <LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="getPage" :tipo_anexo_id="tipo_anexo_id" />
   </div>
 </template>
 
@@ -264,7 +264,7 @@ const cancelPayment = async (ids) => {
     loading.value = false
     enableModal.cancel = false
     $toast.success('Pagamento cancelado com sucesso')
-    await pushData()
+    await getPage()
   } catch (error) {
     console.log(error.message)
     $toast.error(error.message)

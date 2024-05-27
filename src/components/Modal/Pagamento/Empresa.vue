@@ -48,7 +48,12 @@
       />
     </v-col>
 
-    <LazyModalConfirm v-model:enable="enableModal.confirm" message="O projeto mencionado não existe no sistema, deseja criar esse projeto?" :actions="modalActions" />
+    <LazyModalConfirmProjeto 
+      v-model:form="formValue" 
+      v-model:enable="enableModal.confirm" 
+      message="O projeto mencionado não existe no sistema, deseja confirmar a criação desse projeto?" 
+      :actions="modalActions"  
+    />
     
   </v-row>
 </template>
@@ -58,9 +63,10 @@ import { useAuthStore } from '~/store/auth'
 
 const { data: empresas } = await getEmpresa()
 
-const requer_projeto = computed(() => user?.setores?.some((setor) => setor.requer_projeto))
+const setores = computed(() => user.setores)
 
 const { user } = useAuthStore()
+const requer_projeto = computed(() => setores.value.some((setor) => setor.requer_projeto))
 
 const { $toast } = useNuxtApp()
 
@@ -70,15 +76,11 @@ const loading = ref(false)
 
 const enableModal = reactive({ confirm: false })
 
-const setores = computed(() => user.setores)
-
 const itemProps = (item) => {
   return { disabled: item.disabled, subtitle: item.disabled ? 'Setor não relacionado com a empresa' : ''}
 }
 
-const props = defineProps({
-  form: { type: Object, required: true },
-})
+const props = defineProps({ form: { type: Object, required: true } })
 
 const formValue = computed({
   get: () => props.form,

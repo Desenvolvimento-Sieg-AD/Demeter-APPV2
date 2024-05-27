@@ -126,6 +126,8 @@
 import CustomStore from 'devextreme/data/custom_store'
 import { getPagamentoByScope } from '@api'
 
+const { $toast } = useNuxtApp()
+
 const access = useRuntimeConfig()
 const path = access.public.PAGAMENTO_PATH
 const colums = getColumns('historico')
@@ -174,11 +176,12 @@ function formatFilter(filterArray) {
 	const formattedFilters = [];
 
 	for (let i = 0; i < filterArray.length; i++) {
-    
-		if (filterArray[i] === 'or') continue;
 
-		const fieldName = filterArray[i][0];
-		const value = filterArray[i][2];
+		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
+    if(filterArray[i] === filterArray['filterValue']) continue;
+
+		const fieldName = filterArray[i];
+		const value = filterArray['filterValue'];
 
 		formattedFilters.push({ fieldName, value });
 	}
@@ -217,6 +220,11 @@ const getPage = async () => {
 				});
 
 				if (!success) throw new Error(message);
+
+        data.data.map((item) => {
+          item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
+          item.lote = item.movimentacoes_pagamento.at().lote
+        })
 
 				return {
 					data: data.data,

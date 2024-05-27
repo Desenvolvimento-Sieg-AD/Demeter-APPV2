@@ -64,6 +64,7 @@ const { $toast } = useNuxtApp()
 
 const dayjs = useDayjs()
 const { user } = useAuthStore()
+const setores = computed(() => user.setores)
 
 const route = useRoute()
 const router = useRouter()
@@ -114,6 +115,8 @@ const actionsForm = [
 
 // * METHODS
 
+const requer_projeto = computed(() => setores.value.some((setor) => setor.requer_projeto))
+
 function buildFormData() {
   const formData = new FormData()
 
@@ -152,17 +155,14 @@ function buildFormData() {
 const sendForm = async () => {
   loading.value = true
   try {
+
+    if(isNaN(Number(form.value.projeto_id)) && requer_projeto.value) return cancelProcess('Selecione um projeto existente ou crie um novo projeto')
+
     const { valid } = await formValidate.value.validate()
 
-    if (!valid) {
-      loading.value = false
-      return $toast.error('Preencha todos os campos obrigatórios')
-    }
+    if (!valid) return cancelProcess('Preencha todos os campos obrigatórios')
 
-    if (validDateToCard.value) {
-      loading.value = false
-      return $toast.error('Data de vencimento inválida')
-    }
+    if (validDateToCard.value) return cancelProcess('Data de vencimento expirada')
 
     const formData = buildFormData()
     const { success, message } = await postPagamento(formData)
@@ -172,6 +172,7 @@ const sendForm = async () => {
     $toast.success(message)
 
     await definePaymentImportant()
+
     reset()
 
     loading.value = false
@@ -197,6 +198,11 @@ const updatePayment = async (id, data) => {
     console.log('Erro ao atualizar pagamento', error.message)
     $toast.error('Erro ao atualizar pagamento')
   }
+}
+
+const cancelProcess = (message) => {
+  loading.value = false
+  $toast.error(message)
 }
 
 const definePaymentImportant = async () => {
