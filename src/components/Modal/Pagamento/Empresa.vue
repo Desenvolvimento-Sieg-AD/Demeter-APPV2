@@ -33,6 +33,7 @@
 
     <v-col cols="5">
       <CustomInput
+        ref="projetoRef"
         hide-details
         item-value="id"
         label="Projeto"
@@ -42,22 +43,32 @@
         type="combobox"
         v-model="formValue.projeto_id"
         @change="findProject"
+        @blur="notExistProject"
         append-inner-icon="mdi-briefcase-plus-outline"
       />
     </v-col>
 
+    <LazyModalConfirm v-model:enable="enableModal.confirm" message="O projeto mencionado não existe no sistema, deseja criar esse projeto?" :actions="modalActions" />
     
   </v-row>
 </template>
 <script setup>
-import { getEmpresa, existRelationSetorWithEmpresa } from '@api'
+import { getProjects, getEmpresa, existRelationSetorWithEmpresa, createProjectAPI } from '@api'
 import { useAuthStore } from '~/store/auth'
 
 const { data: empresas } = await getEmpresa()
 
+const requer_projeto = computed(() => user?.setores?.some((setor) => setor.requer_projeto))
+
 const { user } = useAuthStore()
 
 const { $toast } = useNuxtApp()
+
+const projetoRef = ref(null)
+const projetos = ref([])
+const loading = ref(false)
+
+const enableModal = reactive({ confirm: false })
 
 const setores = computed(() => user.setores)
 
@@ -109,8 +120,60 @@ const existRelation = async () => {
   }
 }
 
-watch(() => formValue.value.empresa_id, existRelation)
+const modalActions = [
+  {
+    icon: 'mdi-close',
+    title: 'Cancelar',
+    type: 'cancel',
+    click: () => enableModal.confirm = false
+  },
+  {
+    icon: 'mdi-check',
+    title: 'Confirmar',
+    type: 'success',
+    loading: loading.value,
+    click: () => createProject()
+  }
+]
 
+const findProject = async (attrs, search) => {
+  try {
+
+    projetos.value = []
+
+    if (typeof search !== 'string') return
+    if (search.length < 6) throw new Error('Digite pelo menos 6 caracteres para buscar um projeto')
+
+    const { data } = await getProjects(search)
+
+    projetos.value = data
+
+    await projetoRef?.value?.click()
+
+  } catch (error) {}
+}
+
+const notExistProject = async () => projetos.value.length === 0 && formValue.value.projeto_id ? enableModal.confirm = true : null
+
+const createProject = async () => {
+  try {
+    const { success, message, data } = await createProjectAPI(formValue.value.projeto_id)
+
+    if(!success) throw new Error(message)
+
+    formValue.value.projeto_id = data.id
+
+    enableModal.confirm = false
+
+    findProject(null, data.nome)
+
+  } catch (error) {
+    console.error(error)
+    $toast.error('Erro ao criar projeto')
+  }
+}
+
+watch(() => formValue.value.empresa_id, existRelation)
 
 </script>
 <style scoped></style>

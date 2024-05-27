@@ -19,6 +19,7 @@
       :show-borders="outlined"
       :no-data-text="noDataText"
       :word-wrap-enabled="lineBreak"
+      :remote-operations="{ filtering: true, sorting: true, paging: true, visible: true }"
       :hover-state-enabled="hoverRows"
       :column-auto-width="columnAutoWidth"
       :focused-row-enabled="selectableRows"
@@ -48,7 +49,7 @@
 
       <DxSearchPanel :visible="searchable" width="500px" />
 
-      <DxSelection mode="multiple" :show-check-boxed-mode="checkBoxesMode" v-if="selectionCheck" :allow-select-all="true" />
+      <DxSelection mode="multiple" :show-check-boxed-mode="checkBoxesMode" v-if="selectionCheck"  />
 
       <DxSorting :mode="columns.some((el) => el.sortable) ? 'multiple' : 'none'" />
 

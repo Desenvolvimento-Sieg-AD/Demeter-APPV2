@@ -14,8 +14,8 @@
         allowColumnResizing
         allow-column-reordering
         key-stored="pagamentos-table"
-        :allowed-page-sizes="[5, 15, 10, 25]"
-        noDataText="Não há nenhuma solicitação de pagamento"
+        :allowed-page-sizes="[5, 10, 15, 25]"
+        noDataText="Não há nenhuma solicitação provisionada"
         page="financeiro"
       >
         <template #item-usuario="{ data: { data: item } }">
@@ -143,7 +143,6 @@
 // * IMPORT
 
 import CustomStore from 'devextreme/data/custom_store'
-import { getPagamentoByScope, postStatus, omie } from '@api'
 const { $toast } = useNuxtApp()
 const colums = getColumns('financeiro')
 const access = useRuntimeConfig()
@@ -233,29 +232,75 @@ const validBeforeSend = async () => {
   await sendStatus(status_id, lista_id)
 }
 
-const pushData = async () => {
-  loadingTable.value = true
-  try {
-    const { success, message, data } = await getPagamentoByScope('financeiroProvisionados')
-    if (!success) throw new Error(message)
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
-    data.map((item) => {
-      // item.setor = item.usuario.setores[0].sigla
-      item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
-      item.lote = item.movimentacoes_pagamento.at().lote
-    })
+function formatFilter(filterArray) {
+	const formattedFilters = [];
 
-    itens.value = data
+	for (let i = 0; i < filterArray.length; i++) {
+    
+		if (filterArray[i] === 'or') continue;
 
-    loadingTable.value = false
-  } catch (error) {
-    console.error(error.message)
-    $toast.error('Erro ao buscar dados')
-    loadingTable.value = false
-  }
+		const fieldName = filterArray[i][0];
+		const value = filterArray[i][2];
+
+		formattedFilters.push({ fieldName, value });
+	}
+
+	return formattedFilters;
 }
+const getPage = async () => {
 
-await pushData()
+	itens.value = new CustomStore({
+		key: 'id',
+		async load(loadOptions) {
+
+			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
+      
+			const queryString = paramsName
+				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
+				.map((paramName) => {
+					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
+					return { [paramName]: loadOptions[paramName] };
+				});
+
+			const mergedObject = queryString.reduce((acc, obj) => {
+				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
+				return acc;
+			}, {});
+
+			try {
+				const { success, message, data } = await useApi(`/pagamento/scope/financeiroProvisionados`, {
+					query: {
+						paging: true,
+						limit: mergedObject.take,
+						offset: mergedObject.skip,
+						sort: mergedObject.sort,
+						filter: JSON.stringify(mergedObject.filter),
+					},
+				});
+
+				if (!success) throw new Error(message);
+
+        data.data.map((item) => {
+          item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
+          item.lote = item.movimentacoes_pagamento.at().lote
+        })
+
+				return {
+					data: data.data,
+					totalCount: data.count,
+				};
+			} catch (error) {
+				console.log(error.message);
+				$toast.error(error.message);
+			}
+		},
+	});
+};
+
+await getPage();
+
 </script>
 
 <style scoped>

@@ -52,8 +52,8 @@ const tabelas: ITables = {
     { title: 'Descrição pagamento', value: 'descricao', sortable: true, filterable: true, visible: false },
     { title: 'Vencimento', value: 'data', sortable: true, reorderable: true, filterable: false, visible: true, width: 120 },
     { title: 'Valor', value: 'valor_total', sortable: true, filterable: false, visible: true },
-    { title: 'NF', value: 'anexo', sortable: true, filterable: false, visible: true, width: 70 },
-    { title: 'DOC', value: 'doc', sortable: true, filterable: false, visible: true, width: 70 },
+    { title: 'NF', value: 'anexo', filterable: false, visible: true, width: 70 },
+    { title: 'DOC', value: 'doc', filterable: false, visible: true, width: 70 },
     { title: 'Ações', value: 'actions', width: 120, fixed: true }
   ],
   financeiro: [
@@ -65,7 +65,7 @@ const tabelas: ITables = {
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
     { title: 'Nome Fantasia', value: 'fornecedor.nome_fantasia', sortable: true, filterable: true, visible: false },
     { title: 'Tipo Forncedor', value: 'tipo', sortable: true, filterable: true, visible: false },
-    { title: 'Doc.', value: 'documento', sortable: true, filterable: true, visible: false },
+    { title: 'Doc.', value: 'documento', filterable: true, visible: false },
     { title: 'Empresa', value: 'empresa.apelido', sortable: true, filterable: true, visible: true, width: 110 },
     { title: 'Conta', value: 'conta_empresa.descricao', sortable: true, filterable: true, visible: false },
     { title: 'Motivo', value: 'motivo', sortable: true, filterable: false, visible: false },
@@ -76,8 +76,8 @@ const tabelas: ITables = {
     { title: 'Solicitação', value: 'created_at', sortable: true, filterable: false, visible: true, width: 120 },
     { title: 'Vencimento', value: 'data', sortable: true, reorderable: true, filterable: false, visible: true, width: 120 },
     { title: 'Valor', value: 'valor_total', sortable: true, filterable: false, visible: true },
-    { title: 'NF', value: 'anexo', sortable: true, filterable: false, visible: true, width: 70 },
-    { title: 'DOC', value: 'doc', sortable: true, filterable: false, visible: true, width: 70 },
+    { title: 'NF', value: 'anexo',  filterable: false, visible: true, width: 70 },
+    { title: 'DOC', value: 'doc', filterable: false, visible: true, width: 70 },
     { title: 'Ações', value: 'actions', width: 100, fixed: true }
   ],
   historico: [
@@ -100,8 +100,8 @@ const tabelas: ITables = {
     // { title: 'Data de aprovação', value: 'data_aprovacao', sortable: true, reorderable: true, filterable: false, visible: true },
     { title: 'Vencimento', value: 'data', sortable: true, reorderable: true, filterable: false, visible: true, width: 120 },
     { title: 'Valor', value: 'valor_total', sortable: true, filterable: false, visible: true },
-    { title: 'NF', value: 'anexo', sortable: true, filterable: false, visible: true, width: 70 },
-    { title: 'DOC', value: 'doc', sortable: true, filterable: false, visible: true, width: 80 },
+    { title: 'NF', value: 'anexo',  filterable: false, visible: true, width: 70 },
+    { title: 'DOC', value: 'doc', filterable: false, visible: true, width: 70 },
     { title: 'Ações', value: 'actions', width: 80, fixed: true }
   ],
   usuario: [
@@ -122,8 +122,8 @@ const tabelas: ITables = {
     // { title: 'Data de aprovação', value: 'data_aprovacao', sortable: true, reorderable: true, filterable: false, visible: true },
     { title: 'Vencimento', value: 'data', sortable: true, reorderable: true, filterable: false, visible: true, width: 120 },
     { title: 'Valor', value: 'valor_total', sortable: true, filterable: false, visible: true },
-    { title: 'NF', value: 'anexo', sortable: true, filterable: false, visible: true, width: 80 },
-    { title: 'DOC', value: 'doc', sortable: true, filterable: false, visible: true, width: 80 },
+    { title: 'NF', value: 'anexo',  filterable: false, visible: true, width: 70 },
+    { title: 'DOC', value: 'doc', filterable: false, visible: true, width: 70 },
     { title: 'Ações', value: 'actions', width: 120, fixed: true }
   ]
 }

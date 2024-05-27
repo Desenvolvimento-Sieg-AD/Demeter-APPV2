@@ -111,7 +111,7 @@
 
     </LayoutForm>
 
-    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="pushData()" />
+    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="getPage()" />
 
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
@@ -135,6 +135,8 @@
 </template>
 
 <script setup>
+import CustomStore from 'devextreme/data/custom_store'
+
 import { getPagamentoByScope, postStatus } from '@api'
 const paymentGerencia = await getPagamentoByScope('gerencia')
 const { $toast } = useNuxtApp()
@@ -160,7 +162,7 @@ const permiteEditar = ref(false)
 const justificativa = ref(null)
 
 onMounted(async () => {
-  await pushData()
+  await getPage()
 })
 const handleSelectionChange = (items) => {
   const ids = items.map((item) => item.id)
@@ -298,7 +300,7 @@ const sendStatus = async (status, id) => {
     enableModal.confirm = false
     enableModal.allConfirm = false
     $toast.success('Status alterado com sucesso')
-    await pushData()
+    await getPage()
   } catch (error) {
     console.log(error.message)
     $toast.error(error.message)
@@ -371,20 +373,69 @@ const disapprovePayment = async (ids) => {
   }
 }
 
-const pushData = async () => {
-  try {
-    const { success, message, data } = await getPagamentoByScope('gerencia')
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
-    if (!success) throw new Error(message)
+function formatFilter(filterArray) {
+	const formattedFilters = [];
 
-    // data.map((item) => (item.setor = item.usuario.setores[0].sigla))
+	for (let i = 0; i < filterArray.length; i++) {
+    
+		if (filterArray[i] === 'or') continue;
 
-    itens.value = data
-  } catch (error) {
-    console.log(error.message)
-    $toast.error('Erro ao buscar pagamentos')
-  }
+		const fieldName = filterArray[i][0];
+		const value = filterArray[i][2];
+
+		formattedFilters.push({ fieldName, value });
+	}
+
+	return formattedFilters;
 }
+const getPage = async () => {
+
+	itens.value = new CustomStore({
+		key: 'id',
+		async load(loadOptions) {
+
+			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
+      
+			const queryString = paramsName
+				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
+				.map((paramName) => {
+					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
+					return { [paramName]: loadOptions[paramName] };
+				});
+
+			const mergedObject = queryString.reduce((acc, obj) => {
+				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
+				return acc;
+			}, {});
+
+			try {
+				const { success, message, data } = await useApi(`/pagamento/scope/gerencia`, {
+					query: {
+						paging: true,
+						limit: mergedObject.take,
+						offset: mergedObject.skip,
+						sort: mergedObject.sort,
+						filter: JSON.stringify(mergedObject.filter),
+					},
+				});
+
+				if (!success) throw new Error(message);
+
+				return {
+					data: data.data,
+					totalCount: data.count,
+				};
+			} catch (error) {
+				console.log(error.message);
+				$toast.error(error.message);
+			}
+		},
+	});
+};
+
+await getPage();
 </script>
 
 <style scoped>
