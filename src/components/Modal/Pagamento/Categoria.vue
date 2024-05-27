@@ -92,12 +92,12 @@ watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
 
 },{ immediate: true })
 
-const loadCategorias = async (setor_id, internacional) => {
+const loadCategorias = async (setor_id, internacional, nacional) => {
   try {
 
     if(!setor_id) return
 
-    const { success, message, data } = await getCategoriasUsuario(setor_id, internacional)
+    const { success, message, data } = await getCategoriasUsuario(setor_id, internacional, nacional)
     if (!success) throw new Error(message)
 
     const tempGrupos = []
@@ -120,16 +120,16 @@ const loadCategorias = async (setor_id, internacional) => {
 }
 
 watch(() => formValue.value.setor_id, async (value) => {
-  if(value) loadCategorias(value)
+  if(value) loadCategorias(value, null, true)
 },{ immediate: true })
 
 onMounted(() => {
-  if (formValue.value.setor_id) loadCategorias(formValue.value.setor_id)
+  if (formValue.value.setor_id) loadCategorias(formValue.value.setor_id, null, true)
 })
 
 watch(() => formValue.value.fornecedor.internacional, async (value) => {
-  if (value) loadCategorias(formValue.value.setor_id, value)
-  else loadCategorias(formValue.value.setor_id)
+  if (value) loadCategorias(formValue.value.setor_id, value, null)
+  else loadCategorias(formValue.value.setor_id, null, true)
 },{ immediate: true })
 
 </script>

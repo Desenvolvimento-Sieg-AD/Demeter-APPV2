@@ -9,7 +9,7 @@ export async function getCategorias() {
   }
 }
 
-export async function getCategoriasUsuario(setor_id: number, internacional: boolean = false, nacional: boolean = true) {
+export async function getCategoriasUsuario(setor_id: number, internacional: boolean | null, nacional: boolean | null) {
   try {
     const { success, message, data } = await useApi(`/categoria/usuario/${setor_id}`, {
       method: 'POST',
