@@ -9,11 +9,11 @@ export async function getCategorias() {
   }
 }
 
-export async function getCategoriasUsuario(setor_id: number, internacional: boolean = false) {
+export async function getCategoriasUsuario(setor_id: number, internacional: boolean = false, nacional: boolean = true) {
   try {
     const { success, message, data } = await useApi(`/categoria/usuario/${setor_id}`, {
       method: 'POST',
-      body: JSON.stringify({ internacional })
+      body: JSON.stringify({ internacional, nacional })
     })
     if (!success) throw new Error(message)
 
