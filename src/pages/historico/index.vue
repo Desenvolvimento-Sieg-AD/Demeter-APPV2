@@ -14,7 +14,7 @@
         choose-columns
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25]"
-        :page-size="10"
+        :page-size="15"
         pager
       >
         <template #item-usuario="{ data: { data: item } }">
@@ -233,7 +233,7 @@ const getPage = async () => {
 				};
 			} catch (error) {
 				console.log(error.message);
-				$toast.error(error.message);
+				$toast.error('Erro ao carregar os pagamentos');
 			}
 		},
 	});

@@ -3,6 +3,7 @@
     <CustomHeader :title="title" />
     <LayoutForm>
       <CustomTableSelect
+        ref="customRef"
         :columns="columns"
         :items="pagamentos"
         :actions="actions"
@@ -14,7 +15,7 @@
         choose-columns
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25]"
-        :page-size="10"
+        :page-size="15"
         enableAddButton
         createTitle="NOVO PAGAMENTO"
         createText="Ir para página de solicitação"
@@ -152,6 +153,7 @@ const pagamentos = ref([])
 const tipo_anexo_id = ref(null)
 const loadingTable = ref(false)
 const justificativa = ref(null)
+const customRef = ref(null)
 
 const enableModal = reactive({
   cancel: false,
@@ -336,7 +338,9 @@ const getPage = async () => {
 				};
 			} catch (error) {
 				console.log(error.message);
-				$toast.error(error.message);
+				$toast.error('Erro ao carregar os pagamentos');
+        await customRef.value.refresh()
+
 			}
 		},
 	});

@@ -440,7 +440,7 @@ const getPage = async () => {
 				};
 			} catch (error) {
 				console.log(error.message);
-				$toast.error(error.message);
+        $toast.error('Erro ao carregar os pagamentos');
 			}
 		},
 	});
