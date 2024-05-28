@@ -59,7 +59,7 @@ const tabelas: ITables = {
   financeiro: [
     { title: 'Solicit.', value: 'usuario.sigla', sortable: true, filterable: true, visible: true, width: 100 },
     { title: 'Setor', value: 'setor.sigla', sortable: true, filterable: true, visible: true, width: 90 },
-    { title: 'Status', value: 'status', sortable: true, filterable: true, visible: true, width: 150 },
+    { title: 'Status', value: 'movimentacoes_pagamento.status_pagamento', sortable: true, filterable: true, visible: true, width: 150 },
     { title: 'Urgente', value: 'urgente', sortable: true, filterable: true, visible: true, width: 100 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true, width: 80   },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
@@ -83,7 +83,7 @@ const tabelas: ITables = {
   historico: [
     { title: 'Solicit.', value: 'usuario.sigla', sortable: true, filterable: true, visible: true, width: 100 },
     { title: 'Setor', value: 'setor.sigla', sortable: true, filterable: true, visible: true, width: 90 },
-    { title: 'Status', value: 'status', sortable: true, filterable: true, visible: true, width: 125 },
+    { title: 'Status', value: 'movimentacoes_pagamento.status_pagamento', sortable: true, filterable: true, visible: true, width: 125 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
     { title: 'Nome Fantasia', value: 'fornecedor.nome_fantasia', sortable: true, filterable: true, visible: false },
@@ -105,7 +105,7 @@ const tabelas: ITables = {
     { title: 'Ações', value: 'actions', width: 80, fixed: true }
   ],
   usuario: [
-    { title: 'Status', value: 'status', sortable: true, filterable: true, visible: true, width: 125 },
+    { title: 'Status', value: 'movimentacoes_pagamento.status_pagamento', sortable: true, filterable: true, visible: true, width: 125 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
     { title: 'Nome Fantasia', value: 'fornecedor.nome_fantasia', sortable: true, filterable: true, visible: false },

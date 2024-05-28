@@ -36,7 +36,7 @@
           </div>
         </template>
 
-        <template #item-status="{ data: { data: item } }">
+        <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
               <p class="font-weight-bold">
@@ -173,15 +173,16 @@ const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuari
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
 function formatFilter(filterArray) {
+
 	const formattedFilters = [];
 
 	for (let i = 0; i < filterArray.length; i++) {
 
 		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
-    if(filterArray[i] === filterArray['filterValue']) continue;
+    if (filterArray[i] === filterArray['filterValue']) continue;
 
-		const fieldName = filterArray[i];
-		const value = filterArray['filterValue'];
+		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
+		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
 
 		formattedFilters.push({ fieldName, value });
 	}
@@ -222,7 +223,7 @@ const getPage = async () => {
 				if (!success) throw new Error(message);
 
         data.data.map((item) => {
-          item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
+          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0].status_pagamento.nome
           item.lote = item.movimentacoes_pagamento.at().lote
         })
 

@@ -33,7 +33,7 @@
           </div>
         </template>
 
-        <template #item-status="{ data: { data: item } }">
+        <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
           <div class="template">
             <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
               <p class="font-weight-bold">
@@ -275,20 +275,23 @@ const cancelPayment = async (ids) => {
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
 function formatFilter(filterArray) {
+
 	const formattedFilters = [];
 
 	for (let i = 0; i < filterArray.length; i++) {
-    
-		if (filterArray[i] === 'or') continue;
 
-		const fieldName = filterArray[i][0];
-		const value = filterArray[i][2];
+		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
+    if (filterArray[i] === filterArray['filterValue']) continue;
+
+		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
+		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
 
 		formattedFilters.push({ fieldName, value });
 	}
 
 	return formattedFilters;
 }
+
 const getPage = async () => {
 
 	pagamentos.value = new CustomStore({
@@ -323,7 +326,7 @@ const getPage = async () => {
 				if (!success) throw new Error(message);
 
         data.data.map((item) => {
-          item.status = item.movimentacoes_pagamento[0].status_pagamento.nome
+          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0].status_pagamento.nome
           item.lote = item.movimentacoes_pagamento.at().lote
         })
 

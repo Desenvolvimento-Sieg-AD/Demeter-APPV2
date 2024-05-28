@@ -376,14 +376,16 @@ const disapprovePayment = async (ids) => {
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
 
 function formatFilter(filterArray) {
+
 	const formattedFilters = [];
 
 	for (let i = 0; i < filterArray.length; i++) {
-    
-		if (filterArray[i] === 'or') continue;
 
-		const fieldName = filterArray[i][0];
-		const value = filterArray[i][2];
+		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
+    if (filterArray[i] === filterArray['filterValue']) continue;
+
+		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
+		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
 
 		formattedFilters.push({ fieldName, value });
 	}
