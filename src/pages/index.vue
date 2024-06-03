@@ -28,13 +28,19 @@
           </div>
         </template>
 
-        <template #item-tipo="{ data: { data: item } }">
+        <template #[`item-projeto.nome`]="{ data: { data: item } }">
+          <div class="template">
+            {{ item?.projeto?.nome ?? 'Sem projeto' }}
+          </div>
+        </template>
+
+        <template #[`item-fornecedor.tipo`]="{ data: { data: item } }">
           <div class="template">
             {{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
           </div>
         </template>
 
-        <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
+        <template #[`item-movimentacoes_pagamento.status_pagamento`]="{ data: { data: item } }">
           <div class="template">
             <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
               <p class="font-weight-bold">
@@ -44,7 +50,7 @@
           </div>
         </template>
 
-        <template #item-documento="{ data: { data: item } }">
+        <template #[`item-fornecedor.documento`]="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             {{ documentByType(item.fornecedor.tipo, item.fornecedor.documento) }}
           </div>
@@ -101,7 +107,7 @@
         </template>
         <template #item-created_at="{ data: { data: item } }">
           <div class="template">
-            {{ formatDate(item.created_at) }}
+            {{ formatDateTime(item.created_at) }}
           </div>
         </template>
 
@@ -244,7 +250,11 @@ const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
 const nameFiles = (anexos) => anexos.map((anexo) => `${anexo.nome}  -  `)
 
-const documentByType = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(documento) : maskCpf(documento))
+const documentByType = (tipo, documento) => {
+  
+  if(!documento) return ''
+  return tipo === 'juridico' ? maskCnpj(documento) : maskCpf(documento)
+}
 
 const isNotStatusAllowed = (status) => status !== 'Recusado' && status !== 'Cancelado'
 

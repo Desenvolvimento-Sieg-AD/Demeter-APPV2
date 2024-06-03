@@ -15,8 +15,7 @@ export default defineNuxtConfig({
   srcDir: 'src',
   app: {
     head: {
-      titleTemplate: '%s - Pagamentos',
-      title: 'Início',
+      titleTemplate: 'Sieg Pagamentos',
       htmlAttrs: { lang: 'pt-br' },
       meta: [
         { charset: 'utf-8' },

@@ -35,8 +35,7 @@
             {{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
           </div>
         </template>
-
-        <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
+        <template #[`item-movimentacoes_pagamento.status_pagamento`]="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <v-chip :color="item.movimentacoes_pagamento[0]?.status_pagamento?.cor">
               <p class="font-weight-bold">

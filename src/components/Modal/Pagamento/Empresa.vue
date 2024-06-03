@@ -144,7 +144,6 @@ const findProject = async (attrs, search) => {
     projetos.value = []
 
     if (typeof search !== 'string') return
-    if (search.length < 6) throw new Error('Digite pelo menos 6 caracteres para buscar um projeto')
 
     const { data } = await getProjects(search)
 
