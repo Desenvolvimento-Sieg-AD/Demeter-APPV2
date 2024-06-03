@@ -155,7 +155,7 @@ const findProject = async (attrs, search) => {
   } catch (error) {}
 }
 
-const notExistProject = async () => projetos.value.length === 0 && formValue.value.projeto_id ? enableModal.confirm = true : null
+const notExistProject = async () => formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id)) ? enableModal.confirm = true : null
 
 const createProject = async () => {
   try {

@@ -315,7 +315,7 @@ const getPage = async () => {
 			}, {});
 
 			try {
-				const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
+				const { success, message, data } = await useApi(`/pagamento/scope/usuario`, {
 					query: {
 						paging: true,
 						limit: mergedObject.take,
@@ -327,9 +327,9 @@ const getPage = async () => {
 
 				if (!success) throw new Error(message);
 
-        data.data.map((item) => {
-          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0].status_pagamento.nome
-          item.lote = item.movimentacoes_pagamento.at().lote
+        data.data.forEach((item) => {
+          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
+          item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
 				return {

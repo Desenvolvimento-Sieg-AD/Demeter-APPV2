@@ -38,9 +38,9 @@
 
         <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
+            <v-chip :color="item.movimentacoes_pagamento[0]?.status_pagamento?.cor">
               <p class="font-weight-bold">
-                {{ item.movimentacoes_pagamento[0].status_pagamento.label }}
+                {{ item.movimentacoes_pagamento[0]?.status_pagamento?.nome }}
               </p>
             </v-chip>
           </div>
@@ -178,7 +178,7 @@ function formatFilter(filterArray) {
 
 	for (let i = 0; i < filterArray.length; i++) {
 
-		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
+		if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue;
     if (filterArray[i] === filterArray['filterValue']) continue;
 
 		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
@@ -222,15 +222,12 @@ const getPage = async () => {
 
 				if (!success) throw new Error(message);
 
-        data.data.map((item) => {
-          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0].status_pagamento.nome
-          item.lote = item.movimentacoes_pagamento.at().lote
+        data.data.forEach((item) => {
+          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
+          item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-				return {
-					data: data.data,
-					totalCount: data.count,
-				};
+				return { data: data.data, totalCount: data.count };
 			} catch (error) {
 				console.log(error.message);
 				$toast.error('Erro ao carregar os pagamentos');

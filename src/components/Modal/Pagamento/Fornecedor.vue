@@ -27,7 +27,7 @@
     </v-col>
 
     <v-col cols="12" md="6">
-      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="number" />
+      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="chave" />
     </v-col>
     
     <v-col cols="12" md="3" class="mt-n7">
