@@ -1,11 +1,11 @@
 <template>
   <CustomText title="Observações" class="ml-2" color="#118B9F" size="18" :bold="true" />
   <v-row class="pa-2 mb-n5">
-    <v-col cols="12" md="4">
+    <v-col cols="5" >
       <CustomInput required label="Motivo" type="textarea" :rows="5" :counter="300" v-model="formValue.motivo" append-inner-icon="mdi-chat-question-outline" hide-details />
     </v-col>
 
-    <v-col cols="8">
+    <v-col cols="7">
       <CustomInput type="textarea" :counter="300" no-resize :rows="5" label="Observações" v-model="formValue.dados_complementares" hide-details />
     </v-col>
   </v-row>

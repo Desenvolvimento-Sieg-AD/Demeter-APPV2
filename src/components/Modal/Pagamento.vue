@@ -33,7 +33,7 @@
 
         <v-row align="center">
           <v-col cols="4">
-            <CustomInput readonly label="Solicitante" hide-details v-model="pagamento.usuario.nome" />
+            <CustomInput readonly label="Solicitante" hide-details v-model="pagamento.usuario.sigla" />
           </v-col>
 
           <v-col cols="2">
@@ -71,7 +71,7 @@
           </v-col>
 
           <v-col cols="3">
-            <CustomInput readonly :label="isInternacional ? 'Invoice' : 'Número NF'" hide-details v-model="pagamento.numero_nf" />
+            <CustomInput readonly :label="isInternacional ? 'Invoice' : 'Número NF'" hide-details v-model="numero_nf" />
           </v-col>
 
           <v-col cols="9" v-if="!isInternacional">
@@ -197,14 +197,13 @@ const dados_bancarios = ref(null)
 const dados_conta = ref(null)
 const outhers = ref(null)
 const chave_nf = ref(null)
+const numero_nf = ref(null)
 
 const isTED = computed(() => pagamento.value.tipo_pagamento.nome === 'TED')
 
 const labelDataPayment = computed(() => {
   if (pagamento.value.tipo_pagamento.nome === 'PIX') return 'Chave PIX'
   if (pagamento.value.tipo_pagamento.nome === 'Boleto') return 'Código de Barras'
-  if (pagamento.value.tipo_pagamento.nome === 'Cartão de crédito') return 'Número do Cartão'
-  if (pagamento.value.tipo_pagamento.nome === 'Cartão de débito') return 'Número do Cartão'
   else return 'Dados do Pagamento'
 })
 
@@ -272,11 +271,13 @@ const getPagamento = async () => {
 
     dados_conta.value = `${dados_bancarios?.value?.conta} - ${dados_bancarios?.value?.digito}`
 
-    outhers.value = dados_bancarios?.value?.outhers
+    outhers.value = dados_bancarios?.value?.outhers ?? 'Não informado'
 
     urgente.value = pagamento.value.urgente ? 'Sim' : 'Não'
 
     chave_nf.value = pagamento.value.chave_nf ?? 'Não informado'
+
+    numero_nf.value = pagamento.value.numero_nf ?? 'Não informado'
 
     loading.value = false
   } catch (error) {

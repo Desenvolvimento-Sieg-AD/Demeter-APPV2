@@ -97,7 +97,7 @@ const valor_total = computed(() => formatCurrency(props.item.valor_total));
 const data_vencimento = computed(() => formatDate(props.item.data_vencimento));
 
 watch(() => props.enable, (value) => {
-	if (!value) justificativaValue.value = '';	
+	if (!value) justificativaValue.value = null;	
 });
 
 </script>

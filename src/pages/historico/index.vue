@@ -89,9 +89,16 @@
             {{ formatDate(item.movimentacoes_pagamento[0].data_inicio) }}
           </div>
         </template>
+
         <template #item-created_at="{ data: { data: item } }">
           <div class="template">
             {{ formatDate(item.created_at) }}
+          </div>
+        </template>
+
+        <template #item-data_pagamento="{ data: { data: item } }">
+          <div class="d-flex align-center justify-center text-center">
+            {{ item.data_pagamento ?? 'Não pago' }}
           </div>
         </template>
 
@@ -225,6 +232,11 @@ const getPage = async () => {
 
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
+
+          if(item.movimentacoes_pagamento[0]?.status_pagamento?.nome === 'Pago') {
+            item.data_pagamento = formatDate(item.movimentacoes_pagamento[0].data_inicio)
+          }
+
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 

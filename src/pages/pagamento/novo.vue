@@ -6,7 +6,7 @@
       </v-btn>
     </CustomHeader>
 
-    <LayoutForm class="mb-12" height="calc(100vh - 165px)">
+    <LayoutForm class="mb-12" height="calc(100vh - 175px)">
       <v-form ref="formValidate">
         <v-card class="card-pagamento" flat>
           <ModalPagamentoEmpresa v-model:form="form" />
@@ -37,6 +37,7 @@
         </v-card>
 
         <v-row class="mt-n4 d-flex justify-center align-center ga-2">
+          
           <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()" width="200" height="43" :loading="action.loading">
             <v-icon size="large" :icon="action.icon" />
             <v-tooltip :text="action.title" location="bottom" activator="parent" />

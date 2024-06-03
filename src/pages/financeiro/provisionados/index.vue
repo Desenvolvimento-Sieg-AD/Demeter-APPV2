@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CustomHeader title="Financeiro" />
+    <CustomHeader title="Financeiro - Pagamentos Provisionados" />
     <LayoutForm>
       <CustomTableSelect
         pager
@@ -144,7 +144,7 @@
 
 import CustomStore from 'devextreme/data/custom_store'
 const { $toast } = useNuxtApp()
-const colums = getColumns('financeiro')
+const colums = getColumns('provisionados')
 const access = useRuntimeConfig()
 const path = access.public.PAGAMENTO_PATH
 

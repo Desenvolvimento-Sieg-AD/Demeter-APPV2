@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CustomHeader title="Financeiro" />
+    <CustomHeader title="Financeiro - Pendentes de Aprovação" />
     <LayoutForm>
       <CustomTableSelect
         pager
