@@ -315,7 +315,6 @@ const approvePayment = () => {
   emit('approvePayment')
 }
 
-
 defineExpose({
   updateDimentions: () => {
     if (customTable.value) customTable.value.instance?.updateDimensions()
@@ -419,9 +418,7 @@ const forceRender = async () => {
   render.value = true
 }
 
-watch(
-  () => props.loading,
-  () => {
+watch(() => props.loading,() => {
     forceRender()
     storageKey.value = `${props.keyStored}-config`
   }

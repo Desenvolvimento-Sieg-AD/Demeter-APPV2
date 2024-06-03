@@ -7,6 +7,8 @@
         :items="itens"
         :actions="actions"
         :loading="false"
+        store-state
+        key-stored="pagamentos-historico-table"
         scrolling="standard"
         allow-search
         :noDataText="'Não há registros de pagamentos'"

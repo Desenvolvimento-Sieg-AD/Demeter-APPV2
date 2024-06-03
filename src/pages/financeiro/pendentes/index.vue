@@ -13,7 +13,7 @@
         :actions="actions"
         allowColumnResizing
         allow-column-reordering
-        key-stored="pagamentos-table"
+        key-stored="pagamentos-pendentes-table"
         :allowed-page-sizes="[5, 10, 15, 25, 30]"
         :page-size="30"
         @selectionChanged="handleSelectionChange"

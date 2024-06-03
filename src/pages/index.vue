@@ -13,10 +13,12 @@
         allow-search
         allowColumnResizing
         choose-columns
+        store-state
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25]"
         :page-size="15"
         enableAddButton
+        key-stored="pagamentos-usuario-table"
         createTitle="NOVO PAGAMENTO"
         createText="Ir para página de solicitação"
         @add="router.push(`/pagamento/novo`)"

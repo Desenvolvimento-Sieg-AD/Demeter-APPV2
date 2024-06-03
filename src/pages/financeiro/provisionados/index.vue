@@ -13,7 +13,7 @@
         :actions="actions"
         allowColumnResizing
         allow-column-reordering
-        key-stored="pagamentos-table"
+        key-stored="pagamentos-provisionados-table"
         :allowed-page-sizes="[5, 10, 15, 25]"
         noDataText="Não há nenhuma solicitação provisionada"
         page="financeiro"

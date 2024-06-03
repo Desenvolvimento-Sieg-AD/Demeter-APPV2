@@ -19,7 +19,7 @@
         :page-size="15"
         pager
         store-state
-        key-stored="gerencia"
+        key-stored="pagamentos-gerencia-table"
         page="gerencia"
         :paymentsSelecteds="idsSelect.length > 0"
         @disapprovePayment="openDisapprovePayment"
