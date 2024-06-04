@@ -28,7 +28,7 @@
 					</template>
 				</v-list-item>
 
-				<v-list-group v-else :value="getItemValue(item)" fluid>
+				<v-list-group v-else :value="getItemValue(item)" fluid v-show="item.setores.includes('ALL') || item.setores.some((setor) => setor === user?.tipo?.sigla)">
 					<template #activator="{ props }">
 						<v-list-item v-bind="props" :value="item.active" :prepend-icon="item.icon" style="color: #118b9f">
 							<template #title>
@@ -112,8 +112,8 @@ const menuOptions = ref([
 	   { title: 'Provisionados', icon: 'mdi-cash-sync', to: '/financeiro/provisionados', color: 'blue'} 
 	   ]
 	},
-	{ title: 'Gerência', icon: 'mdi-account-tie-outline', to: '/gerencia', setores: ['ALL'] },
-	{ title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['ALL'] },
+	{ title: 'Gerência', icon: 'mdi-account-tie-outline', to: '/gerencia', setores: ['GER', 'ADM'] },
+	{ title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['FIN', 'ADM'] },
 ]);
 
 const menuFooter = ref([
