@@ -40,6 +40,7 @@
 
     <v-col>
       <CustomInput
+        v-if="formValue.tipo_chave_pix_id !== 4"
         :disabled="!tipos.descricao"
         type="text"
         :label="!tipos.descricao ? 'Descrição' : tipos.descricao"
@@ -50,6 +51,17 @@
         @click:append-inner="pasteFromClipBoardDadosBancarios"
         :required="tipos.obrigatorio"
       />
+
+    <CustomInput
+      v-else
+      type="text"
+      label="E-mail"
+      append-inner-icon="mdi-content-copy"
+      v-model="formValue.dados_bancarios.outhers"
+      :required="tipos.obrigatorio"
+      :rules="emailRules"
+    />
+
     </v-col>
   </v-row>
 
@@ -107,6 +119,8 @@ const formValue = computed({
 const tipos = ref(false)
 const cards = ref([])
 const chavesPix = ref([])
+
+const emailRules = [(v) => /.+@.+\..+/.test(v) || 'E-mail inválido']
 
 const tiposNormalize = [2, 5, 6]
 
