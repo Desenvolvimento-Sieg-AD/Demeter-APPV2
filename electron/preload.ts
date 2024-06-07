@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   getUser: () => ipcRenderer.invoke('os:getUser'),
@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   reload: () => ipcRenderer.invoke('reload:app', null),
   sendToken: (token: string) => ipcRenderer.invoke('sendToken:app', token),
   sendLink: (link: string) => ipcRenderer.invoke('sendLink:app', link),
-  updateAvailable: (callback: any) => ipcRenderer.on('updateAvailable:app', (event: IpcRendererEvent, version: string) => callback(event, version))
-});
+  updateAvailable: (callback: any) => ipcRenderer.on('updateAvailable:app', (event: IpcRendererEvent, version: string) => callback(event, version)),
+  getVersion: () => ipcRenderer.invoke('get:version')
+})
