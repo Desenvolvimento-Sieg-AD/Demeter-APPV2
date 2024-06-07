@@ -48,13 +48,12 @@
       />
     </v-col>
 
-    <LazyModalConfirmProjeto 
-      v-model:form="formValue" 
-      v-model:enable="enableModal.confirm" 
-      message="O projeto mencionado não existe no sistema, deseja confirmar a criação desse projeto?" 
-      :actions="modalActions"  
+    <LazyModalConfirmProjeto
+      v-model:form="formValue"
+      v-model:enable="enableModal.confirm"
+      message="O projeto mencionado não existe no sistema, deseja confirmar a criação desse projeto?"
+      :actions="modalActions"
     />
-    
   </v-row>
 </template>
 <script setup>
@@ -66,7 +65,13 @@ const { data: empresas } = await getEmpresa()
 const setores = computed(() => user.setores)
 
 const { user } = useAuthStore()
-const requer_projeto = computed(() => setores.value.some((setor) => setor.requer_projeto))
+
+const requer_projeto = computed(() => {
+  if (!formValue.value.setor_id) return false
+
+  const find = setores.value.find((setor) => setor.id === formValue.value.setor_id)
+  return find ? find.requer_projeto : false
+})
 
 const { $toast } = useNuxtApp()
 
@@ -77,7 +82,7 @@ const loading = ref(false)
 const enableModal = reactive({ confirm: false })
 
 const itemProps = (item) => {
-  return { disabled: item.disabled, subtitle: item.disabled ? 'Setor não relacionado com a empresa' : ''}
+  return { disabled: item.disabled, subtitle: item.disabled ? 'Setor não relacionado com a empresa' : '' }
 }
 
 const props = defineProps({ form: { type: Object, required: true } })
@@ -104,18 +109,14 @@ const openFile = async (folder) => {
 
 const existRelation = async () => {
   try {
-
-    if(!formValue.value.empresa_id) return
+    if (!formValue.value.empresa_id) return
 
     for await (const setor of setores.value) {
-
       const { data } = await existRelationSetorWithEmpresa(setor.id, formValue.value.empresa_id)
 
       setor.disabled = false
       if (!data) setor.disabled = true
-
     }
-
   } catch (error) {
     console.error(error)
     $toast.error('Erro ao verificar relação entre setor e empresa')
@@ -127,7 +128,7 @@ const modalActions = [
     icon: 'mdi-close',
     title: 'Cancelar',
     type: 'cancel',
-    click: () => enableModal.confirm = false
+    click: () => (enableModal.confirm = false)
   },
   {
     icon: 'mdi-check',
@@ -140,7 +141,6 @@ const modalActions = [
 
 const findProject = async (attrs, search) => {
   try {
-
     projetos.value = []
 
     if (typeof search !== 'string') return
@@ -150,24 +150,22 @@ const findProject = async (attrs, search) => {
     projetos.value = data
 
     await projetoRef?.value?.click()
-
   } catch (error) {}
 }
 
-const notExistProject = async () => formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id)) ? enableModal.confirm = true : null
+const notExistProject = async () => (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id)) ? (enableModal.confirm = true) : null)
 
 const createProject = async () => {
   try {
     const { success, message, data } = await createProjectAPI(formValue.value.projeto_id)
 
-    if(!success) throw new Error(message)
+    if (!success) throw new Error(message)
 
     formValue.value.projeto_id = data.id
 
     enableModal.confirm = false
 
     findProject(null, data.nome)
-
   } catch (error) {
     console.error(error)
     $toast.error('Erro ao criar projeto')
@@ -175,6 +173,5 @@ const createProject = async () => {
 }
 
 watch(() => formValue.value.empresa_id, existRelation)
-
 </script>
 <style scoped></style>
