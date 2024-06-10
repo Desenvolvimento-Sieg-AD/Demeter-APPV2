@@ -5,12 +5,13 @@
 
       <v-col v-else-if="pagamento">
         <v-row align="center" class="mb-2">
-          <v-col cols="9" class="d-flex align-center justify-start pb-0">
+          <v-col cols="6" class="d-flex align-center justify-start pb-0">
             <h3 style="color: #118b9f">Dados do Pagamento</h3>
           </v-col>
-          <v-col cols="3" class="d-flex align-center justify-end pb-0">
+          <v-col cols="6" class="d-flex align-center justify-end pb-0 ga-2">
             <v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
             <v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1" />
+            <v-chip v-if="pagamento.updatedByUser?.sigla" class="text-body-2" :text="textUpdatedByUser" color="primary"/>
           </v-col>
         </v-row>
 
@@ -135,6 +136,7 @@
           <v-col v-if="pagamento.urgente">
             <CustomInput type="textarea" readonly label="Justificativa Urgência" hide-details :rows="2" v-model="pagamento.justificativa_urgente" />
           </v-col>
+
         </v-row>
 
         <v-divider class="my-6" v-if="pagamento?.anexos_pagamento?.length > 0" />
@@ -254,6 +256,11 @@ const actions = computed(() => [
     click: () => (enableValue.value = false)
   }
 ])
+
+const textUpdatedByUser = computed(() => {
+  if (!pagamento.value.updatedByUser) return ''
+  return `Atualizado por: ${pagamento.value.updatedByUser.sigla}`
+})
 
 //* METHODS
 

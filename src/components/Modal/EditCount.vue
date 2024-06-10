@@ -3,17 +3,14 @@
     <template #content>
       <v-container class="txt-center">
         <v-row justify="space-beetween" alilgn="center">
-          <v-col cols="auto">
-            <CustomText title="Solicitante:" color="black" size="16" :bold="true" />
-            {{ payment.usuario.nome }}
+          <v-col cols="6">
+            <CustomInput v-model="payment.usuario.nome" disabled label="Solicitante" />
           </v-col>
 
-          <v-spacer />
-
-          <v-col cols="auto">
-            <CustomText title="Valor:" class="ml-2" color="black" size="16" :bold="true" />
-            {{ formatCurrency(payment.valor_total) }}
+          <v-col cols="6">
+            <CustomInput v-model="payment.valor_total" disabled label="Valor" mask="money" />
           </v-col>
+
         </v-row>
 
         <v-row class="mt-3">
@@ -176,7 +173,8 @@ const getEmpresas = async () => {
 
 const getCategsUsuario = async () => {
   try {
-    const { data } = await getCategoriasUsuario(form.setor_id)
+
+    const { data } = await getCategoriasUsuario(12) // ? Financeiro
 
     const tempGrupos = []
 
