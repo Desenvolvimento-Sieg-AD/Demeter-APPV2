@@ -1,10 +1,6 @@
 <template>
   <div>
-    <CustomHeader title="Editar Pagamento">
-      <v-btn icon variant="plain" color="primary">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
-    </CustomHeader>
+    <CustomHeader title="Editar Pagamento"/>
 
     <LayoutForm class="mb-12">
       <v-form ref="formValidate">
@@ -44,7 +40,7 @@
         </div>
       </v-form>
     </LayoutForm>
-    <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
+    <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push({ path: `../financeiro/aprovadas`, query: { client_id: route.query.client_id } })">
       <v-icon>mdi-arrow-left</v-icon>
       <v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
     </v-btn>

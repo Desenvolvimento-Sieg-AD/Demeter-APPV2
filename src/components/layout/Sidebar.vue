@@ -52,9 +52,12 @@
       </v-list-item>
 
       <!-- version -->
-      <p>
-        <span class="sidebar-item">{{ version }}</span>
-      </p>
+      <div class="footer-version">
+        <p class="version-text">
+          <v-divider/>
+            v{{ version }}
+        </p>
+      </div>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -109,7 +112,7 @@ const menuOptions = ref([
     ]
   },
   { title: 'Gerência', icon: 'mdi-account-tie-outline', to: '/gerencia', setores: ['GER', 'ADM'] },
-  { title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['FIN', 'ADM'] }
+  { title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['FIN', 'ADM', 'GER'] }
 ])
 
 const menuFooter = ref([
@@ -162,5 +165,19 @@ watch(
 }
 .footer {
   margin-top: auto;
+}
+
+.footer-version {
+  text-align: center;
+  color: #118b9f;
+}
+
+.version-text {
+  margin: 0;
+  font-size: 14px;
+}
+
+.footer-version v-divider {
+  margin-bottom: 8px;
 }
 </style>
