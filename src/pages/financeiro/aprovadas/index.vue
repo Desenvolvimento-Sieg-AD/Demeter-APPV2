@@ -11,6 +11,7 @@
             v-model="selectedClient"
             :items="clients"
             itemValue="id"
+            noDataText="Nenhum cliente com pagamentos aprovados"
             itemTitle="apelido"
             class="mt-4"
             hide-details="auto"
@@ -26,10 +27,6 @@
         <v-row no-gutters class="row-text" justify="space-between">
           <CustomText title="Pagamentos" color="#118B9F" size="20" :bold="true" />
           <div>
-            <!-- <v-btn color="green" variant="text" v-if="hasPaymentSuccessFul" @click="sendPaidPayments">
-              Pagar
-              <v-tooltip text="Pagar os pagamentos que foram enviados com sucesso" activator="parent" location="top" />
-            </v-btn> -->
             <CustomText class="mr-5" v-if="countPayments > 0" :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
             <v-chip color="#F68A1A" text="Pagamentos aprovados pela gerência"></v-chip>
           </div>
@@ -125,10 +122,16 @@
                       <v-tooltip text="Editar pagamento" activator="parent" location="top" />
                     </v-btn>
 
+                    <v-btn flat icon @click.stop="sendPaidPayment(payment.id)" variant="plain" color="primary" size="40">
+                      <v-icon>mdi-send-clock</v-icon>
+                      <v-tooltip text="Mover para provisionado" activator="parent" location="top"></v-tooltip>
+                    </v-btn>
+
                     <v-btn flat icon @click.stop="confirmCancelPayment(payment.id)" variant="plain" color="red" size="40">
                       <v-icon>mdi-cancel</v-icon>
                       <v-tooltip text="Cancelar pagamento" activator="parent" location="top" />
                     </v-btn>
+
                   </v-col>
                 </v-row>
               </v-col>
@@ -173,6 +176,7 @@ import dayjs from '#build/dayjs.imports.mjs'
 import { getEmpresa, getClientByPayment, getPagamentoByClient, sendPaymentsToOmie, postStatus } from '@api'
 
 const router = useRouter()
+const route = useRoute()
 const { $toast } = useNuxtApp()
 
 // * DATA
@@ -281,24 +285,23 @@ const sendOmie = async () => {
   else $toast.error(`Alguns pagamentos falharam. Sucessos: ${successCount}, Falhas: ${errorCount}`, { duration: 5000 })
 }
 
-const sendPaidPayments = async () => {
+const sendPaidPayment = async (id) => {
   loading.value = true
 
-  const paymentsToSend = payments.value.filter((payment) => payment.enviado_externo && payment.codigo_lancamento_omie).map((payment) => payment.id)
-
   try {
-    const { success, message } = await postStatus({ id: paymentsToSend, status: 6 }) // * Pago
+    const { success, message } = await postStatus({ id: [id], status: 5 }) // * Pago
 
     if (!success) throw new Error(message)
 
-    $toast.success('Pagamentos pagos com sucesso')
+    $toast.success('Pagamento provisionado com sucesso')
 
     await getPaymentByClient()
+
+    loading.value = false
+
   } catch (error) {
     console.error(error.message)
-    $toast.error('Erro ao pagar pagamentos')
-  } finally {
-    loading.value = false
+    $toast.error('Erro ao mover pagamento para provisionado')
   }
 }
 
@@ -337,7 +340,15 @@ const isBoleto = (type) => type === 'Boleto'
 const isPagOnline = (type) => type === 'Pagamento Online'
 const isCartao = (type) => type === 'Cartão de crédito' || type === 'Cartão de débito'
 
-const editPayment = (id) => router.push({ path: `../pagamento/${id}` })
+watch(selectedClient, async (value) => {
+  if (selectedClient.value) await getPaymentByClient()
+})
+
+watch(route, (value) => {
+  if(value.query.client_id) selectedClient.value = Number(value.query.client_id)
+}, {deep: true, immediate: true})
+
+const editPayment = (id) => router.push({ path: `../pagamento/${id}`, query: { client_id: selectedClient.value } })
 
 const sentAndError = (payment) => payment.enviado_externo && !payment.codigo_lancamento_omie
 const sentWithSuccess = (payment) => payment.enviado_externo && payment.codigo_lancamento_omie

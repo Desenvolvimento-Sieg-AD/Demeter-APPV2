@@ -1,6 +1,6 @@
 {
   "name": "sieg-pagamentos",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "private": false,
   "author": "SIEG AD - Tecnologia",
   "description": "Sistema de Pagamentos - SIEG",
@@ -15,7 +15,7 @@
     "transpile-electron": "tsc -p ./electron --outDir .output/electron",
     "dev:electron:lin": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
     "dev:electron": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
-    "build:electron": "yarn build && yarn transpile-electron && node build.js",
+    "build:electron": "set GENERATE_SOURCEMAP=false& yarn build && yarn transpile-electron && node build.js",
     "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite"
   },
   "devDependencies": {
@@ -69,7 +69,7 @@
       "output": "build"
     },
     "win": {
-      "publish":[
+      "publish": [
         {
           "provider": "github"
         }

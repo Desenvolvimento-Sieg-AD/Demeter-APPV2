@@ -9,7 +9,7 @@ const Platform = builder.Platform
 const options = {
   appId: 'com.sieg.pagamentos',
   productName: 'SIEG Pagamentos',
-  compression: 'normal',
+  compression: 'normal', //maximum
   nsis: {
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
@@ -20,14 +20,14 @@ const options = {
     uninstallerIcon: '.output/public/icon.ico',
     installerHeaderIcon: '.output/public/icon.ico',
     installerSidebar: '.output/public/logo-maior.bmp',
-    uninstallerSidebar: '.output/public/logo-maior.bmp',
+    uninstallerSidebar: '.output/public/logo-maior.bmp'
   },
   publish: [
     {
-      provider: "github",
-      owner: "Desenvolvimento-Sieg-AD",
-      repo: "Demeter-APPV2",
-      releaseType: "release"
+      provider: 'github',
+      owner: 'Desenvolvimento-Sieg-AD',
+      repo: 'Demeter-APPV2',
+      releaseType: 'release'
     }
   ],
 
@@ -38,18 +38,17 @@ const options = {
     output: '.output'
   },
   publish: {
-    provider: 'github',
+    provider: 'github'
   },
   win: {
     artifactName: '${productName}-Setup-${version}.${ext}',
     icon: '.output/public/icon.ico',
     publish: [
       {
-
-        repo: "Demeter-APPV2",
+        repo: 'Demeter-APPV2',
         provider: 'github',
         owner: 'Desenvolvimento-Sieg-AD',
-        releaseType: 'release',
+        releaseType: 'release'
       }
     ],
     target: [
@@ -89,6 +88,7 @@ builder
     console.log('----------------------------')
     console.log('Platform:', platform)
     console.log('Output:', JSON.stringify(result, null, 2))
-  }).catch((error) => {
+  })
+  .catch((error) => {
     console.error('Error:', error)
   })
