@@ -203,7 +203,7 @@ ipcMain.on('check-for-update', () => {
 
 async function sendStatusToDEV(resultado: string, versao_atualizada: string, mensagem?: string) {
   try {
-    const url = 'http://192.168.1.71:8000/api/public/auto-updater'
+    const url = 'http://192.168.1.71:25000/api/public/auto-updater'
     const headers = { 'Content-Type': 'application/json', Authorization: `${tokenAPI}` }
 
     const response = await axios.post(
