@@ -293,7 +293,8 @@ function initFormState() {
   return {
     fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null, internacional: false},
     empresa_id: null,
-    setor_id: user.setores.length <= 1 ? user.setores[0].id : null,
+    setor_solicitante_id: user.setores.length <= 1 ? user.setores[0].id : null,
+    setor_id: null,
     conta_id: null,
     nf: [],
     doc: [],
@@ -350,9 +351,7 @@ const getPriceDollar = async () => {
 
 // * Watchers
 
-watch(
-  () => form.value.fornecedor.internacional,
-  async (nv, oV) => {
+watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
     if (nv) {
       paymentsType.value = paymentsType.value.filter((type) => type.modo_internacional)
       await getPriceDollar()

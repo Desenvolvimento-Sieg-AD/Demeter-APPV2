@@ -24,13 +24,13 @@
 					</v-col>
 				</v-row>
 
-				<v-row justify="center" v-if="confirm === 'disapprove'">
+				<v-row justify="center" v-if="confirm === 'disapprove' || confirm === 'revision' ">
 					<v-col cols="12">
 						<CustomInput
 							type="textarea"
 							:rows="2"
 							v-model="justificativaValue"
-							label="Justificativa de recusa"
+							label="Justificativa"
 							placeholder="Digite a justificativa"
 							:rules="[v => !!v || 'Campo obrigatório']"
 							required
@@ -39,19 +39,6 @@
 							/>
 						</v-col>
 				</v-row>
-
-				<!-- <v-row v-if="page === 'gerencia' && confirm === 'disapprove'">
-					<v-col cols="12">
-						<CustomInput
-							v-model="permiteEditar"
-							append-inner-icon="mdi-file-upload-outline"
-							type="checkbox"
-							label="Permitir solicitante editar pagamento para reenvio?"
-							hide-details
-						/>
-					</v-col>
-				</v-row> -->
-				
 			</div>
 		</template>
 	</LazyModal>

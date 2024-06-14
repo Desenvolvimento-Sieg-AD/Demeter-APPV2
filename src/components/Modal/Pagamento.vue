@@ -18,10 +18,9 @@
         <v-row class="my-2" v-if="statusCancelados">
           <v-col>
             <CustomInput
-              icon="mdi-cancel"
               type="textarea"
               v-model="pagamento.observacao"
-              label="Motivo do Cancelamento"
+              :label="labelObservacaoCancelamento"
               :value="ultimaMovimentacao.justificativa ?? ultimaMovimentacao.justificativa_solicitante"
               hide-details
               readonly
@@ -33,20 +32,20 @@
         <v-divider class="mb-6" />
 
         <v-row align="center">
-          <v-col cols="4">
+          <v-col cols="3">
             <CustomInput readonly label="Solicitante" hide-details v-model="pagamento.usuario.sigla" />
           </v-col>
 
-          <v-col cols="2">
-            <CustomInput readonly label="Setor" hide-details v-model="pagamento.setor.sigla" />
+          <v-col cols="3">
+            <CustomInput readonly label="Setor Solicitante" hide-details v-model="pagamento.setorSolicitante.nome" />
           </v-col>
 
-          <v-col cols="4">
+          <v-col cols="3">
+            <CustomInput readonly label="Setor Referência" hide-details v-model="pagamento.setorReferencia.nome" />
+          </v-col>
+
+          <v-col cols="3">
             <CustomInput readonly label="Data Solicitação" hide-details :value="dataSolitacao" v-model="dataSolitacao" />
-          </v-col>
-
-          <v-col cols="2">
-            <CustomInput readonly label="Internacional" hide-details v-model="isInternacionalText" />
           </v-col>
 
           <v-divider class="mx-3" />
@@ -63,12 +62,16 @@
             <CustomInput readonly label="Categoria" hide-details v-model="pagamento.categoria.nome" />
           </v-col>
 
-          <v-col cols="8">
+          <v-col cols="7">
             <CustomInput readonly label="Fornecedor" hide-details v-model="pagamento.fornecedor.razao_social" />
           </v-col>
 
-          <v-col cols="4" v-if="!isInternacional">
+          <v-col cols="3" v-if="!isInternacional">
             <CustomInput readonly label="Documento" hide-details v-model="documentoFormatado" :value="documentoFormatado" />
+          </v-col>
+
+          <v-col cols="2">
+            <CustomInput readonly label="Internacional" hide-details v-model="isInternacionalText" />
           </v-col>
 
           <v-col cols="3">
@@ -181,7 +184,6 @@ const access = useRuntimeConfig()
 const props = defineProps({
   id: { type: Number },
   enable: { type: Boolean, default: false },
-  allowEdit: { type: Boolean, default: true },
   pagamento: { type: Object, default: null }
 })
 
@@ -221,9 +223,14 @@ const ultimaMovimentacao = computed(() => {
   return pagamento.value.movimentacoes_pagamento.find((mov) => !mov.data_fim)
 })
 
-const statusdeCancelamento = [7, 8, 9]
+const statusdeCancelamento = [2, 7, 8, 9]
 
 const statusCancelados = computed(() => statusdeCancelamento.includes(ultimaMovimentacao.value.status_pagamento.id))
+
+const labelObservacaoCancelamento = computed(() => {
+  if(ultimaMovimentacao.value.status_pagamento.id === 2) return 'Motivo da Revisão'
+  else return 'Motivo do Cancelamento'
+})
 
 const dataSolitacao = computed(() => {
   if (!pagamento.value) return null
