@@ -39,8 +39,8 @@
             :class="{
               'card-payment-box': true,
               'approved-box': payment.codigo_lancamento_omie,
-              'error-box': payment.enviado_externo && !payment.codigo_lancamento_omie,
-              'selected-box': payment.selectedOmie
+              'error-box': (payment.enviado_externo && !payment.codigo_lancamento_omie) || sentAndError(payment),
+              'selected-box': payment.selectedOmie && !sentAndError(payment)
             }"
             flat
             @click="selectPayment(payment.id)"
@@ -131,7 +131,6 @@
                       <v-icon>mdi-cancel</v-icon>
                       <v-tooltip text="Cancelar pagamento" activator="parent" location="top" />
                     </v-btn>
-
                   </v-col>
                 </v-row>
               </v-col>
@@ -227,7 +226,6 @@ const getPaymentByClient = async () => {
   try {
     const { success, message, data } = await getPagamentoByClient(selectedClient.value)
     if (!success) throw new Error(message)
-
     payments.value = data.map(formatPaymentData)
 
     showPayments.value = payments.value.length > 0
@@ -253,7 +251,7 @@ const sendOmie = async () => {
     try {
       const { success, message, data } = await sendPaymentsToOmie(payment.id)
       if (!success) throw new Error(message)
-      
+
       if (!data.success) {
         codigo = data.faultcode
         throw new Error(data.message)
@@ -263,7 +261,7 @@ const sendOmie = async () => {
 
       const findPayment = payments.value.find((p) => p.id === payment.id)
       findPayment.selectedOmie = false
-      
+
       payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso', color: 'green' }
       payment.enviado_externo = true
 
@@ -298,7 +296,6 @@ const sendPaidPayment = async (id) => {
     await getPaymentByClient()
 
     loading.value = false
-
   } catch (error) {
     console.error(error.message)
     $toast.error('Erro ao mover pagamento para provisionado')
@@ -344,9 +341,13 @@ watch(selectedClient, async (value) => {
   if (selectedClient.value) await getPaymentByClient()
 })
 
-watch(route, (value) => {
-  if(value.query.client_id) selectedClient.value = Number(value.query.client_id)
-}, {deep: true, immediate: true})
+watch(
+  route,
+  (value) => {
+    if (value.query.client_id) selectedClient.value = Number(value.query.client_id)
+  },
+  { deep: true, immediate: true }
+)
 
 const editPayment = (id) => router.push({ path: `../pagamento/${id}`, query: { client_id: selectedClient.value } })
 
@@ -365,7 +366,6 @@ const selectPayment = (id) => {
   payment.selectedOmie = !payment.selectedOmie
   countPayments.value = payments.value.filter((payment) => payment.selectedOmie).length
 }
-
 
 const formatPaymentData = (payment) => {
   payment.data_vencimento = dayjs(payment.data_vencimento).format('DD/MM/YYYY')
@@ -459,6 +459,6 @@ watch(selectedClient, async () => {
 }
 
 .selected-box {
-  background-color: #cae9ca;
+  background-color: #118c9f60;
 }
 </style>

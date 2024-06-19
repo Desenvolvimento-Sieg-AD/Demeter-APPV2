@@ -21,6 +21,7 @@
         store-state
         key-stored="pagamentos-gerencia-table"
         page="gerencia"
+        companiesFilter
         :paymentsSelecteds="idsSelect.length > 0"
         @disapprovePayment="openDisapprovePayment"
         @approvePayment="openApprovePayment"
@@ -108,7 +109,6 @@
           </div>
         </template>
       </CustomTableSelect>
-
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="getPage()" />
@@ -373,71 +373,67 @@ const disapprovePayment = async (ids) => {
   }
 }
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
 function formatFilter(filterArray) {
+  const formattedFilters = []
 
-	const formattedFilters = [];
+  for (let i = 0; i < filterArray.length; i++) {
+    if (filterArray[i] === 'or' || filterArray[i] === '=') continue
+    if (filterArray[i] === filterArray['filterValue']) continue
 
-	for (let i = 0; i < filterArray.length; i++) {
+    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
+    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
 
-		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
-    if (filterArray[i] === filterArray['filterValue']) continue;
+    formattedFilters.push({ fieldName, value })
+  }
 
-		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
-		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
-
-		formattedFilters.push({ fieldName, value });
-	}
-
-	return formattedFilters;
+  return formattedFilters
 }
 const getPage = async () => {
+  itens.value = new CustomStore({
+    key: 'id',
+    async load(loadOptions) {
+      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
 
-	itens.value = new CustomStore({
-		key: 'id',
-		async load(loadOptions) {
+      const queryString = paramsName
+        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
+        .map((paramName) => {
+          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
+          return { [paramName]: loadOptions[paramName] }
+        })
 
-			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
-      
-			const queryString = paramsName
-				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
-				.map((paramName) => {
-					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
-					return { [paramName]: loadOptions[paramName] };
-				});
+      const mergedObject = queryString.reduce((acc, obj) => {
+        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
+        return acc
+      }, {})
 
-			const mergedObject = queryString.reduce((acc, obj) => {
-				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
-				return acc;
-			}, {});
+      try {
+        const { success, message, data } = await useApi(`/pagamento/scope/gerencia`, {
+          query: {
+            paging: true,
+            limit: mergedObject.take,
+            offset: mergedObject.skip,
+            sort: mergedObject.sort,
+            filter: JSON.stringify(mergedObject.filter)
+          }
+        })
 
-			try {
-				const { success, message, data } = await useApi(`/pagamento/scope/gerencia`, {
-					query: {
-						paging: true,
-						limit: mergedObject.take,
-						offset: mergedObject.skip,
-						sort: mergedObject.sort,
-						filter: JSON.stringify(mergedObject.filter),
-					},
-				});
+        if (!success) throw new Error(message)
 
-				if (!success) throw new Error(message);
+        return {
+          data: data.data,
+          totalCount: data.count
+        }
+      } catch (error) {
+        console.log(error.message)
+        $toast.error('Erro ao carregar os pagamentos')
+      }
+    }
+  })
+}
 
-				return {
-					data: data.data,
-					totalCount: data.count,
-				};
-			} catch (error) {
-				console.log(error.message);
-				$toast.error('Erro ao carregar os pagamentos');
-			}
-		},
-	});
-};
-
-await getPage();
+await getPage()
 </script>
 
 <style scoped>

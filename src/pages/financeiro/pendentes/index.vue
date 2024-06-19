@@ -20,6 +20,7 @@
         noDataText="Não há nenhuma solicitação de pagamento"
         :paymentsSelecteds="itemsSelects.length >= 1"
         page="financeiro"
+        companiesFilter
         @editPayment="openEditPayment"
         @disapprovePayment="openDisapprovePayment"
         @approvePayment="openApprovePayment"
@@ -137,7 +138,6 @@
           </div>
         </template>
       </CustomTableSelect>
-
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
@@ -201,18 +201,18 @@ const enableModal = reactive({
 // * COMPUTED && MODALS ACTIONS
 
 const openApprovePayment = () => {
-    confirm.value = 'approve'
-    enableModal.allConfirm = true
+  confirm.value = 'approve'
+  enableModal.allConfirm = true
 }
 
 const openDisapprovePayment = () => {
-    confirm.value = 'disapprove'
-    enableModal.allConfirm = true
+  confirm.value = 'disapprove'
+  enableModal.allConfirm = true
 }
 
 const openEditPayment = () => {
-    viewPayment.value = itemsSelects.value
-    enableModal.allEdit = true
+  viewPayment.value = itemsSelects.value
+  enableModal.allEdit = true
 }
 
 const actions = computed(() => [
@@ -309,19 +309,17 @@ const messageConfirmAllStatus = computed(() => {
 
 const openFile = (filePath) => {
   try {
-      // window.electronAPI.openFile(filePath).then((response) => {
-      // 	if (!response.success) {
-      // 		console.error('Erro ao abrir arquivo:', response.message);
-      // 	}
-      // }); //? APP
+    // window.electronAPI.openFile(filePath).then((response) => {
+    // 	if (!response.success) {
+    // 		console.error('Erro ao abrir arquivo:', response.message);
+    // 	}
+    // }); //? APP
 
-      useOs().openFile(filePath) //? Template
-
+    useOs().openFile(filePath) //? Template
   } catch (error) {
     console.log(error)
     $toast.error('Erro ao abrir arquivo')
   }
-
 }
 
 const openFiles = (anexos) => {
@@ -378,74 +376,69 @@ const sendStatus = async (status, id) => {
   }
 }
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
 function formatFilter(filterArray) {
+  const formattedFilters = []
 
-	const formattedFilters = [];
+  for (let i = 0; i < filterArray.length; i++) {
+    if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue
+    if (filterArray[i] === filterArray['filterValue']) continue
 
-	for (let i = 0; i < filterArray.length; i++) {
+    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
+    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
 
-		if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue;
-    if (filterArray[i] === filterArray['filterValue']) continue;
+    formattedFilters.push({ fieldName, value })
+  }
 
-		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
-		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
-
-		formattedFilters.push({ fieldName, value });
-	}
-
-	return formattedFilters;
+  return formattedFilters
 }
 const getPage = async () => {
+  itens.value = new CustomStore({
+    key: 'id',
+    async load(loadOptions) {
+      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
 
-	itens.value = new CustomStore({
-		key: 'id',
-		async load(loadOptions) {
+      const queryString = paramsName
+        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
+        .map((paramName) => {
+          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
+          return { [paramName]: loadOptions[paramName] }
+        })
 
-			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
-      
-			const queryString = paramsName
-				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
-				.map((paramName) => {
-					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
-					return { [paramName]: loadOptions[paramName] };
-				});
+      const mergedObject = queryString.reduce((acc, obj) => {
+        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
+        return acc
+      }, {})
 
-			const mergedObject = queryString.reduce((acc, obj) => {
-				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
-				return acc;
-			}, {});
+      try {
+        const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
+          query: {
+            paging: true,
+            limit: mergedObject.take,
+            offset: mergedObject.skip,
+            sort: mergedObject.sort,
+            filter: JSON.stringify(mergedObject.filter)
+          }
+        })
 
-			try {
-				const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
-					query: {
-						paging: true,
-						limit: mergedObject.take,
-						offset: mergedObject.skip,
-						sort: mergedObject.sort,
-						filter: JSON.stringify(mergedObject.filter),
-					},
-				});
-
-				if (!success) throw new Error(message);
+        if (!success) throw new Error(message)
 
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-				return { data: data.data, totalCount: data.count };
-			} catch (error) {
-				console.log(error.message);
-				$toast.error('Erro ao carregar os pagamentos');
-			}
-		},
-	});
-};
+        return { data: data.data, totalCount: data.count }
+      } catch (error) {
+        console.log(error.message)
+        $toast.error('Erro ao carregar os pagamentos')
+      }
+    }
+  })
+}
 
-await getPage();
-
+await getPage()
 </script>
 
 <style scoped>
