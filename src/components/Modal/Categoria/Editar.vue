@@ -18,7 +18,7 @@
                     <v-list v-if="!loading">
                         <v-list-item v-for="(grupo, grupoIndex) of grupos" :key="`${grupo}-${grupoIndex}`" >
                             <v-list-item-title class="mouseClick" @click="selectAllCategories(grupo)">
-                                <v-tooltip activator="parent" location="left" text="Selecionar todas categorias desse grupo"/>
+                                <v-tooltip activator="parent" location="left" :text="textGroupCategory(grupo)"/>
                                 {{ grupo.nome }}
                             </v-list-item-title>
                                 <v-list-item-action v-for="(categoria, categoriaIndex) of grupo.categorias" :key="`${categoria}-${categoriaIndex}`" center class="mb-n8">
@@ -50,6 +50,7 @@ const props = defineProps({
 
 const grupos = ref([])
 const loading = ref(false);
+const toggleCategory = ref(false)
 
 const enableValue = computed({
     get: () => props.enable,
@@ -96,6 +97,8 @@ const getGruposWithCategorias = async () => {
 
         });
 
+        grupos.value.sort((a, b) => a.nome.localeCompare(b.nome))
+
         loading.value = false
 
     } catch (error) {
@@ -103,9 +106,22 @@ const getGruposWithCategorias = async () => {
     }
 }
 
-const selectAllCategories = (grupo) => grupo.categorias.forEach(setValueCategoria)
+const selectAllCategories = (grupo) => {
+    toggleCategory.value = !toggleCategory.value
+
+    grupo.categorias.forEach(categoria => {
+        if(toggleCategory.value) categoria.isActive = true
+        else categoria.isActive = false
+    })
+}
 
 const setValueCategoria = (categoria) => categoria.isActive = !categoria.isActive
+
+const textGroupCategory = (grupo) => {
+    const allActive = grupo.categorias.every((categoria) => categoria.isActive)
+    if(allActive) return 'Desmarcar todas as categorias desse grupo '
+    return 'Marcar todas as categorias desse grupo'
+}
 
 const sendValueCategorias = async (categorias) => {
     try {

@@ -52,8 +52,6 @@ export async function getProjects(search: string) {
 }
 
 export async function createProjectAPI(nome: string){
-
-  console.log(nome) 
   try{
     const { success, message, data } = await useApi(`/projeto`, {
       method: 'POST',
