@@ -2,7 +2,7 @@
 	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="600px">
 		<template #content>
 			<v-container class="txt-center">
-				<CustomText title="Editar contas pagadoras dos pagamentos selecionados" class="ml-2" color="#118B9F" size="20" :bold="true" />
+				<CustomText title="Editar contas pagadoras dos pagamentos selecionados" class="ml-2" color="#F68A1A" size="20" :bold="true" />
 				<br />
 
 				<div class="w-full d-flex mt-2">

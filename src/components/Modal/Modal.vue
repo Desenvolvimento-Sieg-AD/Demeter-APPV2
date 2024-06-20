@@ -136,7 +136,7 @@ const emit = defineEmits(['update:enable', 'update:defaultSlot', 'close', 'slot'
 //* DATA
 
 const colors = {
-	confirm: '#118B9F',
+	confirm: '#F68A1A',
 	cancel: '#F44336',
 	grey: '#AAA',
 	info: 'info',
@@ -165,9 +165,9 @@ const handleClickOutside = () => {
 	enableValue.value = false;
 };
 
-const getColor = (type) => colors[type] || '#118B9F';
+const getColor = (type) => colors[type] || '#F68A1A';
 
-const getActionColor = (slot) => (currentSlot.value == slot.name ? slot.color ?? '#118B9F' : '#ccc');
+const getActionColor = (slot) => (currentSlot.value == slot.name ? slot.color ?? '#F68A1A' : '#ccc');
 
 const setCurrentSlot = (slot) => {
 	if (currentSlot.value == slot) return;
@@ -194,7 +194,7 @@ const loadingAction = (action) => (action != undefined ? action : false);
 	overflow-y: hidden;
 }
 .modal-header {
-	background-color: #118b9f;
+	background-color: #F68A1A;
 	color: white;
 	padding: 10px 15px !important;
 	height: auto;

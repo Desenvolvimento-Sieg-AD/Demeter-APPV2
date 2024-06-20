@@ -1,9 +1,9 @@
 <template>
-  <LazyModal v-model:enable="enableValue" :actions="Actions" title="Anexar arquivo" width="600">
+  <LazyModal v-model:enable="enableValue" :actions="actions" title="Anexar arquivo" width="600">
     <template #content>
       <v-container>
         <div class="d-flex justify-center">
-          <CustomText title="Dados do pagamento" class="ml-2" color="#118B9F" size="20" :bold="true" />
+          <CustomText title="Dados do pagamento" class="ml-2" color="#F68A1A" size="20" :bold="true" />
         </div>
         <v-form ref="formValidate">
           <v-row no-gutters class="mt-5 ga-2">

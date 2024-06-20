@@ -5,13 +5,14 @@
 
       <v-col v-else-if="pagamento">
         <v-row align="center" class="mb-2">
-          <v-col cols="6" class="d-flex align-center justify-start pb-0">
-            <h3 style="color: #118b9f">Dados do Pagamento</h3>
+          <v-col cols="5" class="d-flex align-center justify-start pb-0">
+            <h3 style="color: #F68A1A">Dados do Pagamento</h3>
           </v-col>
-          <v-col cols="6" class="d-flex align-center justify-end pb-0 ga-2">
+          <v-col cols="7" class="d-flex align-center justify-end pb-0 ga-2">
             <v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
             <v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1" />
             <v-chip v-if="pagamento.updatedByUser?.sigla" class="text-body-2" :text="textUpdatedByUser" color="primary"/>
+            <v-chip v-if="pagamento.privado" text="Privado" class="text-body-2" color="red-accent-4"></v-chip>
           </v-col>
         </v-row>
 
@@ -147,7 +148,7 @@
         <v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
 
           <v-col cols="12">
-            <h3 style="color: #118b9f">Arquivos</h3>
+            <h3 style="color: #F68A1A">Arquivos</h3>
           </v-col>
 
           <v-row class="d-flex flex-wrap mr-2" no-gutters>

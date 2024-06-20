@@ -4,7 +4,7 @@
             <v-card>
                 <v-card-title class="d-flex justify-space-between align-center">
                     <div>
-                        <CustomText :title="`Categorias do Setor: ${setor.nome}`" color="#118B9F" size="16" bold />
+                        <CustomText :title="`Categorias do Setor: ${setor.nome}`" color="#F68A1A" size="16" bold />
                     </div>
                     <div>
                         <v-btn @click="reload()" color="primary" icon>
@@ -140,7 +140,7 @@ onMounted( async() => await getGruposWithCategorias())
 }
 
 .mouseClick:hover {
-    color: #118B9F;
+    color: #F68A1A;
 }
 
 </style>

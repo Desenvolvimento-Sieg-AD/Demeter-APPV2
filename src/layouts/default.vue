@@ -115,7 +115,7 @@ const electron = useElectron();
 	z-index: 0;
 }
 .unlogged {
-	background-color: #118b9f;
+	background-color: #F68A1A;
 }
 .unlogged img {
 	width: 25%;
