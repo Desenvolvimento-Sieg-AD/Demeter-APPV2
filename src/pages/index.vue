@@ -15,7 +15,7 @@
         choose-columns
         store-state
         allow-column-reordering
-        :allowed-page-sizes="[5, 10, 15, 25]"
+        :allowed-page-sizes="[5, 10, 15, 25, 30]"
         :page-size="15"
         enableAddButton
         key-stored="pagamentos-usuario-table"
@@ -62,14 +62,14 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="template" v-if="isNotStatusAllowed(item.status)">
-            <v-btn v-if="isNF(item.anexos_pagamento)" flat icon variant="plain" @click="openFile(item, 3)">
+            <v-btn v-if="isNF(item.anexos_pagamento)" flat icon variant="plain" @click="openFile(item.anexos_pagamento, 3, item.privado)">
               <v-icon color="success" class="cursor-pointer" icon="mdi-paperclip" />
 
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </v-btn>
 
-            <v-btn flat icon variant="plain" v-else :disabled="item.status !== 'Pendente'">
-              <v-icon color="#118B9F" class="cursor-pointer" @click="uploadFile(item, 3)" icon="mdi-paperclip-plus" />
+            <v-btn flat icon variant="plain" v-else :disabled="lastStatus(item) !== 'Pendente'">
+              <v-icon color="primary" class="cursor-pointer" @click="uploadFile(item, 3)" icon="mdi-paperclip-plus" />
 
               <v-tooltip text="Anexar arquivo" activator="parent" location="top" />
             </v-btn>
@@ -83,18 +83,18 @@
             <v-btn v-if="isDOC(item.anexos_pagamento)" flat icon variant="plain">
               <div v-if="item.anexos_pagamento?.length > 0">
                 <v-icon
-                  :color="item.anexos_pagamento.length === 1 ? 'success' : 'purple'"
+                  :color="colorDoc(item.anexos_pagamento)"
                   class="cursor-pointer"
                   icon="mdi-paperclip"
-                  @click="item.anexos_pagamento.length === 1 ? openFile(item, 4) : null"
+                  @click="openDoc(item.anexos_pagamento, 4, item.privado)"
                 />
                 <v-tooltip :text="item.anexos_pagamento.length === 1 ? 'Abrir anexo' : nameFiles(item.anexos_pagamento)" activator="parent" location="top" />
               </div>
             </v-btn>
 
-            <v-btn flat icon variant="plain" v-else :disabled="item.status !== 'Pendente'">
+            <v-btn flat icon variant="plain" v-else :disabled="lastStatus(item) !== 'Pendente'">
               <div>
-                <v-icon class="cursor-pointer" color="#118B9F" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
+                <v-icon class="cursor-pointer" color="primary" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
 
                 <v-tooltip text="Anexar arquivo" activator="parent" location="top" />
               </div>
@@ -152,7 +152,9 @@ const columns = getColumns('usuario')
 
 //* DATA
 
-const path = access.public.PAGAMENTO_PATH
+const caminho_normal = access.public.PAGAMENTO_PATH
+const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
+
 const title = ref('Pagamentos')
 const loading = ref(false)
 const pagamento = ref({})
@@ -197,6 +199,8 @@ const actions = computed(() => [
   }
 ]);
 
+const lastStatus = ref((item) => item.movimentacoes_pagamento[0].status_pagamento.label)
+
 const handleViewDetails = (item) => {
   pagamento.value = item;
   enableModal.pagamento = true;
@@ -238,14 +242,30 @@ const modalActions = [
 
 //* METHODS
 
-const openFile = async (item, tipo_anexo) => {
-  try {
-    const itemFind = item.anexos_pagamento.find((ref) => ref.tipo_anexo_id == tipo_anexo)
-    if (!itemFind) throw new Error('Anexo não encontrado')
-    if (!itemFind.caminho) return $toast.error('Anexo não encontrado')
+const colorDoc = (anexos) => {
+  const docs = anexos.filter((anexo) => anexo.tipo_anexo_id === 4)
+  if(docs.length > 1) return 'purple'
+  return 'success'
+}
 
-    const { success, message } = await useOs().openFile(`${path}${itemFind.caminho}`)
+const openDoc = (anexos, tipo_anexo, privado) => {
+  const filterDoc = anexos.filter((anexo) => anexo.tipo_anexo_id === tipo_anexo)
+  if(filterDoc && filterDoc.length !== 0) return openFile(filterDoc, tipo_anexo, privado)
+}
+
+const openFile = async (anexos, tipo_anexo, privado) => {
+  try {
+
+    const anexo = anexos.find((anexo) => anexo.tipo_anexo_id == tipo_anexo)
+
+    if (!anexo) throw new Error('Anexo não encontrado')
+    if (!anexo.caminho) return $toast.error('Anexo não encontrado')
+
+    const caminho = privado ? caminho_privado : caminho_normal
+
+    const { success, message } = await useOs().openFile(`${caminho}${anexo.caminho}`)
     if (!success) $toast.error(message)
+
   } catch (error) {
     $toast.error(error.message)
     console.error(error)
@@ -325,7 +345,7 @@ const getPage = async () => {
 
 			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
       
-			const queryString = paramsName
+			const queryString  = paramsName
 				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
 				.map((paramName) => {
 					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
@@ -367,6 +387,7 @@ const getPage = async () => {
 			}
 		},
 	});
+
 };
 
 await getPage();

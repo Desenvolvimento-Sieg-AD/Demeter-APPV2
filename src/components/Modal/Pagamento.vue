@@ -153,13 +153,13 @@
 
           <v-row class="d-flex flex-wrap mr-2" no-gutters>
             <div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id" class="d-flex align-center mb-2 mr-2">
-              <v-card flat color="#F7F5F5" @click="openFile(anexo.caminho)" class="d-flex flex-row align-center mr-2" width="450px">
-                <v-icon color="#118b9f" class="ml-2 mr-2">mdi-file-document</v-icon>
+              <v-card flat color="#F7F5F5" @click="openFile(anexo.caminho, pagamento.privado)" class="d-flex flex-row align-center mr-2" width="450px">
+                <v-icon color="primary" class="ml-2 mr-2">mdi-file-document</v-icon>
                 <v-card-text>
                   {{ anexo.nome }}
                 </v-card-text>
-                <v-btn icon @click.stop="copyFilePath(anexo)" flat color="transparent" class="ml-auto">
-                  <v-icon color="#118B9F" class="cursor-pointer">mdi-content-copy</v-icon>
+                <v-btn icon @click.stop="copyFilePath(anexo.caminho, pagamento.privado)" flat color="transparent" class="ml-auto">
+                  <v-icon color="primary" class="cursor-pointer">mdi-content-copy</v-icon>
                   <v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
                 </v-btn>
               </v-card>
@@ -194,7 +194,8 @@ const emit = defineEmits(['update:enable', 'getPagamento'])
 
 //* DATA
 
-const caminho = access.public.PAGAMENTO_PATH
+const caminho_normal = access.public.PAGAMENTO_PATH
+const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const pagamento = ref(null)
 const loading = ref(false)
 const urgente = ref(null)
@@ -318,18 +319,24 @@ const saveUpdatePagamento = async () => {
   }
 }
 
-const openFile = async (path) => {
+const openFile = async (path, privado) => {
   try {
+
+    const caminho = privado ? caminho_privado : caminho_normal
     await useOs().openFile(`${caminho}/${path}`)
+
   } catch (error) {
     console.error('Erro ao abrir arquivo:', error.message)
     $toast.error('Não foi possível abrir o arquivo')
   }
 }
 
-const copyFilePath = async (anexo) => {
+const copyFilePath = async (anexo, privado) => {
   try {
+
+    const caminho = privado ? caminho_privado : caminho_normal
     await useOs().copyFilePath(`${caminho}/${anexo.caminho}`)
+
     $toast.success('Caminho do arquivo copiado')
   } catch (error) {
     console.error('Erro ao copiar caminho do arquivo:', error.message)
@@ -349,12 +356,6 @@ const copyData = async (data) => {
 
 //* WATCHERS
 
-watch(
-  () => props.enable,
-  (value) => {
-    if (value) {
-      getPagamento()
-    }
-  }
-)
+watch(() => props.enable, (value) => { if (value) getPagamento() })
+
 </script>

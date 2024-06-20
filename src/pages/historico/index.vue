@@ -56,7 +56,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="existNF(item)">
-              <v-icon @click="openFile(`${path}${item.anexos_pagamento[0].caminho}`)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
+              <v-icon @click="openFile(`${path}${item.anexos_pagamento[0].caminho}`, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -67,7 +67,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="template">
             <div v-if="existDoc(item)">
-              <v-icon color="success" class="cursor-pointer" @click="openFile(`${path}${item.anexos_pagamento[1].caminho}`)"> mdi-paperclip</v-icon>
+              <v-icon color="success" class="cursor-pointer" @click="openFile(`${path}${item.anexos_pagamento[1].caminho}`, item.privado)"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -137,20 +137,26 @@ import { getPagamentoByScope } from '@api'
 const { $toast } = useNuxtApp()
 
 const access = useRuntimeConfig()
-const path = access.public.PAGAMENTO_PATH
+const caminho_normal = access.public.PAGAMENTO_PATH
+const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const colums = getColumns('historico')
 const enableModal = ref(false)
 
 const itens = ref([])
 const itemView = ref({})
 
-const openFile = (filePath) => {
-  window.electronAPI.openFile(filePath).then((response) => {
-    if (!response.success) {
-      console.error('Erro ao abrir arquivo:', response.message)
-    }
-  })
+const openFile = async (path, privado) => {
+  try {
+
+    const caminho = privado ? caminho_privado : caminho_normal
+    await useOs().openFile(`${caminho}/${path}`)
+
+  } catch (error) {
+    console.error('Erro ao abrir arquivo:', error.message)
+    $toast.error('Não foi possível abrir o arquivo')
+  }
 }
+
 
 const actions = computed(() => [
   {

@@ -295,6 +295,7 @@ function initFormState() {
     empresa_id: null,
     setor_solicitante_id: user.setores.length <= 1 ? user.setores[0].id : null,
     setor_id: null,
+    privado: false,
     conta_id: null,
     nf: [],
     doc: [],
