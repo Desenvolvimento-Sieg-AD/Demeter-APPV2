@@ -426,7 +426,7 @@ const props = defineProps({
   rows: { type: Number, default: 1 },
   autogrow: { type: Boolean, default: false },
   //* Styles
-  color: { type: String, default: '#118b9f' },
+  color: { type: String, default: '#F68A1A' },
   rounded: { type: [Boolean, String, Number], default: 'md' },
   flat: { type: Boolean, default: true },
   //* Validations

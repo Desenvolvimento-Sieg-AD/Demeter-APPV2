@@ -2,7 +2,7 @@
 	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="auto">
 		<template #content>
 			<v-container class="txt-center">
-				<CustomText :title="message" class="ml-2" color="#118B9F" size="20" :bold="true" />
+				<CustomText :title="message" class="ml-2" color="#F68A1A" size="20" :bold="true" />
 				<br />
 				<v-row class="mt-2" v-if="confirm === 'disapprove'">
 					<v-col cols="12">

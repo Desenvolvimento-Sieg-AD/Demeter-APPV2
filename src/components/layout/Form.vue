@@ -16,7 +16,7 @@
 const props = defineProps({
   actionButtons: { type: Array, default: [] },
   submit: { type: Function, default: () => {} },
-  titleColor: { type: String, default: '#118B9F' },
+  titleColor: { type: String, default: '#F68A1A' },
   titleSize: { type: String, default: '24' },
   titleBold: { type: Boolean, default: true },
   height: { type: String, default: 'calc(100vh - 145px)' }

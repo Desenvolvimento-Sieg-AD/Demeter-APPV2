@@ -28,9 +28,14 @@
       <CustomInput type="text" mask="money" currency="BRL" required :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'" v-model="formValue.valor_total" hide-details />
     </v-col>
 
-    <v-col cols="2">
-      <CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="#118B9F" />
+    <v-col cols="1">
+      <CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="primary" />
     </v-col>
+
+    <v-col cols="1" v-if="userIsAllowed">
+      <CustomInput type="checkbox" label="Privado" v-model="formValue.privado" hide-details color="primary" />
+    </v-col>
+
   </v-row>
 
   <v-row class="pa-3 mt-n12" v-if="!tiposNormalize.includes(form.tipo_id)">
@@ -96,6 +101,8 @@
   </v-row>
 </template>
 <script setup>
+
+import { useAuthStore } from '~/store/auth'
 import { getPagamentoTipo, getTiposChavePix, getCard, getContasDisponiveis } from '@api'
 
 const dayjs = useDayjs()
@@ -105,6 +112,7 @@ const route = useRoute()
 const emit = defineEmits(['update:form'])
 
 const { $toast } = useNuxtApp()
+const { user } = useAuthStore()
 
 const props = defineProps({
   form: { type: Object, default: {} },
@@ -157,11 +165,14 @@ const minDate = computed(() => {
   return dayjs().format('YYYY-MM-DD')
 })
 
+const userIsAllowed = computed(() => {
+  const setoresAllowed = [3, 5, 12]
+  return user.setores.some((setor) => setoresAllowed.includes(setor.id))
+})
+
 const validPaymentType = () => {
   tipos.value = false
-
   const type = props.paymentsType.find((type) => type.id === formValue.value.tipo_id)
-
   if (type) tipos.value = type
 }
 

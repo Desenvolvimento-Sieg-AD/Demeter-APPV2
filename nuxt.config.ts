@@ -50,7 +50,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiURL: process.env.NUXT_API_URL,
-      PAGAMENTO_PATH: process.env.NUXT_PAGAMENTO_PATH
+      PAGAMENTO_PATH: process.env.NUXT_PAGAMENTO_PATH,
+      PAGAMENTO_PRIVADO_PATH: process.env.NUXT_PAGAMENTO_PRIVADO_PATH,
     }
   },
   vuetify: {
@@ -62,7 +63,7 @@ export default defineNuxtConfig({
           dark: {
             dark: true,
             colors: {
-              primary: '#118B9F',
+              primary: '#F68A1A',
               secondary: '#F68A1A',
               danger: '#D9534F',
               info: '#5BC0DE',
@@ -82,7 +83,7 @@ export default defineNuxtConfig({
           light: {
             dark: false,
             colors: {
-              primary: '#118B9F',
+              primary: '#F68A1A',
               secondary: '#F68A1A',
               danger: '#D9534F',
               info: '#5BC0DE',

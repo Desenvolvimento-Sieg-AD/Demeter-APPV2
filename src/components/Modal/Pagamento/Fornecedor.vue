@@ -34,7 +34,6 @@
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         type="text"
-        hide-details
         :label="documentFornecedor"
         v-model="formValue.fornecedor.documento"
         append-inner-icon="mdi-content-copy"
