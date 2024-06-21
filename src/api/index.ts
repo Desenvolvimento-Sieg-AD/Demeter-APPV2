@@ -3,3 +3,4 @@ export * from './empresa';
 export * from './pagamento';
 export * from './categoria';
 export * from './conversor';
+export * from './setores';

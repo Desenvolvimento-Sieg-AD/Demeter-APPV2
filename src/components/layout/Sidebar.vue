@@ -112,7 +112,10 @@ const menuOptions = ref([
     ]
   },
   { title: 'Gerência', icon: 'mdi-account-tie-outline', to: '/gerencia', setores: ['GER', 'ADM'] },
-  { title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['FIN', 'ADM', 'GER'] }
+  { title: 'Histórico', icon: 'mdi-clock-outline', to: '/historico', setores: ['FIN', 'ADM', 'GER'] },
+  { title: 'Configurações', icon: 'mdi-cog-outline', to: '/configuracoes', setores: ['ALL'], tabs: [
+    { title: 'Categorias', to: '/configuracoes/categorias', icon: 'mdi-format-list-bulleted', color: 'blue' },
+  ] },
 ])
 
 const menuFooter = ref([

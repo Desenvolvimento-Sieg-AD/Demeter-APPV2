@@ -10,14 +10,14 @@
 
         <v-divider class="mt-2 mb-2" />
 
-        <v-card class="card-pagamento" flat>
-          <ModalPagamentoCategoria v-model:form="form" />
+        <v-card class="pt-2 card-pagamento" flat>
+          <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
 
-        <v-card class="pt-2 card-pagamento" flat>
-          <ModalPagamentoEmpresa v-model:form="form" :documentRequired="documentRequired" />
+        <v-card class="card-pagamento" flat>
+          <ModalPagamentoCategoria v-model:form="form" />
         </v-card>
 
         <v-divider class="mt-2 mb-2" />
@@ -36,11 +36,12 @@
           <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()">
             {{ action.title }}
             <v-icon size="small" :icon="action.icon" />
+            <v-tooltip :text="action.tooltip" activator="parent" location="top" v-if="route.query.edit === 'true'"/>
           </v-btn>
         </div>
       </v-form>
     </LayoutForm>
-    <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push({ path: `../financeiro/aprovadas`, query: { client_id: route.query.client_id } })">
+    <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="sendRoute()">
       <v-icon>mdi-arrow-left</v-icon>
       <v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
     </v-btn>
@@ -51,8 +52,11 @@
 // * IMPORTS
 
 import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
+import { postStatus } from '~/api/pagamento'
+import { set } from '~~/node_modules/nuxt/dist/app/compat/capi'
 
 import { useAuthStore } from '../../store/auth'
+
 
 const { $toast } = useNuxtApp()
 
@@ -75,9 +79,11 @@ const formValidate = ref(null)
 
 // * COMPUTEDS
 
-const routeId = computed(() => {
-  return route.params.id
-})
+const currentRoute = computed(() => route.query.edit === 'true' ? `/` : {path: '/financeiro/aprovadas', query: { client_id: route.query.client_id }})
+
+const sendRoute = () => router.push(currentRoute.value) 
+
+const routeId = computed(() => route.params.id )
 
 const documentRequired = computed(() => {
   const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
@@ -91,6 +97,7 @@ const validDateToCard = computed(() => isExpired.value && form.value.tipo_id !==
 const actionsForm = [
   {
     title: 'Atualizar',
+    tooltip: 'Atualizar pagamento e enviar para aprovação',
     icon: 'mdi-currency-usd',
     color: 'green',
     onClick: () => {
@@ -148,8 +155,11 @@ const updatePayment = async (id, data) => {
     if (!success) throw new Error(message)
 
     $toast.success(message)
+    
+    if(route.query.edit === 'true' && route.query.revision === 'true') await postStatus({ id: [id], status: 1, justificativa: 'Pagamento atualizado pelo usuário'})
 
-    setTimeout(() => router.push('/financeiro/aprovadas'), 750)
+    setTimeout(() => router.push(currentRoute.value), 750)
+
   } catch (error) {
     console.log('Erro ao atualizar pagamento', error)
     $toast.error('Erro ao atualizar pagamento', error)

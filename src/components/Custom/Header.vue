@@ -1,8 +1,15 @@
 <template>
 	<div class="align-center">
 		<v-card-title class="d-flex justify-space-between align-center mb-n4">
-			<CustomText :title="title" color="#118B9F" size="26" bold />
-			<img src="/img/S®800px.png" height="75" class="slow-blink" />
+			<div>
+				<CustomText :title="title" color="#118B9F" size="26" bold />
+			</div>
+			<div class="d-flex align-center">
+				<v-icon @click="reload()" size="small" color="primary">
+					mdi-cached
+				</v-icon>
+				<img src="/img/S®800px.png" height="75" class="slow-blink" />
+			</div>
 		</v-card-title>
 	</div>
 	<v-divider />
@@ -12,6 +19,10 @@
 const props = defineProps({
 	title: { type: String, default: '' },
 });
+
+const electron = useElectron()
+
+const reload = async () => await electron.actions.reload()
 
 </script>
 

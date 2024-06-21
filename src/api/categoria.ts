@@ -49,15 +49,23 @@ export async function getGrupos() {
     const { success, message, data } = await useApi(`/categoria/grupo`)
     if (!success) throw new Error(message)
 
-    const grupos = data.map((g: any) => {
-      return g.grupo
-    })
-
-    return { success, message, grupos }
+    return { success, message, data }
   } catch (error) {
     return { success: false, message: error, data: null }
   }
 }
+
+export async function getGrupoWithCategoria() {
+  try {
+    const { success, message, data } = await useApi(`/categoria/grupo/grupo-categoria`)
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error, data: null }
+  }
+}
+
 
 export async function existRelationSetorWithEmpresa(setor_id: number, empresa_id: number) {
   try {
@@ -68,4 +76,19 @@ export async function existRelationSetorWithEmpresa(setor_id: number, empresa_id
   } catch (error) {
     return { success: false, message: error }
   }
+}
+
+export async function createCategoria(options: { nome: string, descricao: string, grupo_id: number, empresas_id: number[], setores_id: number[] }) {
+  try {
+    const { success, message, data } = await useApi(`/categoria`, {
+      method: 'POST',
+      body: JSON.stringify(options)
+    })
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error }
+  }
+  
 }
