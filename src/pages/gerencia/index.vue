@@ -2,6 +2,13 @@
   <div>
     <CustomHeader title="Gerência - Aprovação de Pagamentos" />
     <LayoutForm>
+      <div class="info-value">
+        <CustomText title="Valores pagos/aprovados" color="#118B9F" size="18" :bold="true" />
+        <p>
+          Ano:<span>{{ years }} R$</span> - Mês anterior:<span>{{ lastMonth }} R$</span> - Mês atual:<span>{{ actualMonth }} R$</span> - Hoje:<span>{{ today }} R$</span>
+        </p>
+      </div>
+      <v-divider class="my-2" />
       <CustomTableSelect
         :columns="colums"
         :items="itens"
@@ -143,7 +150,7 @@ const { $toast } = useNuxtApp()
 const access = useRuntimeConfig()
 const colums = getColumns('gerencia')
 const path = access.public.PAGAMENTO_PATH
-
+const dayjs = useDayjs()
 const enableModal = reactive({
   confirm: false,
   reprove: false,
@@ -158,17 +165,103 @@ const idsSelect = ref([])
 const ambos = ref(true)
 const loadingModal = ref(false)
 const permiteEditar = ref(false)
-
+const valores = ref([])
+const selections = ref([])
 const justificativa = ref(null)
 
 onMounted(async () => {
   await getPage()
 })
 const handleSelectionChange = (items) => {
+  selections.value = items
   const ids = items.map((item) => item.id)
   idsSelect.value = ids
 }
+const lastMonth = computed(() => {
+  if (valores.value.length === 0) {
+    return '0,00'
+  }
+  const lastMonth = dayjs().subtract(1, 'month').month()
+  const currentYear = dayjs().year()
 
+  const total = valores.value
+    .filter((item) => {
+      const itemDate = dayjs(item.movimentacoes_pagamento[0].data_inicio)
+      return itemDate.year() === currentYear && itemDate.month() === lastMonth
+    })
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+
+  return total.toFixed(2).replace('.', ',')
+})
+
+const actualMonth = computed(() => {
+  let selec = 0
+  if (selections.value.length > 0) {
+    selec = selections.value.reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  }
+
+  if (valores.value.length === 0 && selections.value.length === 0) {
+    return '0,00'
+  }
+  if (valores.value.length === 0) {
+    return selec.toFixed(2).replace('.', ',')
+  }
+
+  const currentMonth = dayjs().month()
+  const currentYear = dayjs().year()
+
+  let total = valores.value
+    .filter((item) => {
+      const itemDate = dayjs(item.movimentacoes_pagamento[0].data_inicio)
+      return itemDate.year() === currentYear && itemDate.month() === currentMonth
+    })
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  total += selec
+  return total.toFixed(2).replace('.', ',')
+})
+
+const today = computed(() => {
+  let selec = 0
+  if (selections.value.length > 0) {
+    selec = selections.value.reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  }
+
+  if (valores.value.length === 0 && selections.value.length === 0) {
+    return '0,00'
+  }
+  if (valores.value.length === 0) {
+    return selec.toFixed(2).replace('.', ',')
+  }
+  const today = dayjs().startOf('day')
+
+  let total = valores.value
+    .filter((item) => {
+      const itemDate = dayjs(item.movimentacoes_pagamento[0].data_inicio)
+      return itemDate.isSame(today, 'day')
+    })
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  total += selec
+  return total.toFixed(2).replace('.', ',')
+})
+const years = computed(() => {
+  let selec = 0
+  if (selections.value.length > 0) {
+    selec = selections.value.reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  }
+
+  if (valores.value.length === 0 && selections.value.length === 0) {
+    return '0,00'
+  }
+  if (valores.value.length === 0) {
+    return selec.toFixed(2).replace('.', ',')
+  }
+
+  const currentYear = dayjs().year()
+
+  let total = valores.value.filter((item) => dayjs(item.movimentacoes_pagamento[0].data_inicio).year() === currentYear).reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  total += selec
+  return total.toFixed(2).replace('.', ',')
+})
 const actions = ref([
   {
     icon: 'mdi-eye',
@@ -420,6 +513,7 @@ const getPage = async () => {
         })
 
         if (!success) throw new Error(message)
+        valores.value = data.valores
 
         return {
           data: data.data,
@@ -437,6 +531,14 @@ await getPage()
 </script>
 
 <style scoped>
+.info-value p {
+  font-weight: 600;
+}
+.info-value span {
+  color: rgb(7, 180, 7);
+  font-weight: 600;
+  margin-right: 5px;
+}
 .btn-container {
   display: flex;
   justify-content: flex-end;

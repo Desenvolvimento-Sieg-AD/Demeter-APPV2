@@ -2,6 +2,13 @@
   <div>
     <CustomHeader title="Histórico de Solicitações" />
     <LayoutForm>
+      <div class="info-value">
+        <CustomText title="Valores pagos/aprovados" color="#118B9F" size="18" :bold="true" />
+        <p>
+          Ano:<span>{{ years }} R$</span> - Mês anterior:<span>{{ lastMonth }} R$</span> - Mês atual:<span>{{ actualMonth }} R$</span> - Hoje:<span>{{ today }} R$</span>
+        </p>
+      </div>
+      <v-divider class="my-2" />
       <CustomTableSelect
         :columns="colums"
         :items="itens"
@@ -134,14 +141,14 @@
 <script setup>
 import CustomStore from 'devextreme/data/custom_store'
 import { getPagamentoByScope } from '@api'
-
+const dayjs = useDayjs()
 const { $toast } = useNuxtApp()
-
+const currentYear = dayjs().year()
 const access = useRuntimeConfig()
 const path = access.public.PAGAMENTO_PATH
 const colums = getColumns('historico')
 const enableModal = ref(false)
-
+const valores = ref([])
 const itens = ref([])
 const itemView = ref({})
 
@@ -180,6 +187,70 @@ const defineDocument = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(docu
 const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
+
+const lastMonth = computed(() => {
+  if (valores.value.length === 0) {
+    return '0,00'
+  }
+  const lastMonth = dayjs().subtract(1, 'month').month()
+  const currentYear = dayjs().year()
+
+  const total = valores.value
+    .filter((item) => {
+      const itemDate = dayjs(item.movimentacoes_pagamento[0].data_inicio)
+      return itemDate.year() === currentYear && itemDate.month() === lastMonth
+    })
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+
+  return total.toFixed(2).replace('.', ',')
+})
+
+const actualMonth = computed(() => {
+  if (valores.value.length === 0) {
+    return '0,00'
+  }
+
+  const currentMonth = dayjs().month()
+  const currentYear = dayjs().year()
+
+  const total = valores.value
+    .filter((item) => {
+      const itemDate = dayjs(item.movimentacoes_pagamento[0].data_inicio)
+      return itemDate.year() === currentYear && itemDate.month() === currentMonth
+    })
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+
+  return total.toFixed(2).replace('.', ',')
+})
+
+const today = computed(() => {
+  if (valores.value.length === 0) {
+    return '0,00'
+  }
+
+  const todays = dayjs().startOf('day')
+
+  const total = valores.value
+    .filter((item) => {
+      const itemDate = dayjs(item.movimentacoes_pagamento[0].data_inicio)
+      return itemDate.isSame(todays, 'day')
+    })
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+
+  return total.toFixed(2).replace('.', ',')
+})
+
+const years = computed(() => {
+  if (valores.value.length === 0) {
+    return '0,00'
+  }
+
+  const total = valores.value
+    .filter((item) => dayjs(item.movimentacoes_pagamento[0].data_inicio).year() === currentYear)
+    .reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+
+  return total.toFixed(2).replace('.', ',')
+})
 
 function formatFilter(filterArray) {
   const formattedFilters = []
@@ -236,7 +307,7 @@ const getPage = async () => {
 
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
-
+        valores.value = data.valores
         return { data: data.data, totalCount: data.count }
       } catch (error) {
         console.log(error.message)
@@ -250,6 +321,14 @@ await getPage()
 </script>
 
 <style scoped>
+.info-value p {
+  font-weight: 600;
+}
+.info-value span {
+  color: rgb(7, 180, 7);
+  font-weight: 600;
+  margin-right: 5px;
+}
 .btn-container {
   display: flex;
   justify-content: flex-end;
