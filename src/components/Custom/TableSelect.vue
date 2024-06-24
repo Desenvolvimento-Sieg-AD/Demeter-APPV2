@@ -7,7 +7,7 @@
     <DxDataGrid
       v-else
       ref="customTable"
-      height="calc(100vh - 180px)"
+      :height="height"
       render-async
       :key-expr="keyExpr"
       auto-navigate-to-focused-row
@@ -309,7 +309,8 @@ const props = defineProps({
   createText: { type: String, default: 'Adicionar' },
   paymentsSelecteds: { type: Boolean, default: false },
   page: { type: String, default: '' },
-  companiesFilter: { type: Boolean, default: false }
+  companiesFilter: { type: Boolean, default: false },
+  height: { type: String, default: 'calc(100vh - 180px)' }
 })
 
 // Initialization
