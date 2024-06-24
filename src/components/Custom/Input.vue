@@ -252,7 +252,7 @@
     :item-title="itemTitle"
     :return-object="returnObject"
     :item-value="itemValue"
-    :class="{ 'required-field field': required && (enableValue === null || enableValue.length === 0), 'field': true }"
+    :class="{ 'required-field field': required && (enableValue === null || enableValue.length === 0), field: true }"
     :delimiters="[',', ';', ' ']"
     @update:modelValue="onChange"
     @focus="onFocus"
@@ -420,7 +420,7 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   readonly: { type: Boolean, default: false },
   counter: { type: [Boolean, Number], default: 300 },
-  backgroundColor: { type: String, default: '#FFF' },
+  backgroundColor: { type: String, default: themes.dark.light },
   hideDetails: { default: false },
   mask: { type: String, default: 'default' },
   rows: { type: Number, default: 1 },

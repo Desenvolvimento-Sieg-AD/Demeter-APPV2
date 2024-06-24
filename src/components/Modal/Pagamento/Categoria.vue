@@ -1,16 +1,16 @@
 <template>
-  <CustomText title="Categoria" class="ml-3 " color="#118B9F" size="18" :bold="true" />
+  <CustomText title="Categoria" class="ml-3" color="secondary" size="18" :bold="true" />
   <v-row class="pa-3 mb-n6">
     <v-col cols="2" md="3">
-      <CustomInput 
+      <CustomInput
         required
         hide-details
         itemValue="id"
-        v-model="formValue.grupo_id" 
-        :items="grupos" 
-        itemTitle="nome" 
-        type="autocomplete" 
-        label="Grupo do pedido" 
+        v-model="formValue.grupo_id"
+        :items="grupos"
+        itemTitle="nome"
+        type="autocomplete"
+        label="Grupo do pedido"
         :disabled="!formValue.setor_solicitante_id || !formValue.empresa_id"
       />
     </v-col>
@@ -30,7 +30,7 @@
       />
     </v-col>
 
-   <v-col cols="6">
+    <v-col cols="6">
       <CustomInput
         type="file"
         persistent-hint
@@ -50,7 +50,6 @@
         </template>
       </CustomInput>
     </v-col>
-
   </v-row>
 </template>
 
@@ -67,7 +66,7 @@ const categorias = ref([])
 
 const emit = defineEmits(['update:form'])
 
-const props = defineProps({ 
+const props = defineProps({
   form: { type: Object, required: true },
   documentRequired: { type: Boolean, default: true }
 })
@@ -81,33 +80,34 @@ const formValue = computed({
 
 const selectedCategories = computed(() => categorias.value.filter((categoria) => categoria.grupo_id === formValue.value.grupo_id))
 
-const defineFileTitle = (fileName) => fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName
+const defineFileTitle = (fileName) => (fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName)
 
-watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
-  
-  if (oldValue && newValue !== oldValue) {
-    formValue.value.categoria_id = null
-    await categoriaRef?.value?.click()
-  }
-
-},{ immediate: true })
+watch(
+  () => formValue.value.grupo_id,
+  async (newValue, oldValue) => {
+    if (oldValue && newValue !== oldValue) {
+      formValue.value.categoria_id = null
+      await categoriaRef?.value?.click()
+    }
+  },
+  { immediate: true }
+)
 
 const loadCategorias = async (setor_solicitante_id, internacional, nacional) => {
   try {
-
-    if(!setor_solicitante_id) return
+    if (!setor_solicitante_id) return
 
     const { success, message, data } = await getCategoriasUsuario(setor_solicitante_id, internacional, nacional)
     if (!success) throw new Error(message)
 
     const tempGrupos = []
 
-    for (const categoria of data) { 
+    for (const categoria of data) {
       if (!tempGrupos.find((grupo) => grupo.id === categoria.grupo_id)) {
-          tempGrupos.push({
-              id: categoria.grupo_id,
-              nome: categoria.grupo.nome
-            })
+        tempGrupos.push({
+          id: categoria.grupo_id,
+          nome: categoria.grupo.nome
+        })
       }
     }
 
@@ -119,17 +119,24 @@ const loadCategorias = async (setor_solicitante_id, internacional, nacional) => 
   }
 }
 
-watch(() => formValue.value.setor_solicitante_id, async (value) => {
-  if(value) loadCategorias(value, null, true)
-},{ immediate: true })
+watch(
+  () => formValue.value.setor_solicitante_id,
+  async (value) => {
+    if (value) loadCategorias(value, null, true)
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   if (formValue.value.setor_solicitante_id) loadCategorias(formValue.value.setor_solicitante_id, null, true)
 })
 
-watch(() => formValue.value.fornecedor.internacional, async (value) => {
-  if (value) loadCategorias(formValue.value.setor_solicitante_id, value, null)
-  else loadCategorias(formValue.value.setor_solicitante_id, null, true)
-},{ immediate: true })
-
+watch(
+  () => formValue.value.fornecedor.internacional,
+  async (value) => {
+    if (value) loadCategorias(formValue.value.setor_solicitante_id, value, null)
+    else loadCategorias(formValue.value.setor_solicitante_id, null, true)
+  },
+  { immediate: true }
+)
 </script>

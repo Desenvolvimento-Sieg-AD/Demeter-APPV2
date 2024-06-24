@@ -1,16 +1,16 @@
 <template>
   <v-row no-gutters justify="space-between" align="center" class="mb-n14 mr-2">
-    <CustomText title="Fornecedor" class="ml-2 mb-n5 mt-n10" color="#118B9F" size="18" :bold="true" />
-    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional"  :disabled="route.params.id" />
+    <CustomText title="Fornecedor" class="ml-2 mb-n5 mt-n10" color="secondary" size="18" :bold="true" />
+    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" :disabled="route.params.id" />
   </v-row>
   <v-row class="pa-2" v-if="!formValue.fornecedor.internacional">
-
     <v-col cols="12" md="3">
       <CustomInput
         type="file"
         hide-details
         v-model="formValue.nf"
         :loading="loadingProcessFile"
+        color="primary"
         :disabled="formValue.fornecedor.internacional || !formValue.setor_solicitante_id || !formValue.empresa_id"
         label="Nota fiscal/Cupom fiscal"
         accept="image/*,application/pdf"
@@ -29,7 +29,7 @@
     <v-col cols="12" md="6">
       <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="chave" />
     </v-col>
-    
+
     <v-col cols="12" md="3" class="mt-n7">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
@@ -71,11 +71,10 @@
         append-inner-icon="mdi-shopping-outline"
       />
     </v-col>
-
   </v-row>
 
-  <v-row v-else class="pa-3 mb-n10" >
-    <v-col >
+  <v-row v-else class="pa-3 mb-n10">
+    <v-col>
       <CustomInput
         required
         hideDetails
@@ -89,7 +88,7 @@
       />
     </v-col>
 
-    <v-col >
+    <v-col>
       <CustomInput type="text" label="Número Invoice" v-model="form.numero_nf" />
     </v-col>
   </v-row>
@@ -100,7 +99,7 @@ import { getFornecedor, getFornecedorByDocumentOrName } from '@api'
 
 const { $toast } = useNuxtApp()
 
-const props = defineProps({ form: { type: Object, required: true }})
+const props = defineProps({ form: { type: Object, required: true } })
 
 const route = useRoute()
 
@@ -113,7 +112,6 @@ const fornecedores = ref([])
 const loadingProcessFile = ref(false)
 
 const processNfFile = async (file) => {
-
   loadingProcessFile.value = true
   try {
     const { nf, cpf_emitente, chave_acesso, cnpj_emitente, allIsNull, valor_total } = await getFileContent(file)
@@ -125,7 +123,6 @@ const processNfFile = async (file) => {
     formValue.value.valor_total = parseFloat(valor_total)
 
     validDocument(cpf_emitente, cnpj_emitente)
-
   } catch (error) {
     console.error('Erro ao processar arquivo NF:', error.message)
     $toast.error(error.message)
@@ -136,7 +133,6 @@ const processNfFile = async (file) => {
 
 const validDocument = async (cpf_emitente, cnpj_emitente) => {
   if (cpf_emitente || cnpj_emitente) {
-
     let documento = cpf_emitente ?? cnpj_emitente
 
     documento = documento.replace(/\D/g, '')
@@ -144,11 +140,10 @@ const validDocument = async (cpf_emitente, cnpj_emitente) => {
     const fornecedor = await findFornecedorByDocumento(documento)
 
     if (find) {
-
       const payload = {
         id: fornecedor.id,
         nome: fornecedor.razao_social,
-        apelido: fornecedor.nome_fantasia,  
+        apelido: fornecedor.nome_fantasia,
         documento: cpf_emitente ? maskCpf(cpf_emitente) : maskCnpj(cnpj_emitente),
         tipo: cpf_emitente ? 'fisico' : 'juridico',
         internacional: fornecedor.internacional
@@ -156,52 +151,48 @@ const validDocument = async (cpf_emitente, cnpj_emitente) => {
 
       formValue.value.fornecedor = payload
     }
-  } 
-
+  }
 }
 
 const findFornecedorByDocumento = async (documento) => {
   return fornecedores.value.find((fornecedor) => fornecedor.documento === documento)
 }
 
-const verifyFornecedor= async (type) => {
+const verifyFornecedor = async (type) => {
   try {
-
     const documento = formValue.value.fornecedor.documento ? formValue.value.fornecedor.documento.replace(/\D/g, '') : null
     const nome = formValue.value.fornecedor.nome
 
-    if(nome && formValue.value.fornecedor.id && type === 'nome') {
+    if (nome && formValue.value.fornecedor.id && type === 'nome') {
       const fornecedor = fornecedores.value.find((f) => f.razao_social === nome)
       await getDataFornecedor(fornecedor)
     }
 
-    if(type === 'documento'){
+    if (type === 'documento') {
       const { data } = await getFornecedorByDocumentOrName(documento, null, formValue.value.fornecedor.internacional)
 
-      if(data) {
+      if (data) {
         await getDataFornecedor(data)
       } else {
         formValue.value.fornecedor.nome = null
-        formValue.value.fornecedor.id = null 
+        formValue.value.fornecedor.id = null
       }
-
-    } else if(type === 'nome'){
+    } else if (type === 'nome') {
       const { data } = await getFornecedorByDocumentOrName(null, nome, formValue.value.fornecedor.internacional)
 
-      if(data){ 
+      if (data) {
         await getDataFornecedor(data)
       } else {
-        formValue.value.fornecedor.id = null 
+        formValue.value.fornecedor.id = null
       }
     }
-
   } catch (error) {
     console.error('Erro ao buscar fornecedor:', error)
     $toast.error('Erro ao buscar fornecedor')
   }
 }
 
-const defineFileTitle = (fileName) => fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName
+const defineFileTitle = (fileName) => (fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName)
 
 const getDataFornecedor = async (fornecedor) => {
   for (const key in formValue.value.fornecedor) {
@@ -261,7 +252,9 @@ const clearFornecedor = () => {
   }
 }
 
-watch(() => formValue.value.fornecedor.internacional, async (value) => {
+watch(
+  () => formValue.value.fornecedor.internacional,
+  async (value) => {
     clearFornecedor()
 
     const { data } = await getFornecedor(value)
@@ -269,12 +262,12 @@ watch(() => formValue.value.fornecedor.internacional, async (value) => {
   }
 )
 
-watch(() => formValue.value.nf, async (value) => {
-    if(route.params.id) return
+watch(
+  () => formValue.value.nf,
+  async (value) => {
+    if (route.params.id) return
     if (value && value.length > 0) await processNfFile(value[0])
   }
 )
-
 </script>
-<style scoped>
-</style>
+<style scoped></style>

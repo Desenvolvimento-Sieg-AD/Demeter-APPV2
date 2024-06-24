@@ -1,8 +1,8 @@
 <template>
   <v-container class="ajust" fluid>
     <v-form ref="customForm" @submit.prevent="submit" class="d-flex justify-center">
-      <v-col cols="12" >
-        <v-card class="backgroundimg" style="overflow-y: auto" :height="height">
+      <v-col cols="12">
+        <v-card style="overflow-y: auto" :height="height" :color="themes.dark.bgsecondary">
           <v-card-text class="card-box">
             <slot />
           </v-card-text>
@@ -43,12 +43,5 @@ defineExpose({ resetForm, validateForm })
 
 .v-form {
   overflow-y: auto;
-}
-.backgroundimg {
-  /* background-image: url('../../img/light.jpg'); */
-  background-color: #ffffff;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 </style>

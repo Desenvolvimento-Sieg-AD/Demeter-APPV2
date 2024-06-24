@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { resolve } from 'path'
+import themes from './src/utils/themes'
 
 export default defineNuxtConfig({
   devtools: {
@@ -51,54 +52,22 @@ export default defineNuxtConfig({
     public: {
       apiURL: process.env.NUXT_API_URL,
       PAGAMENTO_PATH: process.env.NUXT_PAGAMENTO_PATH,
-      PAGAMENTO_PRIVADO_PATH: process.env.NUXT_PAGAMENTO_PRIVADO_PATH,
+      PAGAMENTO_PRIVADO_PATH: process.env.NUXT_PAGAMENTO_PRIVADO_PATH
     }
   },
   vuetify: {
     vuetifyOptions: {
       labComponents: ['VTimePicker'],
       theme: {
-        defaultTheme: 'light',
+        defaultTheme: 'dark',
         themes: {
           dark: {
             dark: true,
-            colors: {
-              primary: '#F68A1A',
-              secondary: '#F68A1A',
-              danger: '#D9534F',
-              info: '#5BC0DE',
-              success: '#5CB85C',
-              warning: '#F0AD4E',
-              light: '#636363',
-              muted: '#CCCCCC',
-              dark: '#343A40',
-              purple: '#6F42C1',
-              graylighter: '#2C2C2C',
-              graylight: '#3C3C3C',
-              gray: '#4C4C4C',
-              graydark: '#5C5C5C',
-              black: '#000000'
-            }
+            colors: themes.dark
           },
           light: {
             dark: false,
-            colors: {
-              primary: '#F68A1A',
-              secondary: '#F68A1A',
-              danger: '#D9534F',
-              info: '#5BC0DE',
-              success: '#5CB85C',
-              warning: '#F0AD4E',
-              light: '#F7F7F7',
-              muted: '#6C757D',
-              dark: '#343A40',
-              purple: '#6F42C1',
-              graylighter: '#EDEDED',
-              graylight: '#CCCCCC',
-              gray: '#959595',
-              graydark: '#636363',
-              black: '#000000'
-            }
+            colors: themes.light
           }
         }
       }
