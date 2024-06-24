@@ -1,7 +1,7 @@
 <template>
   <CustomText title="Empresa" class="ml-3" color="#118B9F" size="18" :bold="true" />
   <v-row class="pa-3 mb-n6">
-    <v-col cols="4">
+    <v-col cols="3">
       <CustomInput
         required
         type="select"
@@ -24,14 +24,28 @@
         itemTitle="nome"
         :itemProps="itemProps"
         :items="setores"
-        label="Setor"
-        v-model="formValue.setor_id"
+        label="Seu setor"
+        v-model="formValue.setor_solicitante_id"
         append-inner-icon="mdi-domain"
         :disabled="setores.length <= 1 || !formValue.empresa_id"
       />
     </v-col>
 
-    <v-col cols="5">
+    <v-col cols="3">
+      <CustomInput
+        required
+        hide-details
+        itemValue="id"
+        itemTitle="nome"
+        :items="setoresPadrao"
+        label="Setor referência"
+        type="combobox"
+        v-model="formValue.setor_id"
+        append-inner-icon="mdi-briefcase-plus-outline"
+      />
+    </v-col>
+
+    <v-col cols="3">
       <CustomInput
         ref="projetoRef"
         hide-details
@@ -57,19 +71,20 @@
   </v-row>
 </template>
 <script setup>
-import { getProjects, getEmpresa, existRelationSetorWithEmpresa, createProjectAPI } from '@api'
+import { getProjects, getEmpresa, existRelationSetorWithEmpresa, createProjectAPI, getSetoresPadrao } from '@api'
 import { useAuthStore } from '~/store/auth'
 
 const { data: empresas } = await getEmpresa()
 
 const setores = computed(() => user.setores)
+const { data: setoresPadrao } = await getSetoresPadrao()
 
 const { user } = useAuthStore()
 
 const requer_projeto = computed(() => {
-  if (!formValue.value.setor_id) return false
+  if (!formValue.value.setor_solicitante_id) return false
 
-  const find = setores.value.find((setor) => setor.id === formValue.value.setor_id)
+  const find = setores.value.find((setor) => setor.id === formValue.value.setor_solicitante_id)
   return find ? find.requer_projeto : false
 })
 

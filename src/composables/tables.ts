@@ -33,12 +33,13 @@ interface ITables {
   financeiro: IColumn[]
   historico: IColumn[]
   provisionados: IColumn[]
+  setores: IColumn[]
 }
 
 const tabelas: ITables = {
   gerencia: [
     { title: 'Solicit.', value: 'usuario.sigla', sortable: true, filterable: true, visible: true, width: 100 },
-    { title: 'Setor', value: 'setor.sigla', sortable: true, filterable: true, visible: true, width: 90 },
+    { title: 'Setor', value: 'setorReferencia.sigla', sortable: true, filterable: true, visible: true, width: 90 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
     { title: 'Internacional', value: 'fornecedor.internacional', filterable: true, visible: false },
@@ -60,7 +61,7 @@ const tabelas: ITables = {
   ],
   financeiro: [
     { title: 'Solicit.', value: 'usuario.sigla', sortable: true, filterable: true, visible: true, width: 100 },
-    { title: 'Setor', value: 'setor.sigla', sortable: true, filterable: true, visible: true, width: 90 },
+    { title: 'Setor', value: 'setorReferencia.sigla', sortable: true, filterable: true, visible: true, width: 90 },
     { title: 'Status', value: 'movimentacoes_pagamento.status_pagamento', visible: true, filterable: true, width: 150 },
     { title: 'Urgente', value: 'urgente', sortable: true, filterable: true, visible: true, width: 100 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true, width: 80   },
@@ -81,11 +82,11 @@ const tabelas: ITables = {
     { title: 'Valor', value: 'valor_total', sortable: true, filterable: false, visible: true },
     { title: 'NF', value: 'anexo',  filterable: false, visible: true, width: 70 },
     { title: 'DOC', value: 'doc', filterable: false, visible: true, width: 70 },
-    { title: 'Ações', value: 'actions', width: 100, fixed: true }
+    { title: 'Ações', value: 'actions', width: 120, fixed: true }
   ],
   provisionados: [
     { title: 'Solicit.', value: 'usuario.sigla', sortable: true, filterable: true, visible: true, width: 100 },
-    { title: 'Setor', value: 'setor.sigla', sortable: true, filterable: true, visible: true, width: 90 },
+    { title: 'Setor', value: 'setorReferencia.sigla', sortable: true, filterable: true, visible: true, width: 90 },
     { title: 'Urgente', value: 'urgente', sortable: true, filterable: true, visible: true, width: 100 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true, width: 80   },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
@@ -109,7 +110,7 @@ const tabelas: ITables = {
   ],
   historico: [
     { title: 'Solicit.', value: 'usuario.sigla', sortable: true, filterable: true, visible: true, width: 100 },
-    { title: 'Setor', value: 'setor.sigla', sortable: true, filterable: true, visible: true, width: 90 },
+    { title: 'Setor', value: 'setorReferencia.sigla', sortable: true, filterable: true, visible: true, width: 90 },
     { title: 'Status', value: 'movimentacoes_pagamento.status_pagamento', visible: true, filterable: true, width: 150 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
@@ -148,12 +149,18 @@ const tabelas: ITables = {
     { title: 'Forma de pagamento', value: 'tipo_pagamento.nome', sortable: true, filterable: true, visible: false },
     { title: 'Descrição pagamento', value: 'descricao', sortable: true, filterable: true, visible: false },
     { title: 'Solicitação', value: 'created_at', sortable: true, filterable: false, visible: true, width: 120 },
-    // { title: 'Data de aprovação', value: 'data_aprovacao', sortable: true, reorderable: true, filterable: false, visible: true },
     { title: 'Vencimento', value: 'data', sortable: true, reorderable: true, filterable: false, visible: true, width: 120 },
     { title: 'Valor', value: 'valor_total', sortable: true, filterable: false, visible: true },
     { title: 'NF', value: 'anexo',  filterable: false, visible: true, width: 70 },
     { title: 'DOC', value: 'doc', filterable: false, visible: true, width: 70 },
     { title: 'Ações', value: 'actions', width: 120, fixed: true }
+  ],
+  setores: [
+    { title: 'Setor', value: 'nome', sortable: true, filterable: true, visible: true, width: 410 },
+    { title: 'Sigla', value: 'sigla', sortable: true, filterable: true, visible: true, width: 410 },
+    { title: 'Usuarios', value: 'usuarios.length', visible: true, width: 410},
+    { title: 'Categorias', value: 'categorias', visible: true, width: 410, align: 'center' },
+    { title: 'Ações', value: 'actions', width: 120, fixed: true}
   ]
 }
 

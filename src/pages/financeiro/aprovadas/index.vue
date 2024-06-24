@@ -340,15 +340,14 @@ const isBoleto = (type) => type === 'Boleto'
 const isPagOnline = (type) => type === 'Pagamento Online'
 const isCartao = (type) => type === 'Cartão de crédito' || type === 'Cartão de débito'
 
-watch(selectedClient, async (value) => {
-  if (selectedClient.value) await getPaymentByClient()
-})
+watch(selectedClient, async (value) => { if (selectedClient.value) await getPaymentByClient() })
 
 watch(route, (value) => {
+  console.log(value.query)
   if(value.query.client_id) selectedClient.value = Number(value.query.client_id)
 }, {deep: true, immediate: true})
 
-const editPayment = (id) => router.push({ path: `../pagamento/${id}`, query: { client_id: selectedClient.value } })
+const editPayment = (id) => router.push({ path: `../pagamento/${id}`, query: { client_id: selectedClient.value, edit: false } })
 
 const sentAndError = (payment) => payment.enviado_externo && !payment.codigo_lancamento_omie
 const sentWithSuccess = (payment) => payment.enviado_externo && payment.codigo_lancamento_omie

@@ -140,6 +140,7 @@ const getPayment = async () => {
     form.conta_id = data.conta_id
     form.grupo_id = data.categoria.grupo.id
     form.categoria_id = data.categoria_id
+    form.setor_solicitante_id = data.setor_solicitante_id
     form.setor_id = data.setor_id
 
     getContasDisp()

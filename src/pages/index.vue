@@ -134,7 +134,7 @@
       </CustomTableSelect>
     </LayoutForm>
 
-    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id" :allowEdit="allowEdit" @getPagamento="getPage()" />
+    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id"  @getPagamento="getPage()" />
 
     <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :item="pagamento" :actions="modalActions" />
     <LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="getPage" :tipo_anexo_id="tipo_anexo_id" />
@@ -155,7 +155,6 @@ const columns = getColumns('usuario')
 const path = access.public.PAGAMENTO_PATH
 const title = ref('Pagamentos')
 const loading = ref(false)
-const allowEdit = ref(true)
 const pagamento = ref({})
 const pagamentos = ref([])
 const tipo_anexo_id = ref(null)
@@ -171,14 +170,13 @@ const enableModal = reactive({
 
 // * ACTIONS
 
+const statusDisabled = ref([1, 2])
+
 const actions = computed(() => [
   {
     icon: 'mdi-eye',
     tooltip: 'Ver detalhes',
-    click: (item) => {
-      pagamento.value = item
-      enableModal.pagamento = true
-    },
+    click: handleViewDetails,
     visible: true,
     active: true,
     type: 'padrao'
@@ -186,23 +184,36 @@ const actions = computed(() => [
   {
     icon: 'mdi-cancel',
     tooltip: 'Cancelar',
-    click: (item) => {
-      pagamento.value = item
-      enableModal.cancel = true
-    },
-    disabled: (item) => !(item.movimentacoes_pagamento[0].status_pagamento.label === 'Pendente'),
+    click: handleCancel,
+    disabled: isDisabled,
     type: 'cancel'
   },
   {
     icon: 'mdi-pencil',
     tooltip: 'Editar',
-    disabled: () => true,
-    click: (item) => {
-      pagamento.value = item
-      enableModal.pagamento = true
-    }
+    click: handleEdit,
+    disabled: isDisabled,
+    type: 'edit'
   }
-])
+]);
+
+const handleViewDetails = (item) => {
+  pagamento.value = item;
+  enableModal.pagamento = true;
+};
+
+const handleCancel = (item) => {
+  pagamento.value = item;
+  enableModal.cancel = true;
+};
+
+const handleEdit = (item) => {
+  const status_id = item.movimentacoes_pagamento[0].status_pagamento.id;
+  const path = `../pagamento/${item.id}`;
+  router.push({ path, query: { edit: true, revision: status_id === 2} });
+};
+
+const isDisabled = (item) => !statusDisabled.value.includes(item.movimentacoes_pagamento[0].status_pagamento.id);
 
 const modalActions = [
   {

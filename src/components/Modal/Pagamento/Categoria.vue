@@ -11,7 +11,7 @@
         itemTitle="nome" 
         type="autocomplete" 
         label="Grupo do pedido" 
-        :disabled="!formValue.setor_id || !formValue.empresa_id"
+        :disabled="!formValue.setor_solicitante_id || !formValue.empresa_id"
       />
     </v-col>
 
@@ -92,12 +92,12 @@ watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
 
 },{ immediate: true })
 
-const loadCategorias = async (setor_id, internacional, nacional) => {
+const loadCategorias = async (setor_solicitante_id, internacional, nacional) => {
   try {
 
-    if(!setor_id) return
+    if(!setor_solicitante_id) return
 
-    const { success, message, data } = await getCategoriasUsuario(setor_id, internacional, nacional)
+    const { success, message, data } = await getCategoriasUsuario(setor_solicitante_id, internacional, nacional)
     if (!success) throw new Error(message)
 
     const tempGrupos = []
@@ -119,17 +119,17 @@ const loadCategorias = async (setor_id, internacional, nacional) => {
   }
 }
 
-watch(() => formValue.value.setor_id, async (value) => {
+watch(() => formValue.value.setor_solicitante_id, async (value) => {
   if(value) loadCategorias(value, null, true)
 },{ immediate: true })
 
 onMounted(() => {
-  if (formValue.value.setor_id) loadCategorias(formValue.value.setor_id, null, true)
+  if (formValue.value.setor_solicitante_id) loadCategorias(formValue.value.setor_solicitante_id, null, true)
 })
 
 watch(() => formValue.value.fornecedor.internacional, async (value) => {
-  if (value) loadCategorias(formValue.value.setor_id, value, null)
-  else loadCategorias(formValue.value.setor_id, null, true)
+  if (value) loadCategorias(formValue.value.setor_solicitante_id, value, null)
+  else loadCategorias(formValue.value.setor_solicitante_id, null, true)
 },{ immediate: true })
 
 </script>

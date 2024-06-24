@@ -200,14 +200,31 @@ const enableModal = reactive({
 
 // * COMPUTED && MODALS ACTIONS
 
+const status = {
+  approve: 3,
+  disapprove: 8,
+  revision: 2
+}
+
+const title = {
+  approve: 'Aprovar',
+  disapprove: 'Reprovar',
+  revision: 'Solicitar revisão'
+}
+
 const openApprovePayment = () => {
-    confirm.value = 'approve'
-    enableModal.allConfirm = true
+  confirm.value = 'approve'
+  enableModal.allConfirm = true
 }
 
 const openDisapprovePayment = () => {
-    confirm.value = 'disapprove'
-    enableModal.allConfirm = true
+  confirm.value = 'disapprove'
+  enableModal.allConfirm = true
+}
+
+const openRevisionPayment = () => {
+  confirm.value = 'revision'
+  enableModal.allConfirm = true
 }
 
 const openEditPayment = () => {
@@ -233,6 +250,18 @@ const actions = computed(() => [
       viewPayment.value = item
       enableModal.editCount = true
     }
+  },
+  {
+    tooltip: 'Revisão',
+    icon: 'mdi-file-document-refresh',
+    click: (item) => {
+      viewPayment.value = item
+      enableModal.confirm = true
+      confirm.value = 'revision'
+    },
+    active: true,
+    disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
+    type: 'warning'
   },
   {
     icon: 'mdi-close',
@@ -269,13 +298,14 @@ const actionsModalConfirm = computed(() => [
   },
   {
     icon: 'mdi-check',
-    title: confirm.value === 'approve' ? 'Aprovar' : 'Reprovar',
+    title: title[confirm.value],
     type: 'success',
     loading: loadingModal.value,
     click: async () => {
-      if (confirm.value === 'approve') await sendStatus(3, [viewPayment.value.id])
-      else await sendStatus(8, [viewPayment.value.id])
-    }
+      const status_id = status[confirm.value]
+      await sendStatus(status_id, [viewPayment.value.id])
+    },
+    width: '200px'
   }
 ])
 
@@ -288,20 +318,22 @@ const modalActionsAprovedAll = computed(() => [
   },
   {
     icon: 'mdi-check',
-    title: confirm.value === 'approve' ? 'Aprovar' : 'Recusar',
+    title: title[confirm.value],
     type: 'success',
     loading: loadingModal.value,
     click: async () => await validBeforeSend()
-  }
+  },
 ])
 
 const messageConfirmStatus = computed(() => {
   if (confirm.value === 'approve') return 'Deseja realmente aprovar essa solicitação de pagamento?'
+  else if (confirm.value === 'revision') return 'Deseja realmente solicitar revisão dessa solicitação de pagamento?'
   return 'Deseja realmente reprovar essa solicitação de pagamento?'
 })
 
 const messageConfirmAllStatus = computed(() => {
   if (confirm.value === 'approve') return 'Deseja realmente aprovar todas as solicitações de pagamentos selecionadas?'
+  else if (confirm.value === 'revision') return 'Deseja realmente solicitar revisão todas as solicitações de pagamentos selecionadas?'
   return 'Deseja realmente reprovar todas as solicitações de pagamentos selecionadas?'
 })
 
@@ -348,7 +380,8 @@ const handleSelectionChange = (items) => {
   itemsSelects.value = items
 }
 const validBeforeSend = async () => {
-  const status_id = confirm.value === 'approve' ? 3 : 8
+
+  const status_id = status[confirm.value]
 
   const lista_id = itemsSelects.value.map((item) => item.id)
 
@@ -361,7 +394,13 @@ const sendStatus = async (status, id) => {
 
     loadingModal.value = true
 
-    const justificativaValue = confirm.value === 'disapprove' ? justificativa.value : 'Aprovado pelo Financeiro'
+    const justificativas = {
+      disapprove: justificativa.value,
+      approve: 'Aprovado pelo Financeiro',
+      revision: justificativa.value
+    }
+
+    const justificativaValue = justificativas[confirm.value]
 
     const { success, message } = await postStatus({ id, status, justificativa: justificativaValue })
 

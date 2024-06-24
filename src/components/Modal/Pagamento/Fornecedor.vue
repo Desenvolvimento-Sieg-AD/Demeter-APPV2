@@ -11,7 +11,7 @@
         hide-details
         v-model="formValue.nf"
         :loading="loadingProcessFile"
-        :disabled="formValue.fornecedor.internacional || !formValue.setor_id || !formValue.empresa_id"
+        :disabled="formValue.fornecedor.internacional || !formValue.setor_solicitante_id || !formValue.empresa_id"
         label="Nota fiscal/Cupom fiscal"
         accept="image/*,application/pdf"
         append-inner-icon="mdi-file-upload-outline"
