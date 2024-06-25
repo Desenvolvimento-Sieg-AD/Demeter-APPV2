@@ -34,6 +34,7 @@ interface ITables {
   historico: IColumn[]
   provisionados: IColumn[]
   setores: IColumn[]
+  categorias: IColumn[]
 }
 
 const tabelas: ITables = {
@@ -134,6 +135,7 @@ const tabelas: ITables = {
     { title: 'Ações', value: 'actions', width: 80, fixed: true }
   ],
   usuario: [
+    { title: 'Urgente', value: 'urgente', sortable: true, filterable: true, visible: false, width: 100 },
     { title: 'Status', value: 'movimentacoes_pagamento.status_pagamento', visible: true, filterable: true, width: 150 },
     { title: 'Categoria', value: 'categoria.nome', align: 'center', sortable: true, filterable: true, visible: true },
     { title: 'Fornecedor', value: 'fornecedor.razao_social', sortable: true, filterable: true, visible: true },
@@ -160,6 +162,16 @@ const tabelas: ITables = {
     { title: 'Sigla', value: 'sigla', sortable: true, filterable: true, visible: true, width: 410 },
     { title: 'Usuarios', value: 'usuarios.length', visible: true, width: 410},
     { title: 'Categorias', value: 'categorias', visible: true, width: 410, align: 'center' },
+    { title: 'Ações', value: 'actions', width: 120, fixed: true}
+  ],
+  categorias: [
+    { title: 'Categoria', value: 'nome', sortable: true, filterable: true, visible: true, width: 350 },
+    { title: 'Descrição', value: 'descricao', sortable: true, filterable: true, visible: true, width: 350 },
+    { title: 'Grupo', value: 'grupo.nome', sortable: true, filterable: true, visible: true, width: 350 },
+    { title: 'Ativo', value: 'ativo', sortable: true, filterable: true, visible: true, width: 150 },
+    { title: 'Nacional', value: 'nacional', sortable: true, filterable: true, visible: true, width: 150 },
+    { title: 'Internacional', value: 'internacional', sortable: true, filterable: true, visible: true, width: 150 },
+    { title: 'Projeto Obrigatório', value: 'requer_projeto', sortable: true, filterable: true, visible: true, width: 150 },
     { title: 'Ações', value: 'actions', width: 120, fixed: true}
   ]
 }

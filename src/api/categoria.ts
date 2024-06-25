@@ -9,6 +9,28 @@ export async function getCategorias() {
   }
 }
 
+export async function getCategoriaById(id: number) {
+  try {
+    const { success, message, data } = await useApi(`/categoria/${id}`)
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error }
+  }
+}
+
+export async function getCategoriasWithGrupo(){
+  try {
+    const { success, message, data } = await useApi(`/categoria/grupos`)
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error, data: null }
+  }
+}
+
 export async function getCategoriasUsuario(setor_id: number, internacional: boolean | null, nacional: boolean | null) {
   try {
     const { success, message, data } = await useApi(`/categoria/usuario/${setor_id}`, {
@@ -90,5 +112,18 @@ export async function createCategoria(options: { nome: string, descricao: string
   } catch (error) {
     return { success: false, message: error }
   }
-  
+}
+
+export async function updateCategoria(id: number, options: { nome: string, descricao: string, grupo_id: number, empresas_id: number[], setores_id: number[] }) {
+  try {
+    const { success, message, data } = await useApi(`/categoria/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(options)
+    })
+    if (!success) throw new Error(message)
+
+    return { success, message, data }
+  } catch (error) {
+    return { success: false, message: error }
+  }
 }
