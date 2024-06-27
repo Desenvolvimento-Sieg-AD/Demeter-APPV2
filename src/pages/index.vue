@@ -134,7 +134,7 @@
       </CustomTableSelect>
     </LayoutForm>
 
-    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id"  @getPagamento="getPage()" />
+    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id" @getPagamento="getPage()" />
 
     <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :item="pagamento" :actions="modalActions" />
     <LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="getPage" :tipo_anexo_id="tipo_anexo_id" />
@@ -195,25 +195,25 @@ const actions = computed(() => [
     disabled: isDisabled,
     type: 'edit'
   }
-]);
+])
 
 const handleViewDetails = (item) => {
-  pagamento.value = item;
-  enableModal.pagamento = true;
-};
+  pagamento.value = item
+  enableModal.pagamento = true
+}
 
 const handleCancel = (item) => {
-  pagamento.value = item;
-  enableModal.cancel = true;
-};
+  pagamento.value = item
+  enableModal.cancel = true
+}
 
 const handleEdit = (item) => {
-  const status_id = item.movimentacoes_pagamento[0].status_pagamento.id;
-  const path = `../pagamento/${item.id}`;
-  router.push({ path, query: { edit: true, revision: status_id === 2} });
-};
+  const status_id = item.movimentacoes_pagamento[0].status_pagamento.id
+  const path = `../pagamento/${item.id}`
+  router.push({ path, query: { edit: true, revision: status_id === 2 } })
+}
 
-const isDisabled = (item) => !statusDisabled.value.includes(item.movimentacoes_pagamento[0].status_pagamento.id);
+const isDisabled = (item) => !statusDisabled.value.includes(item.movimentacoes_pagamento[0].status_pagamento.id)
 
 const modalActions = [
   {
@@ -261,11 +261,10 @@ const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
 const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
-const nameFiles = (anexos) => anexos.map((anexo) => `${anexo.nome}  -  `)
+const nameFiles = (anexos) => anexos.map((anexo) => `${anexo.nome}`).join('; ')
 
 const documentByType = (tipo, documento) => {
-  
-  if(!documento) return ''
+  if (!documento) return ''
   return tipo === 'juridico' ? maskCnpj(documento) : maskCpf(documento)
 }
 
@@ -297,80 +296,74 @@ const cancelPayment = async (ids) => {
   justificativa.value = null
 }
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
 function formatFilter(filterArray) {
+  const formattedFilters = []
 
-	const formattedFilters = [];
+  for (let i = 0; i < filterArray.length; i++) {
+    if (filterArray[i] === 'or' || filterArray[i] === '=') continue
+    if (filterArray[i] === filterArray['filterValue']) continue
 
-	for (let i = 0; i < filterArray.length; i++) {
+    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
+    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
 
-		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
-    if (filterArray[i] === filterArray['filterValue']) continue;
+    formattedFilters.push({ fieldName, value })
+  }
 
-		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
-		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
-
-		formattedFilters.push({ fieldName, value });
-	}
-
-	return formattedFilters;
+  return formattedFilters
 }
 
 const getPage = async () => {
+  pagamentos.value = new CustomStore({
+    key: 'id',
+    async load(loadOptions) {
+      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
 
-	pagamentos.value = new CustomStore({
-		key: 'id',
-		async load(loadOptions) {
+      const queryString = paramsName
+        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
+        .map((paramName) => {
+          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
+          return { [paramName]: loadOptions[paramName] }
+        })
 
-			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
-      
-			const queryString = paramsName
-				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
-				.map((paramName) => {
-					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
-					return { [paramName]: loadOptions[paramName] };
-				});
+      const mergedObject = queryString.reduce((acc, obj) => {
+        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
+        return acc
+      }, {})
 
-			const mergedObject = queryString.reduce((acc, obj) => {
-				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
-				return acc;
-			}, {});
+      try {
+        const { success, message, data } = await useApi(`/pagamento/scope/usuario`, {
+          query: {
+            paging: true,
+            limit: mergedObject.take,
+            offset: mergedObject.skip,
+            sort: mergedObject.sort,
+            filter: JSON.stringify(mergedObject.filter)
+          }
+        })
 
-			try {
-				const { success, message, data } = await useApi(`/pagamento/scope/usuario`, {
-					query: {
-						paging: true,
-						limit: mergedObject.take,
-						offset: mergedObject.skip,
-						sort: mergedObject.sort,
-						filter: JSON.stringify(mergedObject.filter),
-					},
-				});
-
-				if (!success) throw new Error(message);
+        if (!success) throw new Error(message)
 
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-				return {
-					data: data.data,
-					totalCount: data.count,
-				};
-			} catch (error) {
-				console.log(error.message);
-				$toast.error('Erro ao carregar os pagamentos');
+        return {
+          data: data.data,
+          totalCount: data.count
+        }
+      } catch (error) {
+        console.log(error.message)
+        $toast.error('Erro ao carregar os pagamentos')
         await customRef.value.refresh()
+      }
+    }
+  })
+}
 
-			}
-		},
-	});
-};
-
-await getPage();
-
+await getPage()
 </script>
 
 <style scoped>
