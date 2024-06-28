@@ -60,7 +60,7 @@ const updateMessage = computed({
 <style scoped>
 
 .title{
-color: #118B9F
+color: #F68A1A
 }
 
 </style>

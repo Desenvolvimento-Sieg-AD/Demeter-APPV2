@@ -39,8 +39,8 @@
             :class="{
               'card-payment-box': true,
               'approved-box': payment.codigo_lancamento_omie,
-              'error-box': payment.enviado_externo && !payment.codigo_lancamento_omie,
-              'selected-box': payment.selectedOmie
+              'error-box': (payment.enviado_externo && !payment.codigo_lancamento_omie) || sentAndError(payment),
+              'selected-box': payment.selectedOmie && !sentAndError(payment)
             }"
             flat
             @click="selectPayment(payment.id)"
@@ -50,55 +50,55 @@
               <v-col cols="10">
                 <v-row>
                   <v-col cols="5">
-                    <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Valor" v-model="payment.valor_total" color="#118B9F" disabled mask="money" hide-details />
+                    <CustomInput label="Valor" v-model="payment.valor_total" color="primary" disabled mask="money" hide-details />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Vencimento" v-model="payment.data_vencimento" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Vencimento" v-model="payment.data_vencimento" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="5" v-if="payment.projeto">
-                    <CustomInput label="Projeto" v-model="payment.projeto.nome" color="#118B9F" disabled hide-details v-if="payment.projeto" />
+                    <CustomInput label="Projeto" v-model="payment.projeto.nome" color="primary" disabled hide-details v-if="payment.projeto" />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Método" v-model="payment.tipo_pagamento.nome" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Método" v-model="payment.tipo_pagamento.nome" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
-                    <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
-                    <CustomInput label="Agência" v-model="payment.dados_bancarios.agencia" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Agência" v-model="payment.dados_bancarios.agencia" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
-                    <CustomInput label="Conta" v-model="payment.dados_bancarios.conta" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Conta" v-model="payment.dados_bancarios.conta" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="3" v-if="isPIX(payment.tipo_pagamento.nome)">
-                    <CustomInput label="Chave PIX" v-model="payment.dados_bancarios.chave_pix" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Chave PIX" v-model="payment.dados_bancarios.chave_pix" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="6" v-if="isBoleto(payment.tipo_pagamento.nome)">
-                    <CustomInput label="Código de Barras" v-model="payment.dados_bancarios.codigo_barras" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Código de Barras" v-model="payment.dados_bancarios.codigo_barras" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="6" v-if="isPagOnline(payment.tipo_pagamento.nome)">
-                    <CustomInput label="Link de Pagamento" v-model="payment.dados_bancarios.outhers" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Link de Pagamento" v-model="payment.dados_bancarios.outhers" color="primary" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2" v-if="isCartao(payment.tipo_pagamento.nome) && payment.conta_empresa">
-                    <CustomInput label="Número do Cartão" v-model="payment.conta_empresa.descricao" color="#118B9F" disabled hide-details />
+                    <CustomInput label="Número do Cartão" v-model="payment.conta_empresa.descricao" color="primary" disabled hide-details />
                   </v-col>
                 </v-row>
               </v-col>
@@ -131,7 +131,6 @@
                       <v-icon>mdi-cancel</v-icon>
                       <v-tooltip text="Cancelar pagamento" activator="parent" location="top" />
                     </v-btn>
-
                   </v-col>
                 </v-row>
               </v-col>
@@ -152,11 +151,11 @@
       </v-card>
 
       <v-row no-gutters align="center" justify="center" class="my-10" v-else-if="notExistPayments">
-        <CustomText title="Não existe pagamentos nesse cliente" color="#118B9F" size="20" :bold="true" class="text-center" />
+        <CustomText title="Não existe pagamentos nesse cliente" color="primary" size="20" :bold="true" class="text-center" />
       </v-row>
 
       <v-row no-gutters align="center" justify="center" class="my-10" v-else>
-        <CustomText title="Selecione um cliente primeiro" color="#118B9F" size="20" :bold="true" class="text-center" />
+        <CustomText title="Selecione um cliente primeiro" color="primary" size="20" :bold="true" class="text-center" />
       </v-row>
 
       <v-btn color="green" class="btn-send" icon size="75" @click="sendOmie" :loading="loading" :disabled="countPayments === 0">
@@ -227,7 +226,6 @@ const getPaymentByClient = async () => {
   try {
     const { success, message, data } = await getPagamentoByClient(selectedClient.value)
     if (!success) throw new Error(message)
-
     payments.value = data.map(formatPaymentData)
 
     showPayments.value = payments.value.length > 0
@@ -253,7 +251,7 @@ const sendOmie = async () => {
     try {
       const { success, message, data } = await sendPaymentsToOmie(payment.id)
       if (!success) throw new Error(message)
-      
+
       if (!data.success) {
         codigo = data.faultcode
         throw new Error(data.message)
@@ -263,7 +261,7 @@ const sendOmie = async () => {
 
       const findPayment = payments.value.find((p) => p.id === payment.id)
       findPayment.selectedOmie = false
-      
+
       payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso', color: 'green' }
       payment.enviado_externo = true
 
@@ -298,7 +296,6 @@ const sendPaidPayment = async (id) => {
     await getPaymentByClient()
 
     loading.value = false
-
   } catch (error) {
     console.error(error.message)
     $toast.error('Erro ao mover pagamento para provisionado')
@@ -364,7 +361,6 @@ const selectPayment = (id) => {
   payment.selectedOmie = !payment.selectedOmie
   countPayments.value = payments.value.filter((payment) => payment.selectedOmie).length
 }
-
 
 const formatPaymentData = (payment) => {
   payment.data_vencimento = dayjs(payment.data_vencimento).format('DD/MM/YYYY')
@@ -458,6 +454,6 @@ watch(selectedClient, async () => {
 }
 
 .selected-box {
-  background-color: #cae9ca;
+  background-color: #118c9f60;
 }
 </style>

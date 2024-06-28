@@ -3,7 +3,7 @@
         <template #content>
             <v-col>
                 <v-row class="mb-2" >
-                    <CustomText :title="message" class="ml-2" color="#118B9F" size="20" :bold="true" />
+                    <CustomText :title="message" class="ml-2" color="#F68A1A" size="20" :bold="true" />
                 </v-row>
                 <v-row>
                     <CustomInput v-model="formValue.projeto_id" label="Nome do projeto" />

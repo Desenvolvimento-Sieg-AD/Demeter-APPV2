@@ -49,7 +49,7 @@
 
       <DxSearchPanel :visible="searchable" width="500px" />
 
-      <DxSelection mode="multiple" :show-check-boxed-mode="checkBoxesMode" v-if="selectionCheck"  />
+      <DxSelection mode="multiple" :show-check-boxed-mode="checkBoxesMode" v-if="selectionCheck" />
 
       <DxSorting :mode="columns.some((el) => el.sortable) ? 'multiple' : 'none'" />
 
@@ -60,15 +60,17 @@
       <DxToolbar :visible="enableAddButton || filterOn || props.enableAddButton || allowGroupingColumns || searchable || columns.some((el) => el.searchable) || chooseColumns">
         <DxItem name="create" v-if="props.enableAddButton" locate-in-menu="auto" location="before" template="create" />
 
+        <DxItem name="companiesFilter" v-if="companiesFilter" locate-in-menu="auto" location="before" template="companiesFilter" />
+
         <DxItem name="resetTable" locate-in-menu="auto" location="before" template="resetTable" />
 
         <DxItem name="removingFilter" v-if="filterOn" locate-in-menu="auto" location="before" template="removingFilter" />
 
-        <DxItem name="editPayment" locate-in-menu="auto" location="after" template="editPayment" v-if="paymentsSelecteds && page == 'financeiro'"/>
+        <DxItem name="editPayment" locate-in-menu="auto" location="after" template="editPayment" v-if="paymentsSelecteds && page == 'financeiro'" />
 
-        <DxItem name="disapprovePayment" locate-in-menu="auto" location="after" template="disapprovePayment" v-if="paymentsSelecteds"/>
+        <DxItem name="disapprovePayment" locate-in-menu="auto" location="after" template="disapprovePayment" v-if="paymentsSelecteds" />
 
-        <DxItem name="approvePayment" locate-in-menu="auto" location="after" template="approvePayment" v-if="paymentsSelecteds"/>
+        <DxItem name="approvePayment" locate-in-menu="auto" location="after" template="approvePayment" v-if="paymentsSelecteds" />
 
         <DxItem name="groupPanel" v-if="allowGroupingColumns" locate-in-menu="auto" location="before" />
 
@@ -86,7 +88,29 @@
           {{ createTitle }}
         </v-btn>
       </template>
+      <template #companiesFilter>
+        <v-btn @click="companyFilter('Sieg')" class="dx-button dx-button-mode-contained mr-2" color="#118B9F" :variant="companies.includes('Sieg') ? 'tonal' : 'outlined'">
+          <v-tooltip activator="parent" location="bottom" text="SIEG APOIO ADMINISTRATIVO LTDA" />
+          Sieg
+        </v-btn>
+        <v-btn @click="companyFilter('B2G')" class="dx-button dx-button-mode-contained mr-2" color="#6A1748" :variant="companies.includes('B2G') ? 'tonal' : 'outlined'">
+          <v-tooltip activator="parent" location="bottom" text="B2G COMERCIO DE EQUIPAMENTOS LIMITADA" />
+          B2G
+        </v-btn>
+        <v-btn @click="companyFilter('18Gigas')" class="dx-button dx-button-mode-contained mr-2" color="#191919" :variant="companies.includes('18Gigas') ? 'tonal' : 'outlined'">
+          <v-tooltip activator="parent" location="bottom" text="18 GIGAS COMERCIO DE EQUIPAMENTOS LTDA" />
+          18Gigas
+        </v-btn>
 
+        <v-btn @click="companyFilter('Ribeiro')" class="dx-button dx-button-mode-contained mr-2" color="#FF8600" :variant="companies.includes('Ribeiro') ? 'tonal' : 'outlined'">
+          <v-tooltip activator="parent" location="bottom" text="RIBEIRO APOIO ADMINISTRATIVO E COMERCIO LTDA" />
+          Ribeiro
+        </v-btn>
+        <v-btn @click="companyFilter('Kolsen')" class="dx-button dx-button-mode-contained mr-2" color="#9BA681" :variant="companies.includes('Kolsen') ? 'tonal' : 'outlined'">
+          <v-tooltip activator="parent" location="bottom" text="KOLTUN E ANDERSEN COM. E FAB. DE EQUIP. DE TEC. LTDA." />
+          Kolsen
+        </v-btn>
+      </template>
       <template #resetTable>
         <v-btn @click="resetTable" class="dx-button dx-button-mode-contained" color="red" flat variant="plain">
           <v-icon size="small" :icon="`mdi mdi-filter-remove-outline`" start />
@@ -284,7 +308,8 @@ const props = defineProps({
   createTitle: { type: String, default: 'Adicionar' },
   createText: { type: String, default: 'Adicionar' },
   paymentsSelecteds: { type: Boolean, default: false },
-  page: { type: String, default: ''}
+  page: { type: String, default: '' },
+  companiesFilter: { type: Boolean, default: false }
 })
 
 // Initialization
@@ -295,7 +320,7 @@ let tablePageSize = ref(
   !props.pageSize ? (props.allowedPageSizes[props.allowedPageSizes.length - 1] == 'all' ? 0 : props.allowedPageSizes[props.allowedPageSizes.length - 1]) : props.pageSize
 )
 const focusedRowIndex = ref(0)
-
+const companies = ref([])
 const customTable = ref(null)
 const filterOn = ref(false)
 const render = ref(true)
@@ -362,14 +387,14 @@ const onFocusedRowChanging = (e) => {
 }
 
 const colors = {
-  confirm: '#118B9F',
+  confirm: '#F68A1A',
   cancel: '#F44336',
   info: 'info',
   success: 'success',
   excel: '#008000'
 }
 
-const getActionColor = (type) => colors[type] || '#118B9F'
+const getActionColor = (type) => colors[type] || '#F68A1A'
 
 const getActionDisabled = (action, item) => (action.disabled ? action.disabled(item.data, item.rowIndex, props.items) : false)
 
@@ -418,7 +443,9 @@ const forceRender = async () => {
   render.value = true
 }
 
-watch(() => props.loading,() => {
+watch(
+  () => props.loading,
+  () => {
     forceRender()
     storageKey.value = `${props.keyStored}-config`
   }
@@ -446,6 +473,7 @@ const clearFiltersAndRefreshToolbar = () => {
 
 const resetTable = async () => {
   localStorage.removeItem(storageKey.value)
+  companySelected()
   toolbarKey.value++
 }
 
@@ -459,6 +487,21 @@ const onOptionChanged = () => {
   }
 
   const filters = customTable?.value?.instance?.getCombinedFilter()
+  if (props.companiesFilter && filters) {
+    let comp = []
+
+    if (filters[0] == 'empresa.apelido') {
+      comp.push(filters[2])
+    } else {
+      for (const filter of filters) {
+        if (filter[0] == 'empresa.apelido') {
+          comp.push(filter[2])
+        }
+      }
+    }
+
+    companies.value = comp
+  }
 
   if ((filters && filterOn.value == false) || verify) {
     filterOn.value = true
@@ -518,6 +561,49 @@ const getClosestTaskForItem = (item) => {
   return sortedTasks[0] || null
 }
 
+const companyFilter = (company) => {
+  let stored = localStorage.getItem(storageKey.value)
+  if (!stored) return
+
+  stored = JSON.parse(stored)
+  const columns = stored.columns
+
+  for (const column of columns) {
+    column.filterValue = null
+    column.sortOrder = null
+    column.filterValues = null
+
+    if (column.name == 'empresa.apelido') {
+      column.filterValues = [company]
+    }
+  }
+
+  stored.searchText = null
+  stored.columns = columns
+  localStorage.setItem(storageKey.value, JSON.stringify(stored))
+  companySelected()
+  toolbarKey.value++
+}
+
+const companySelected = () => {
+  let stored = localStorage.getItem(storageKey.value)
+  if (!stored) {
+    companies.value = []
+    return
+  }
+
+  stored = JSON.parse(stored)
+  const columns = stored.columns
+
+  for (const column of columns) {
+    if (column.name == 'empresa.apelido') {
+      if (column.filterValues) {
+        companies.value = column.filterValues
+      }
+    }
+  }
+}
+
 watch(
   () => props.items,
   (items) => (itemList.value = items),
@@ -534,7 +620,7 @@ watch(
   color: rgba(149, 149, 149, 0.5) !important;
 }
 .dx-datagrid .dx-header-filter {
-  color: #118b9f;
+  color: #F68A1A;
 }
 .dx-datagrid-content .dx-datagrid-table .dx-row > td,
 .dx-datagrid-content .dx-datagrid-table .dx-row > tr > td {
@@ -554,7 +640,7 @@ watch(
 <style scoped>
 .cff {
   font-size: 14px;
-  color: #118b9f;
+  color: #F68A1A;
   font-weight: 700;
 }
 .dx-data-row {

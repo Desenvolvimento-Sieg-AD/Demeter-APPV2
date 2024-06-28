@@ -1,5 +1,5 @@
 <template>
-  <CustomText title="Pagamento" class="ml-3" color="#118B9F" size="18" :bold="true" />
+  <CustomText title="Pagamento" class="ml-3" size="18" color="secondary" :bold="true" />
   <v-row class="pa-3 mb-n5">
     <v-col cols="3">
       <CustomInput
@@ -28,14 +28,27 @@
       <CustomInput type="text" mask="money" currency="BRL" required :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'" v-model="formValue.valor_total" hide-details />
     </v-col>
 
-    <v-col cols="2">
-      <CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="#118B9F" />
+    <v-col cols="1">
+      <CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="primary" />
+    </v-col>
+
+    <v-col cols="1" v-if="userIsAllowed">
+      <CustomInput type="checkbox" label="Privado" v-model="formValue.privado" hide-details color="primary" />
     </v-col>
   </v-row>
 
   <v-row class="pa-3 mt-n12" v-if="!tiposNormalize.includes(form.tipo_id)">
     <v-col v-if="formValue.tipo_id === 1" cols="3">
-      <CustomInput v-model="formValue.tipo_chave_pix_id" append-inner-icon="mdi-key" type="select" required :items="chavesPix" itemTitle="nome" itemValue="id" label="Tipo de Chave" />
+      <CustomInput
+        v-model="formValue.tipo_chave_pix_id"
+        append-inner-icon="mdi-key"
+        type="select"
+        required
+        :items="chavesPix"
+        itemTitle="nome"
+        itemValue="id"
+        label="Tipo de Chave"
+      />
     </v-col>
 
     <v-col>
@@ -52,16 +65,15 @@
         :required="tipos.obrigatorio"
       />
 
-    <CustomInput
-      v-else
-      type="text"
-      label="E-mail"
-      append-inner-icon="mdi-content-copy"
-      v-model="formValue.dados_bancarios.outhers"
-      :required="tipos.obrigatorio"
-      :rules="emailRules"
-    />
-
+      <CustomInput
+        v-else
+        type="text"
+        label="E-mail"
+        append-inner-icon="mdi-content-copy"
+        v-model="formValue.dados_bancarios.outhers"
+        :required="tipos.obrigatorio"
+        :rules="emailRules"
+      />
     </v-col>
   </v-row>
 
@@ -96,6 +108,7 @@
   </v-row>
 </template>
 <script setup>
+import { useAuthStore } from '~/store/auth'
 import { getPagamentoTipo, getTiposChavePix, getCard, getContasDisponiveis } from '@api'
 
 const dayjs = useDayjs()
@@ -105,6 +118,7 @@ const route = useRoute()
 const emit = defineEmits(['update:form'])
 
 const { $toast } = useNuxtApp()
+const { user } = useAuthStore()
 
 const props = defineProps({
   form: { type: Object, default: {} },
@@ -157,11 +171,14 @@ const minDate = computed(() => {
   return dayjs().format('YYYY-MM-DD')
 })
 
+const userIsAllowed = computed(() => {
+  const setoresAllowed = [3, 5, 12]
+  return user.setores.some((setor) => setoresAllowed.includes(setor.id))
+})
+
 const validPaymentType = () => {
   tipos.value = false
-
   const type = props.paymentsType.find((type) => type.id === formValue.value.tipo_id)
-
   if (type) tipos.value = type
 }
 
@@ -196,7 +213,6 @@ const getTiposChave = async () => {
 
 const getCards = async () => {
   try {
-    
     if (!formValue.value.empresa_id) return $toast.error('Selecione uma empresa')
     if (!formValue.value.tipo_id) return $toast.error('Selecione um tipo de pagamento')
 
@@ -212,15 +228,19 @@ const getCards = async () => {
 
 await getTiposChave()
 
-watch(() => formValue.value.tipo_chave_pix_id, async (newValue, oldValue) => {
+watch(
+  () => formValue.value.tipo_chave_pix_id,
+  async (newValue, oldValue) => {
+    if (newValue !== oldValue && oldValue) {
+      formValue.value.dados_bancarios.outhers = null
+    }
+  },
+  { immediate: true }
+)
 
-  if(newValue !== oldValue && oldValue) {
-    formValue.value.dados_bancarios.outhers = null
-    
-  }
-}, { immediate: true })
-
-watch(() => formValue.value.tipo_id, (value) => {
+watch(
+  () => formValue.value.tipo_id,
+  (value) => {
     if (value == 5 || value == 6) {
       try {
         getCards()
@@ -228,19 +248,21 @@ watch(() => formValue.value.tipo_id, (value) => {
         console.error(error.message)
       }
     }
-  },{ immediate: true }
+  },
+  { immediate: true }
 )
 
-watch(() => formValue.value.empresa_id, (value) => {
-  if (value == 5 || value == 6) {
-    try {
-      getCards()
-    } catch (error) {
-      console.error(error.message)
+watch(
+  () => formValue.value.empresa_id,
+  (value) => {
+    if (value == 5 || value == 6) {
+      try {
+        getCards()
+      } catch (error) {
+        console.error(error.message)
+      }
     }
-  }
-  },{ immediate: true }
+  },
+  { immediate: true }
 )
-
-
 </script>

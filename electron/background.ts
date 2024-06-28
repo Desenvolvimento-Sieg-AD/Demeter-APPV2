@@ -1,14 +1,16 @@
-import * as path from 'path'
-import { autoUpdater } from 'electron-updater'
-import * as os from 'os'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { autoUpdater } from 'electron-updater'
+import { arch, userInfo } from 'os'
+import log from 'electron-log'
+import { join } from 'path'
+import axios from 'axios'
+
 import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
+
 import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import osModule from './modules/os'
-import log from 'electron-log'
-import axios from 'axios'
 
 // ? AUTO UPDATE CONFIG
 
@@ -18,7 +20,7 @@ autoUpdater.autoInstallOnAppQuit = true
 autoUpdater.disableWebInstaller = true
 ;(autoUpdater.logger as typeof log).transports.file.level = 'info'
 
-log.transports.file.resolvePathFn = () => path.join('A:/Dev TI/Demeter', './logs/main.log')
+log.transports.file.resolvePathFn = () => join('A:/Dev TI/Demeter', './logs/main.log')
 
 const caminho_log = 'A:/Dev TI/Demeter/logs/main.log'
 
@@ -38,7 +40,7 @@ let tokenAPI = ''
 
 const isProduction = process.env.NODE_ENV !== 'development'
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
-const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32'
+const architucture: '64' | '32' = arch() === 'x64' ? '64' : '32'
 const headerSize = 32
 const modules = [titleBarActionsModule, updaterModule, osModule]
 
@@ -61,7 +63,7 @@ function createWindow() {
       devTools: !isProduction,
       nodeIntegration: true,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: join(__dirname, 'preload.js')
     },
     titleBarStyle: 'hiddenInset',
     autoHideMenuBar: true,
@@ -70,7 +72,7 @@ function createWindow() {
     frame: true, // <= Remove this line if you wanted to implement your own title bar
     titleBarOverlay: platform === 'darwin' && { height: headerSize },
     title: 'SIEG Pagamentos',
-    icon: path.join(__dirname, '../..', 'public', 'favicon.ico')
+    icon: join(__dirname, '../..', 'public', 'favicon.ico')
   })
 
   mainWindow.maximize()
@@ -213,7 +215,7 @@ async function sendStatusToDEV(resultado: string, versao_atualizada: string, men
         caminho_log,
         versao_atualizada,
         mensagem_atualizacao: mensagem ? mensagem : '',
-        sigla: os.userInfo().username,
+        sigla: userInfo().username,
         versao_anterior: app.getVersion(),
         data_atualizacao: new Date().toLocaleDateString()
       },

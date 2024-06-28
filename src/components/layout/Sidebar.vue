@@ -12,7 +12,7 @@
           v-show="item.setores.includes('ALL') || item.setores.some((setor) => setor === user?.tipo?.sigla)"
           :value="getItemValue(item)"
           :to="item.to"
-          style="color: #118b9f"
+          style="color: #F68A1A"
           :prepend-icon="item.icon"
         >
           <template #title>
@@ -22,7 +22,7 @@
 
         <v-list-group v-else :value="getItemValue(item)" fluid v-show="item.setores.includes('ALL') || item.setores.some((setor) => setor === user?.tipo?.sigla)">
           <template #activator="{ props }">
-            <v-list-item v-bind="props" :value="item.active" :prepend-icon="item.icon" style="color: #118b9f">
+            <v-list-item v-bind="props" :value="item.active" :prepend-icon="item.icon" style="color: #F68A1A">
               <template #title>
                 <span class="sidebar-item">{{ item.title }}</span>
               </template>
@@ -30,7 +30,7 @@
           </template>
 
           <v-card color="bg_secondary" flat>
-            <v-list-item v-for="(sub, subIndex) in item.tabs" :key="subIndex" :value="getSubitemValue(item, sub)" :to="sub.to" exact variant="text" color="#118b9f" class="ml-5">
+            <v-list-item v-for="(sub, subIndex) in item.tabs" :key="subIndex" :value="getSubitemValue(item, sub)" :to="sub.to" exact variant="text" color="#F68A1A" class="ml-5">
               <template #prepend>
                 <v-icon :color="sub.color" :icon="sub.icon" />
               </template>
@@ -45,7 +45,7 @@
 
       <div class="spacer" style="flex-grow: 1"></div>
 
-      <v-list-item class="footer" v-for="(item, index) in menuFooter" :key="index" @click="sendLink(item.to)" style="color: #118b9f" :prepend-icon="item.icon">
+      <v-list-item class="footer" v-for="(item, index) in menuFooter" :key="index" @click="sendLink(item.to)" style="color: #F68A1A" :prepend-icon="item.icon">
         <template #title>
           <span class="sidebar-item">{{ item.title }}</span>
         </template>
@@ -55,7 +55,7 @@
       <div class="footer-version">
         <p class="version-text">
           <v-divider/>
-            v{{ version }}
+            v{{ version }}  - Homologação
         </p>
       </div>
     </v-list>
@@ -158,7 +158,7 @@ watch(
 <style>
 .sidebar-item {
   font-size: 15px;
-  color: #118b9f;
+  color: #F68A1A;
 }
 
 .sidebar {
@@ -172,12 +172,13 @@ watch(
 
 .footer-version {
   text-align: center;
-  color: #118b9f;
+  color: #F68A1A;
 }
 
 .version-text {
   margin: 0;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .footer-version v-divider {

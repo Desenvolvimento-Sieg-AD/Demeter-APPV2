@@ -2,7 +2,7 @@
 	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="auto">
 		<template #content>
 			<div class="txt-center">
-				<CustomText :title="message" color="#118B9F" size="20" :bold="true" />
+				<CustomText :title="message" color="#F68A1A" size="20" :bold="true" />
 				<v-row justify="space-between" align="start" align-content="start" class="mt-3">
 					<v-col cols="auto" v-if="item.usuario">
 						<CustomText title="Solicitante:" color="black" size="16" :bold="true" />

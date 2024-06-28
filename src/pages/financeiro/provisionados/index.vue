@@ -15,6 +15,7 @@
         allow-column-reordering
         key-stored="pagamentos-provisionados-table"
         :allowed-page-sizes="[5, 10, 15, 25]"
+        companiesFilter
         noDataText="Não há nenhuma solicitação provisionada"
         page="financeiro"
       >
@@ -64,7 +65,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item.anexos_pagamento)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openFiles(item.anexos_pagamento, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
 
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
@@ -79,7 +80,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item.anexos_pagamento)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openFiles(item.anexos_pagamento, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -131,11 +132,9 @@
           </div>
         </template>
       </CustomTableSelect>
-
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
-
   </div>
 </template>
 
@@ -146,7 +145,8 @@ import CustomStore from 'devextreme/data/custom_store'
 const { $toast } = useNuxtApp()
 const colums = getColumns('provisionados')
 const access = useRuntimeConfig()
-const path = access.public.PAGAMENTO_PATH
+const caminho_normal = access.public.PAGAMENTO_PATH
+const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 
 // * DATA
 
@@ -180,34 +180,34 @@ const actions = computed(() => [
     },
     active: true,
     type: 'info'
-  },
+  }
 ])
 
 // * METHODS
 
 const openFile = (filePath) => {
   try {
-      // window.electronAPI.openFile(filePath).then((response) => {
-      // 	if (!response.success) {
-      // 		console.error('Erro ao abrir arquivo:', response.message);
-      // 	}
-      // }); //? APP
+    // window.electronAPI.openFile(filePath).then((response) => {
+    // 	if (!response.success) {
+    // 		console.error('Erro ao abrir arquivo:', response.message);
+    // 	}
+    // }); //? APP
 
-      useOs().openFile(filePath) //? Template
-
+    useOs().openFile(filePath) //? Template
   } catch (error) {
     console.log(error)
     $toast.error('Erro ao abrir arquivo')
   }
-
 }
 
-const openFiles = (anexos) => {
+const openFiles = (anexos, privado) => {
   const statusAllowed = [3, 4]
 
   const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
-  openFile(`${path}${anexo.caminho}`)
+
+  const caminho = privado ? caminho_privado : caminho_normal
+  openFile(`${caminho}${anexo.caminho}`)
 }
 
 const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
@@ -232,78 +232,73 @@ const validBeforeSend = async () => {
   await sendStatus(status_id, lista_id)
 }
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
 function formatFilter(filterArray) {
+  const formattedFilters = []
 
-	const formattedFilters = [];
+  for (let i = 0; i < filterArray.length; i++) {
+    if (filterArray[i] === 'or' || filterArray[i] === '=') continue
+    if (filterArray[i] === filterArray['filterValue']) continue
 
-	for (let i = 0; i < filterArray.length; i++) {
+    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
+    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
 
-		if (filterArray[i] === 'or' || filterArray[i] === '=') continue;
-    if (filterArray[i] === filterArray['filterValue']) continue;
+    formattedFilters.push({ fieldName, value })
+  }
 
-		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
-		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
-
-		formattedFilters.push({ fieldName, value });
-	}
-
-	return formattedFilters;
+  return formattedFilters
 }
 
 const getPage = async () => {
+  itens.value = new CustomStore({
+    key: 'id',
+    async load(loadOptions) {
+      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
 
-	itens.value = new CustomStore({
-		key: 'id',
-		async load(loadOptions) {
+      const queryString = paramsName
+        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
+        .map((paramName) => {
+          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
+          return { [paramName]: loadOptions[paramName] }
+        })
 
-			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
-      
-			const queryString = paramsName
-				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
-				.map((paramName) => {
-					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
-					return { [paramName]: loadOptions[paramName] };
-				});
+      const mergedObject = queryString.reduce((acc, obj) => {
+        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
+        return acc
+      }, {})
 
-			const mergedObject = queryString.reduce((acc, obj) => {
-				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
-				return acc;
-			}, {});
+      try {
+        const { success, message, data } = await useApi(`/pagamento/scope/financeiroProvisionados`, {
+          query: {
+            paging: true,
+            limit: mergedObject.take,
+            offset: mergedObject.skip,
+            sort: mergedObject.sort,
+            filter: JSON.stringify(mergedObject.filter)
+          }
+        })
 
-			try {
-				const { success, message, data } = await useApi(`/pagamento/scope/financeiroProvisionados`, {
-					query: {
-						paging: true,
-						limit: mergedObject.take,
-						offset: mergedObject.skip,
-						sort: mergedObject.sort,
-						filter: JSON.stringify(mergedObject.filter),
-					},
-				});
-
-				if (!success) throw new Error(message);
+        if (!success) throw new Error(message)
 
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-				return {
-					data: data.data,
-					totalCount: data.count,
-				};
-			} catch (error) {
-				console.log(error.message);
-        $toast.error('Erro ao carregar os pagamentos');
+        return {
+          data: data.data,
+          totalCount: data.count
+        }
+      } catch (error) {
+        console.log(error.message)
+        $toast.error('Erro ao carregar os pagamentos')
       }
-		},
-	});
-};
+    }
+  })
+}
 
-await getPage();
-
+await getPage()
 </script>
 
 <style scoped>

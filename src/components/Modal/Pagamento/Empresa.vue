@@ -1,5 +1,5 @@
 <template>
-  <CustomText title="Empresa" class="ml-3" color="#118B9F" size="18" :bold="true" />
+  <CustomText title="Empresa" class="ml-3" size="18" color="secondary" :bold="true" />
   <v-row class="pa-3 mb-n6">
     <v-col cols="3">
       <CustomInput

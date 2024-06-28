@@ -6,51 +6,49 @@
       </v-btn>
     </CustomHeader>
 
-    <LayoutForm class="mb-12" height="calc(100vh - 175px)">
-      <v-form ref="formValidate">
-        <v-card class="card-pagamento" flat>
+    <v-card flat>
+      <LayoutForm class="mb-12" height="calc(100vh - 175px)">
+        <v-form ref="formValidate">
           <ModalPagamentoEmpresa v-model:form="form" />
-        </v-card>
 
-        <v-divider class="mt-2 mb-2" />
+          <v-divider class="mt-2 mb-2" />
 
-        <v-card flat class="card-pagamento">
           <ModalPagamentoFornecedor v-model:form="form" />
-        </v-card>
 
-        <v-divider class="mt-2 mb-2" />
+          <v-divider class="mt-2 mb-2" />
 
-        <v-card class="card-pagamento" flat>
           <ModalPagamentoCategoria v-model:form="form" :documentRequired="documentRequired" />
-        </v-card>
 
-        <v-divider class="mt-2 mb-2" />
+          <v-divider class="mt-2 mb-2" />
 
-        <v-card class="pt-2 card-pagamento" flat>
           <ModalPagamentoObservacoes v-model:form="form" :user="user" />
-        </v-card>
 
-        <v-divider class="mt-2 mb-2" />
+          <v-divider class="mt-2 mb-2" />
 
-        <v-card class="pt-2 card-pagamento" flat>
           <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
-        </v-card>
 
-        <v-row class="mt-n4 d-flex justify-center align-center ga-2">
-          
-          <v-btn v-for="(action, index) of actionsForm" :key="`${action}-${index}`" :color="action.color" @click="action.onClick()" width="200" height="43" :loading="action.loading">
-            <v-icon size="large" :icon="action.icon" />
-            <v-tooltip :text="action.title" location="bottom" activator="parent" />
-          </v-btn>
-        </v-row>
-      </v-form>
-    </LayoutForm>
+          <v-row class="mt-n4 d-flex justify-center align-center ga-2">
+            <v-btn
+              v-for="(action, index) of actionsForm"
+              :key="`${action}-${index}`"
+              :color="action.color"
+              @click="action.onClick()"
+              width="200"
+              height="43"
+              :loading="action.loading"
+            >
+              <v-icon size="large" :icon="action.icon" />
+              <v-tooltip :text="action.title" location="bottom" activator="parent" />
+            </v-btn>
+          </v-row>
+        </v-form>
+      </LayoutForm>
+    </v-card>
 
     <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
       <v-icon>mdi-arrow-left</v-icon>
       <v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
     </v-btn>
-    
   </div>
 </template>
 
@@ -139,8 +137,8 @@ function buildFormData() {
     if (key === 'nf' && form.value.nf.length > 0) {
       formData.append('nf', form.value.nf[0])
       continue
-    } 
-    
+    }
+
     if (key === 'doc' && form.value.doc.length > 0) {
       for (let i = 0; i < form.value.doc.length; i++) {
         formData.append('doc', form.value.doc[i])
@@ -156,8 +154,7 @@ function buildFormData() {
 const sendForm = async () => {
   loading.value = true
   try {
-
-    if(isNaN(Number(form.value.projeto_id)) && requer_projeto.value) return cancelProcess('Selecione um projeto existente ou crie um novo projeto')
+    if (isNaN(Number(form.value.projeto_id)) && requer_projeto.value) return cancelProcess('Selecione um projeto existente ou crie um novo projeto')
 
     const { valid } = await formValidate.value.validate()
 
@@ -177,7 +174,6 @@ const sendForm = async () => {
     reset()
 
     loading.value = false
-
   } catch (error) {
     console.error(error)
     $toast.error(error.message)
@@ -291,10 +287,11 @@ const reset = () => {
 
 function initFormState() {
   return {
-    fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null, internacional: false},
+    fornecedor: { id: null, nome: null, apelido: null, documento: null, tipo: null, internacional: false },
     empresa_id: null,
     setor_solicitante_id: user.setores.length <= 1 ? user.setores[0].id : null,
     setor_id: null,
+    privado: false,
     conta_id: null,
     nf: [],
     doc: [],
@@ -351,7 +348,9 @@ const getPriceDollar = async () => {
 
 // * Watchers
 
-watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
+watch(
+  () => form.value.fornecedor.internacional,
+  async (nv, oV) => {
     if (nv) {
       paymentsType.value = paymentsType.value.filter((type) => type.modo_internacional)
       await getPriceDollar()
@@ -359,7 +358,9 @@ watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
   }
 )
 
-watch(() => form.value.valor_total_dolar, (nv, oV) => {
+watch(
+  () => form.value.valor_total_dolar,
+  (nv, oV) => {
     if (nv) form.value.valor_total = priceNow.value * nv
   }
 )
@@ -385,6 +386,4 @@ watch(() => form.value.valor_total_dolar, (nv, oV) => {
   left: 70px;
   scale: 1.5;
 }
-
-
 </style>

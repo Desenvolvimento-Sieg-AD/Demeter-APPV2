@@ -2,7 +2,7 @@
   <LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="500">
     <template #content>
       <v-container class="txt-center">
-        <CustomText title="Selecione o cliente a ser exportado" class="ml-2" color="#118B9F" size="20" bold />
+        <CustomText title="Selecione o cliente a ser exportado" class="ml-2" color="#F68A1A" size="20" bold />
         <br />
         <CustomInput v-model="clientValue" readonly label="Cliente" icon="mdi-account" type="autocomplete" :items="clients" />
         <br>

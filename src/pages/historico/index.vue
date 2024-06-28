@@ -17,6 +17,7 @@
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25]"
         :page-size="15"
+        companiesFilter
         pager
       >
         <template #item-usuario="{ data: { data: item } }">
@@ -56,7 +57,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="existNF(item)">
-              <v-icon @click="openFile(`${path}${item.anexos_pagamento[0].caminho}`)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
+              <v-icon @click="openFile(`${path}${item.anexos_pagamento[0].caminho}`, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -67,7 +68,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="template">
             <div v-if="existDoc(item)">
-              <v-icon color="success" class="cursor-pointer" @click="openFile(`${path}${item.anexos_pagamento[1].caminho}`)"> mdi-paperclip</v-icon>
+              <v-icon color="success" class="cursor-pointer" @click="openFile(`${path}${item.anexos_pagamento[1].caminho}`, item.privado)"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -137,20 +138,26 @@ import { getPagamentoByScope } from '@api'
 const { $toast } = useNuxtApp()
 
 const access = useRuntimeConfig()
-const path = access.public.PAGAMENTO_PATH
+const caminho_normal = access.public.PAGAMENTO_PATH
+const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const colums = getColumns('historico')
 const enableModal = ref(false)
 
 const itens = ref([])
 const itemView = ref({})
 
-const openFile = (filePath) => {
-  window.electronAPI.openFile(filePath).then((response) => {
-    if (!response.success) {
-      console.error('Erro ao abrir arquivo:', response.message)
-    }
-  })
+const openFile = async (path, privado) => {
+  try {
+
+    const caminho = privado ? caminho_privado : caminho_normal
+    await useOs().openFile(`${caminho}/${path}`)
+
+  } catch (error) {
+    console.error('Erro ao abrir arquivo:', error.message)
+    $toast.error('Não foi possível abrir o arquivo')
+  }
 }
+
 
 const actions = computed(() => [
   {
@@ -178,78 +185,74 @@ const defineDocument = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(docu
 
 const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== '';
+const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
 function formatFilter(filterArray) {
+  const formattedFilters = []
 
-	const formattedFilters = [];
+  for (let i = 0; i < filterArray.length; i++) {
+    if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue
+    if (filterArray[i] === filterArray['filterValue']) continue
 
-	for (let i = 0; i < filterArray.length; i++) {
+    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
+    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
 
-		if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue;
-    if (filterArray[i] === filterArray['filterValue']) continue;
+    formattedFilters.push({ fieldName, value })
+  }
 
-		const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i];
-		const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue'];
-
-		formattedFilters.push({ fieldName, value });
-	}
-
-	return formattedFilters;
+  return formattedFilters
 }
 const getPage = async () => {
+  itens.value = new CustomStore({
+    key: 'id',
+    async load(loadOptions) {
+      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
 
-	itens.value = new CustomStore({
-		key: 'id',
-		async load(loadOptions) {
+      const queryString = paramsName
+        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
+        .map((paramName) => {
+          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
+          return { [paramName]: loadOptions[paramName] }
+        })
 
-			const paramsName = [ 'skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary'];
-      
-			const queryString = paramsName
-				.filter((paramName) => isNotEmpty(loadOptions[paramName]))
-				.map((paramName) => {
-					if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) };
-					return { [paramName]: loadOptions[paramName] };
-				});
+      const mergedObject = queryString.reduce((acc, obj) => {
+        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
+        return acc
+      }, {})
 
-			const mergedObject = queryString.reduce((acc, obj) => {
-				Object.keys(obj).forEach((key) => (acc[key] = obj[key]));
-				return acc;
-			}, {});
+      try {
+        const { success, message, data } = await useApi(`/pagamento/scope/geral`, {
+          query: {
+            paging: true,
+            limit: mergedObject.take,
+            offset: mergedObject.skip,
+            sort: mergedObject.sort,
+            filter: JSON.stringify(mergedObject.filter)
+          }
+        })
 
-			try {
-				const { success, message, data } = await useApi(`/pagamento/scope/geral`, {
-					query: {
-						paging: true,
-						limit: mergedObject.take,
-						offset: mergedObject.skip,
-						sort: mergedObject.sort,
-						filter: JSON.stringify(mergedObject.filter),
-					},
-				});
-
-				if (!success) throw new Error(message);
+        if (!success) throw new Error(message)
 
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
 
-          if(item.movimentacoes_pagamento[0]?.status_pagamento?.nome === 'Pago') {
+          if (item.movimentacoes_pagamento[0]?.status_pagamento?.nome === 'Pago') {
             item.data_pagamento = formatDate(item.movimentacoes_pagamento[0].data_inicio)
           }
 
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-				return { data: data.data, totalCount: data.count };
-			} catch (error) {
-				console.log(error.message);
-				$toast.error('Erro ao carregar os pagamentos');
-			}
-		},
-	});
-};
+        return { data: data.data, totalCount: data.count }
+      } catch (error) {
+        console.log(error.message)
+        $toast.error('Erro ao carregar os pagamentos')
+      }
+    }
+  })
+}
 
-await getPage();
+await getPage()
 </script>
 
 <style scoped>

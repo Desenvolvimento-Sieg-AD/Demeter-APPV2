@@ -1,14 +1,14 @@
 <template>
-  <LazyModal v-model:enable="enableValue" :actions="Actions" title="Anexar arquivo" width="600">
+  <LazyModal v-model:enable="enableValue" :actions="actions" title="Anexar arquivo" width="600">
     <template #content>
       <v-container>
         <div class="d-flex justify-center">
-          <CustomText title="Dados do pagamento" class="ml-2" color="#118B9F" size="20" :bold="true" />
+          <CustomText title="Dados do pagamento" class="ml-2" color="#F68A1A" size="20" :bold="true" />
         </div>
         <v-form ref="formValidate">
           <v-row no-gutters class="mt-5 ga-2">
             <v-col>
-              <CustomInput label="Fornecedor" v-model="item.fornecedor.nome_fantasia" disabled />
+              <CustomInput label="Fornecedor" v-model="item.fornecedor.razao_social" disabled />
             </v-col>
             <v-col>
               <CustomInput label="Categoria" v-model="item.categoria.nome" disabled />
@@ -82,13 +82,12 @@ const loading = ref(false)
 const formValidate = ref(null)
 
 //* COMPUTED
-const Actions = computed(() => [
+const actions = computed(() => [
   {
     icon: 'mdi-close',
     title: 'Fechar',
     type: 'grey',
     click: async () => {
-      await formValidate.value.reset()
       enableValue.value = false
     }
   },
@@ -108,14 +107,12 @@ const emit = defineEmits(['close', 'update', 'nameFile'])
 //* METHODS
 
 const nameFile = computed(() => {
-  return `${dayjs().format('YYYYMMDD')} - ${props.item.fornecedor.nome_fantasia} - ${formatCurrency(props.item.valor_total)} - ${props.item.tipo_pagamento.nome} `
+  if(props.tipo_anexo_id == 3) return `${dayjs().format('YYYYMMDD')} - ${props.item.fornecedor.razao_social} - ${formatCurrency(props.item.valor_total)} - NF `
+  return `${dayjs().format('YYYYMMDD')} - ${props.item.fornecedor.razao_social} - ${formatCurrency(props.item.valor_total)} - ${props.item.tipo_pagamento.nome} `
 })
 
 const sendUpload = async () => {
-  if (!anexo.value) {
-    $toast.error('Selecione um arquivo para enviar')
-    return
-  }
+  if (!anexo.value) return $toast.error('Selecione um arquivo para enviar')
 
   loading.value = true
 
@@ -124,7 +121,6 @@ const sendUpload = async () => {
 
     formData.append('file', anexo.value)
     formData.append('name_file', nameFile.value)
-
     formData.append('tipo_anexo_id', props.tipo_anexo_id)
 
     const { success, message } = await postUpload(formData, props.item.id)
@@ -156,9 +152,7 @@ const defineFileTitle = (fileName) => {
   return fileName
 }
 
-watch(
-  () => props.enable,
-  (value) => {
+watch(() => props.enable, (value) => {
     if (!value) anexo.value = null
   }
 )
