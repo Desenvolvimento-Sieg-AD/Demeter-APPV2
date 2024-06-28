@@ -19,7 +19,6 @@
         :page-size="15"
         enableAddButton
         companiesFilter
-        key-stored="pagamentos-usuario-table"
         createTitle="NOVO PAGAMENTO"
         createText="Ir para página de solicitação"
         @add="router.push(`/pagamento/novo`)"
