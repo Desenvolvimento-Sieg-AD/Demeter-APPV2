@@ -2,6 +2,9 @@
   <div>
     <CustomHeader title="Histórico de Solicitações" />
     <LayoutForm>
+      <PaymentsValue :year="valueYear" :month="valueActualMonth" :lastMonth="valueLastMonth" :today="valueToday" />
+
+      <v-divider class="my-2" />
       <CustomTableSelect
         :columns="colums"
         :items="itens"
@@ -19,6 +22,7 @@
         :page-size="15"
         companiesFilter
         pager
+        height="calc(100vh - 240px)"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -38,7 +42,7 @@
             {{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
           </div>
         </template>
-        <template #[`item-movimentacoes_pagamento.status_pagamento`]="{ data: { data: item } }">
+        <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <v-chip :color="item.movimentacoes_pagamento[0]?.status_pagamento?.cor">
               <p class="font-weight-bold">
@@ -141,10 +145,14 @@ const access = useRuntimeConfig()
 const caminho_normal = access.public.PAGAMENTO_PATH
 const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const colums = getColumns('historico')
+const itens = ref([])
 const enableModal = ref(false)
 
-const itens = ref([])
 const itemView = ref({})
+const valueYear = ref(0)
+const valueLastMonth = ref(0)
+const valueActualMonth = ref(0)
+const valueToday = ref(0)
 
 const openFile = async (path, privado) => {
   try {
@@ -232,6 +240,11 @@ const getPage = async () => {
         })
 
         if (!success) throw new Error(message)
+        const { valores } = data
+        valueYear.value = valores.ano ?? 0
+        valueLastMonth.value = valores.ultimo_mes ?? 0
+        valueActualMonth.value = valores.mes ?? 0
+        valueToday.value = valores.hj ?? 0
 
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome

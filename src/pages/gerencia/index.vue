@@ -2,7 +2,11 @@
   <div>
     <CustomHeader title="Gerência - Aprovação de Pagamentos" />
     <LayoutForm>
+      <PaymentsValue :year="year" :month="month" :lastMonth="lastMonth" :today="today" />
+
+      <v-divider class="my-2" />
       <CustomTableSelect
+        height="calc(100vh - 240px)"
         :columns="colums"
         :items="itens"
         :actions="actions"
@@ -160,17 +164,50 @@ const idsSelect = ref([])
 const ambos = ref(true)
 const loadingModal = ref(false)
 const permiteEditar = ref(false)
-
+const selections = ref([])
 const justificativa = ref(null)
+const valueYear = ref(0)
+const valueLastMonth = ref(0)
+const valueActualMonth = ref(0)
+const valueToday = ref(0)
 
 onMounted(async () => {
   await getPage()
 })
 const handleSelectionChange = (items) => {
+  selections.value = items
   const ids = items.map((item) => item.id)
   idsSelect.value = ids
 }
 
+const sumSelect = computed(() => {
+  let selec = 0
+  if (selections.value.length > 0) {
+    selec = selections.value.reduce((sum, item) => sum + parseFloat(item.valor_total), 0)
+  }
+
+  return selec
+})
+
+const year = computed(() => {
+  let value = sumSelect.value + valueYear.value
+  return value
+})
+
+const month = computed(() => {
+  let value = sumSelect.value + valueActualMonth.value
+  return value
+})
+
+const lastMonth = computed(() => {
+  let value = valueLastMonth.value
+  return value
+})
+
+const today = computed(() => {
+  let value = sumSelect.value + valueToday.value
+  return value
+})
 const actions = ref([
   {
     icon: 'mdi-eye',
@@ -424,6 +461,11 @@ const getPage = async () => {
         })
 
         if (!success) throw new Error(message)
+        const { valores } = data
+        valueYear.value = valores.ano ?? 0
+        valueLastMonth.value = valores.ultimo_mes ?? 0
+        valueActualMonth.value = valores.mes ?? 0
+        valueToday.value = valores.hj ?? 0
 
         return {
           data: data.data,
