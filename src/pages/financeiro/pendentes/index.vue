@@ -70,7 +70,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item.anexos_pagamento)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
 
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
@@ -85,7 +85,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item.anexos_pagamento)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -356,12 +356,13 @@ const openFile = (filePath) => {
 
 }
 
-const openFiles = (anexos) => {
+const openFiles = (pagamento) => {
   const statusAllowed = [3, 4]
 
-  const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
+  const anexo = pagamento.anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
-  openFile(`${path}${anexo.caminho}`)
+
+  openFile(`${pagamento.diretorio_atual}/${anexo.caminho}`)
 }
 
 const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
