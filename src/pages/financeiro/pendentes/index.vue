@@ -357,12 +357,12 @@ const openFile = (filePath) => {
 const openFiles = (pagamento) => {
   const statusAllowed = [3, 4]
 
-  const anexo = pagamento.anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
+  const anexo = pagamento.anexos_pagamento.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
 
   const caminho = pagamento.privado ? pagamento.caminho_privado : pagamento.caminho_normal
   // TODO TEST caminho
-  openFile(`${pagamento.diretorio_atual}/${anexo.caminho}`)
+  openFile(`${pagamento.diretorio_atual}/${anexo.nome}`)
 }
 
 const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)

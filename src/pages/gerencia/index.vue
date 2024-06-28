@@ -59,7 +59,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item.anexos_pagamento, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
+              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
             <div v-else> <v-tooltip text="Sem anexo" activator="parent" location="top" /><v-icon disabled color="gray">mdi-paperclip</v-icon> </div>
@@ -68,7 +68,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item.anexos_pagamento, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
 
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
@@ -304,14 +304,15 @@ const openFile = async (filePath) => {
   await useOs().openFile(filePath)
 }
 
-const openFiles = (anexos, privado) => {
+const openFiles = (pagamento) => {
   const statusAllowed = [3, 4]
 
-  const anexo = anexos.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
+  const anexo = pagamento.anexos_pagamento.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
 
-  const caminho = privado ? caminho_privado : caminho_normal
-  openFile(`${caminho}${anexo.caminho}`)
+  const caminho = pagamento.privado ? pagamento.caminho_privado : pagamento.caminho_normal
+  // TODO TEST caminho
+  openFile(`${pagamento.diretorio_atual}/${anexo.nome}`)
 }
 
 const smallerIndex = (index, item) => index < item.length - 1
