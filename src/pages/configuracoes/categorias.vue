@@ -1,104 +1,99 @@
 <template>
     <div>
-        <CustomHeader title="Configuração de Categorias por Setor" />
+        <CustomHeader title="Configuração de Categorias" />
         <LayoutForm>
             <CustomTableSelect
                 ref="categoriasTable"
                 :columns="columns"
-                :items="setores"
+                :items="categorias"
                 :actions="actions"
                 :loading="loadingTable"
                 scrolling="standard"
-                noDataText="Nenhum setor cadastrado"
+                noDataText="Nenhuma categoria cadastrada"
                 choose-columns
                 store-state
                 key-stored="categorias-table"
                 allowColumnResizing
+                :allowed-page-sizes="[15, 30, 60, 100]"
+                :page-size="30"
+                pager
                 enableAddButton
                 @add="enableModal.create = true"
                 allow-column-reordering
             >
-                <template #item-nome="{data: { data: item } } ">
-                    <v-chip :text="item.nome" :color="colors[item.nome]" variant="flat"/>
-                </template>
-                <template #item-sigla="{data: { data: item } } ">
-                    <v-chip :text="item.sigla" :color="colors[item.nome]" variant="flat"/>
-                </template>
-                <template #[`item-usuarios.length`]="{data: { data: item } } ">
-                    <v-chip :text="item.usuarios.length" color="primary" variant="flat"/>
-                    <v-tooltip v-for="(usuario, index) in item.usuarios" :key="index" :text="textUser(item.usuarios)" activator="parent" location="top"/>
-                </template>
-                <template #item-categorias="{data: { data: item } } ">
-                    <v-chip :text="categoriasLength(item.grupo_categoria)" color="primary" variant="flat"/>
-                </template>
+            <template #[`item-grupo.nome`]="{data: { data: item } } ">
+                <v-chip :text="item.grupo.nome" color="primary" variant="tonal"/>
+            </template>
+
+            <template #item-nacional="{data: { data: item } } ">
+                <v-chip :text="item.nacional ? 'Sim' : 'Não'" :color="item.nacional ? 'success' : 'red'" variant="flat"/>
+            </template>
+
+            <template #item-internacional="{data: { data: item } } ">
+                <v-chip :text="item.internacional ? 'Sim' : 'Não'" :color="item.internacional ? 'success' : 'red'" variant="flat"/>
+            </template>
+
+            <template #item-descricao="{data: { data: item } } ">
+                <p> {{ item.descricao ?? '-' }}</p>
+            </template>
+
+            <template #item-ativo="{data: { data: item } } ">
+                <v-chip :text="item.ativo ? 'Ativo' : 'Inativo'" :color="item.ativo ? 'success' : 'red'" variant="flat"/>
+            </template>
+
+            <template #item-requer_projeto="{data: { data: item } } ">
+                <v-chip :text="item.requer_projeto ? 'Sim' : 'Não'" :color="item.requer_projeto ? 'success' : 'red'" variant="flat"/>
+            </template>
+
             </CustomTableSelect>
         </LayoutForm>
-        <LazyModalCategoriaEditar v-if="enableModal.edit" v-model:enable="enableModal.edit" :setor="setorSelected" @close="getSetores()" />
-        <LazyModalCategoriaCriar v-if="enableModal.create" v-model:enable="enableModal.create" @close="getSetores()"/>
+        <LazyModalCategoriaCriar v-if="enableModal.create" v-model:enable="enableModal.create" @close="getCategorias()" :categoria_id="categoria_id"/>
     </div>
 </template>
 <script setup>
-import { getSetoresCategorias } from "@api"
+
+import { getCategoriasWithGrupo } from '@api'
 
 const { $toast } = useNuxtApp()
-const setores = ref([])
-const columns = getColumns('setores')
+
+const categorias = ref([])
+const columns = getColumns('categorias')
 const loadingTable = ref(false)
-const setorSelected = ref({})
-
-const enableModal = reactive({ edit: false, create: false })
-
-const colors = {
-    Desenvolvimento: '#FFC107',
-    Produção: '#4CAF50',
-    Gerência: '#9C27B0',
-    'Recursos Humanos': '#FF5722',
-    Marketing: '#2196F3',
-    Administrativo: '#607D8B',
-    Financeiro: '#795548',
-    Compras: '#FF9800',
-    Comercial: '#E91E63',
-    Licitação: '#9E9E9E',
-    Cliente: '#00BCD4',
-    Qualidade: '#8BC34A',
-    Logística: '#FFEB3B',
-}
+const categoria_id = ref(null)
 
 const actions = [
     {
         icon: 'mdi-pencil',
-        tooltip: 'Editar categorias do setor',
         color: 'primary',
+        tooltip: 'Editar',
         click: (item) => {
-            enableModal.edit = true
-            setorSelected.value = item
+            enableModal.create = true
+            categoria_id.value = item.id
         }
     }
 ]
 
-const getSetores = async () => {
-    loadingTable.value = true
+const enableModal = reactive({ edit: false, create: false })
+
+watch(() => enableModal.create, (value) => {
+    if(!value) categoria_id.value = null
+})
+
+const getCategorias = async () => {
     try {
-        const { success, message, data } = await getSetoresCategorias()
+        const { success, message, data } = await getCategoriasWithGrupo()
 
         if(!success) throw new Error(message)
 
-        setores.value = data
-
-        loadingTable.value = false
+        categorias.value = data
 
     } catch (error) {
-        console.error(error.message)
-        $toast.error('Erro ao buscar setores')
+        console.log(error.message)
+        $toast.error('Erro ao buscar categorias')
     }
 }
 
-const categoriasLength = (grupos) => grupos.reduce((acc, grupo) => { return acc + grupo.categorias.length }, 0)
-
-const textUser = (usuarios) => usuarios.map((usuario) => usuario.sigla).join(', ')
-
-await getSetores()
-
+await getCategorias()
 </script>
 <style scoped>
 

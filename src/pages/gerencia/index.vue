@@ -6,6 +6,7 @@
 
       <v-divider class="my-2" />
       <CustomTableSelect
+        ref="tableRef"
         height="calc(100vh - 240px)"
         :columns="colums"
         :items="itens"
@@ -164,6 +165,7 @@ const idsSelect = ref([])
 const ambos = ref(true)
 const loadingModal = ref(false)
 const permiteEditar = ref(false)
+const tableRef = ref(null)
 const selections = ref([])
 const justificativa = ref(null)
 const valueYear = ref(0)
@@ -331,6 +333,8 @@ const messageConfirmStatusAll = () => {
 }
 
 const sendStatus = async (status, id) => {
+
+  console.log(status, id)
   try {
     if (status === 9 && !justificativa.value) throw new Error('Justificativa é obrigatória para prosseguir!')
     loadingModal.value = true
@@ -341,7 +345,11 @@ const sendStatus = async (status, id) => {
     enableModal.confirm = false
     enableModal.allConfirm = false
     $toast.success('Status alterado com sucesso')
+    
+    await tableRef.value.clearFilters()
+    
     await getPage()
+
   } catch (error) {
     console.log(error.message)
     $toast.error(error.message)
@@ -364,6 +372,7 @@ const approvePayment = async (ids) => {
     enableModal.allConfirm = false
     $toast.success('Pagamento aprovado com sucesso')
     itens.value = paymentGerencia.data
+
   } catch (error) {
     console.log(error.message)
     $toast.error(error.message)

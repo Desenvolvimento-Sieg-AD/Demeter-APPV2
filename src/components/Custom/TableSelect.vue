@@ -359,7 +359,10 @@ defineExpose({
   },
   clearSelection: () => {
     if (customTable.value) customTable.value.instance?.clearSelection()
-  }
+  },
+  clearFilters: () => {
+    clearFiltersAndRefreshToolbar()
+  },
 })
 
 const slotColumns = computed(() => props.columns.filter((el) => el.value != 'actions'))

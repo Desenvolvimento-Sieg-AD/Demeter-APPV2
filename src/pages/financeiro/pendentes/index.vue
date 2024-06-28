@@ -3,6 +3,7 @@
     <CustomHeader title="Financeiro - Pendentes de Aprovação" />
     <LayoutForm>
       <CustomTableSelect
+        ref="tableRef"
         pager
         store-state
         :items="itens"
@@ -15,7 +16,7 @@
         allow-column-reordering
         key-stored="pagamentos-pendentes-table"
         :allowed-page-sizes="[5, 10, 15, 25, 30]"
-        :page-size="30"
+        :page-size="15"
         @selectionChanged="handleSelectionChange"
         noDataText="Não há nenhuma solicitação de pagamento"
         :paymentsSelecteds="itemsSelects.length >= 1"
@@ -187,6 +188,7 @@ const loadingModal = ref(false)
 const loadingTable = ref(false)
 const clients = ref([])
 const link = ref('')
+const tableRef = ref(null)
 
 const enableModal = reactive({
   link: false,
@@ -342,11 +344,8 @@ const messageConfirmAllStatus = computed(() => {
 
 const openFile = (filePath) => {
   try {
-    // window.electronAPI.openFile(filePath).then((response) => {
-    // 	if (!response.success) {
-    // 		console.error('Erro ao abrir arquivo:', response.message);
-    // 	}
-    // }); //? APP
+
+      useOs().openFile(filePath) 
 
     useOs().openFile(filePath) //? Template
   } catch (error) {
@@ -412,6 +411,9 @@ const sendStatus = async (status, id) => {
     loadingModal.value = false
     enableModal.confirm = false
     enableModal.allConfirm = false
+    
+    await tableRef.value.clearFilters()
+    
     await getPage()
   } catch (error) {
     console.error(error.message)

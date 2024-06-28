@@ -3,17 +3,17 @@
     <CustomHeader :title="title" />
     <LayoutForm>
       <CustomTableSelect
-        ref="customRef"
         :columns="columns"
         :items="pagamentos"
         :actions="actions"
-        :loading="loadingTable"
+        :loading="false"
+        store-state
+        key-stored="pagamentos-usuario-table"
         scrolling="standard"
-        noDataText="Você não tem nenhuma solicitação de pagamento"
         allow-search
+        noDataText="Você não tem nenhuma solicitação de pagamento"
         allowColumnResizing
         choose-columns
-        store-state
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25, 30]"
         :page-size="15"
@@ -366,16 +366,16 @@ const getPage = async () => {
 
         if (!success) throw new Error(message)
 
+        console.log(data.count, data.totalCount)
+
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-        return {
-          data: data.data,
-          totalCount: data.count
-        }
-      } catch (error) {
+		return { data: data.data ?? [], totalCount: data.count ?? 0 };
+      } 
+      catch (error) {
         console.log(error.message)
         $toast.error('Erro ao carregar os pagamentos')
         await customRef.value.refresh()
