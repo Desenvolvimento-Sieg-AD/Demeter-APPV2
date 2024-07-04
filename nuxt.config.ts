@@ -59,7 +59,7 @@ export default defineNuxtConfig({
     vuetifyOptions: {
       labComponents: ['VTimePicker'],
       theme: {
-        defaultTheme: 'dark',
+        defaultTheme: 'light',
         themes: {
           dark: {
             dark: true,
