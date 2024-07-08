@@ -2,7 +2,7 @@
   <v-container class="ajust" fluid>
     <v-form ref="customForm" @submit.prevent="submit" class="d-flex justify-center">
       <v-col cols="12">
-        <v-card style="overflow-y: auto" :height="height">
+        <v-card style="overflow-y: auto" :max-height="height" height="100%">
           <v-card-text class="card-box">
             <slot />
           </v-card-text>

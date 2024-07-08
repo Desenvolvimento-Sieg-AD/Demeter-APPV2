@@ -82,12 +82,7 @@
           <div class="template" v-if="isNotStatusAllowed(item.status)">
             <v-btn v-if="isDOC(item.anexos_pagamento)" flat icon variant="plain">
               <div v-if="item.anexos_pagamento?.length > 0">
-                <v-icon
-                  :color="colorDoc(item.anexos_pagamento)"
-                  class="cursor-pointer"
-                  icon="mdi-paperclip"
-                  @click="openDoc(item.anexos_pagamento, 4, item.privado)"
-                />
+                <v-icon :color="colorDoc(item.anexos_pagamento)" class="cursor-pointer" icon="mdi-paperclip" @click="openDoc(item.anexos_pagamento, 4, item.privado)" />
                 <v-tooltip :text="item.anexos_pagamento.length === 1 ? 'Abrir anexo' : nameFiles(item.anexos_pagamento)" activator="parent" location="top" />
               </div>
             </v-btn>
@@ -194,7 +189,7 @@ const actions = computed(() => [
     icon: 'mdi-pencil',
     tooltip: 'Editar',
     click: handleEdit,
-    disabled: isDisabled,
+    disabled: isEditable,
     type: 'edit'
   }
 ])
@@ -218,6 +213,11 @@ const handleEdit = (item) => {
 }
 
 const isDisabled = (item) => !statusDisabled.value.includes(item.movimentacoes_pagamento[0].status_pagamento.id)
+
+const isEditable = (item) => {
+  const statusEditable = [1, 2, 3, 8, 9]
+  return !statusEditable.includes(item.movimentacoes_pagamento[0].status_pagamento.id)
+}
 
 const modalActions = [
   {
@@ -244,18 +244,17 @@ const modalActions = [
 
 const colorDoc = (anexos) => {
   const docs = anexos.filter((anexo) => anexo.tipo_anexo_id === 4)
-  if(docs.length > 1) return 'purple'
+  if (docs.length > 1) return 'purple'
   return 'success'
 }
 
 const openDoc = (anexos, tipo_anexo, privado) => {
   const filterDoc = anexos.filter((anexo) => anexo.tipo_anexo_id === tipo_anexo)
-  if(filterDoc && filterDoc.length !== 0) return openFile(filterDoc, tipo_anexo, privado)
+  if (filterDoc && filterDoc.length !== 0) return openFile(filterDoc, tipo_anexo, privado)
 }
 
 const openFile = async (anexos, tipo_anexo, privado) => {
   try {
-
     const anexo = anexos.find((anexo) => anexo.tipo_anexo_id == tipo_anexo)
 
     if (!anexo) throw new Error('Anexo não encontrado')
@@ -265,7 +264,6 @@ const openFile = async (anexos, tipo_anexo, privado) => {
 
     const { success, message } = await useOs().openFile(`${caminho}${anexo.caminho}`)
     if (!success) $toast.error(message)
-
   } catch (error) {
     $toast.error(error.message)
     console.error(error)
@@ -372,9 +370,8 @@ const getPage = async () => {
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-		return { data: data.data ?? [], totalCount: data.count ?? 0 };
-      } 
-      catch (error) {
+        return { data: data.data ?? [], totalCount: data.count ?? 0 }
+      } catch (error) {
         console.log(error.message)
         $toast.error('Erro ao carregar os pagamentos')
         await customRef.value.refresh()

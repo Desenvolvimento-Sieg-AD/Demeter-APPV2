@@ -6,8 +6,8 @@
       </v-btn>
     </CustomHeader>
 
-    <v-card flat>
-      <LayoutForm class="mb-12" height="calc(100vh - 175px)">
+    <v-card flat color="transparent">
+      <LayoutForm max-height="calc(100vh - 175px)">
         <v-form ref="formValidate">
           <ModalPagamentoEmpresa v-model:form="form" />
 
@@ -27,7 +27,7 @@
 
           <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
 
-          <v-row class="mt-n4 d-flex justify-center align-center ga-2">
+          <v-row class="mt-5 mb-3 d-flex justify-center align-center ga-2">
             <v-btn
               v-for="(action, index) of actionsForm"
               :key="`${action}-${index}`"

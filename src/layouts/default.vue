@@ -99,7 +99,7 @@ const electron = useElectron()
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: rgba(240, 240, 240, 0.288);
+  background-color: rgba(240, 240, 240, 1);
   background-size: cover;
   background-position: center;
 }
@@ -110,7 +110,6 @@ const electron = useElectron()
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.055);
   z-index: 0;
 }
 .unlogged {

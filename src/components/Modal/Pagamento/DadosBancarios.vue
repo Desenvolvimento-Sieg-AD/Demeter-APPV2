@@ -1,7 +1,7 @@
 <template>
   <CustomText title="Pagamento" class="ml-3" size="18" color="secondary" :bold="true" />
-  <v-row class="pa-3 mb-n5">
-    <v-col cols="3">
+  <v-row class="pa-3" dense>
+    <v-col cols="4">
       <CustomInput
         append-inner-icon="mdi-cash-clock"
         type="select"
@@ -11,21 +11,29 @@
         v-model="formValue.tipo_id"
         itemValue="id"
         itemTitle="nome"
-        hide-details
+        hide-details="auto"
         :change="validPaymentType()"
       />
     </v-col>
 
     <v-col cols="3">
-      <CustomInput type="date" required label="Data de vencimento" v-model="formValue.data_vencimento" :messages="messagesDate()" :min="minDate" />
+      <CustomInput type="date" required label="Data de vencimento" v-model="formValue.data_vencimento" :messages="messagesDate()" :min="minDate" hide-details="auto" />
     </v-col>
 
-    <v-col v-if="isInternacional">
-      <CustomInput type="text" mask="money" currency="USD" required label="Valor em Dólar" v-model="formValue.valor_total_dolar" hide-details />
+    <v-col v-if="isInternacional" cols="2">
+      <CustomInput type="text" mask="money" currency="USD" required label="Valor em Dólar" v-model="formValue.valor_total_dolar" hide-details="auto" />
     </v-col>
 
-    <v-col>
-      <CustomInput type="text" mask="money" currency="BRL" required :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'" v-model="formValue.valor_total" hide-details />
+    <v-col cols="2">
+      <CustomInput
+        type="text"
+        mask="money"
+        currency="BRL"
+        required
+        :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'"
+        v-model="formValue.valor_total"
+        hide-details="auto"
+      />
     </v-col>
 
     <v-col cols="1">
@@ -35,9 +43,7 @@
     <v-col cols="1" v-if="userIsAllowed">
       <CustomInput type="checkbox" label="Privado" v-model="formValue.privado" hide-details color="primary" />
     </v-col>
-  </v-row>
 
-  <v-row class="pa-3 mt-n12" v-if="!tiposNormalize.includes(form.tipo_id)">
     <v-col v-if="formValue.tipo_id === 1" cols="3">
       <CustomInput
         v-model="formValue.tipo_chave_pix_id"
@@ -48,19 +54,21 @@
         itemTitle="nome"
         itemValue="id"
         label="Tipo de Chave"
+        hide-details="auto"
       />
     </v-col>
 
-    <v-col>
+    <v-col v-if="form.tipo_id === 1 && formValue.tipo_chave_pix_id" cols="4">
       <CustomInput
         v-if="formValue.tipo_chave_pix_id !== 4"
-        :disabled="!tipos.descricao"
+        :disabled="!tipos.descricao && !formValue.tipo_chave_pix_id"
         type="text"
         :label="!tipos.descricao ? 'Descrição' : tipos.descricao"
         v-model="formValue.dados_bancarios.outhers"
         :mask="formValue.tipo_id === 1 ? maskDescriptionPIX : maskDescriptionOuthers"
         appen-innerColor="#118B9F"
         append-inner-icon="mdi-content-copy"
+        hide-details="auto"
         @click:append-inner="pasteFromClipBoardDadosBancarios"
         :required="tipos.obrigatorio"
       />
@@ -69,35 +77,48 @@
         v-else
         type="text"
         label="E-mail"
+        hide-details="auto"
         append-inner-icon="mdi-content-copy"
         v-model="formValue.dados_bancarios.outhers"
         :required="tipos.obrigatorio"
         :rules="emailRules"
+        :disabled="!formValue.tipo_chave_pix_id"
       />
     </v-col>
-  </v-row>
 
-  <v-row class="pa-3 mt-n11" v-else-if="form.tipo_id === 2">
-    <v-col>
-      <CustomInput type="text" mask="number" label="Banco" v-model="formValue.dados_bancarios.banco" required :max="3" />
+    <v-col v-if="form.tipo_id === 2" cols="3">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Banco" v-model="formValue.dados_bancarios.banco" required :max="3" />
     </v-col>
 
-    <v-col>
-      <CustomInput type="text" mask="number" label="Agência" v-model="formValue.dados_bancarios.agencia" required :max="4" />
+    <v-col v-if="form.tipo_id === 2" cols="3">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Agência" v-model="formValue.dados_bancarios.agencia" required :max="4" />
     </v-col>
 
-    <v-col>
-      <CustomInput type="text" mask="number" label="Conta" v-model="formValue.dados_bancarios.conta" required />
+    <v-col v-if="form.tipo_id === 2" cols="3">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Conta" v-model="formValue.dados_bancarios.conta" required />
     </v-col>
 
-    <v-col>
-      <CustomInput type="text" mask="number" label="Dígito" v-model="formValue.dados_bancarios.digito" required :max="1" />
+    <v-col v-if="form.tipo_id === 2" cols="3">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Dígito" v-model="formValue.dados_bancarios.digito" required :max="1" />
     </v-col>
-  </v-row>
 
-  <v-row class="pa-3 mt-n11" v-else>
-    <v-col>
-      <CustomInput type="autocomplete" label="Cartão" v-model="formValue.conta_id" required :items="cards" itemTitle="descricao" itemValue="id" />
+    <v-col v-if="form.tipo_id === 5 || form.tipo_id === 6" cols="3">
+      <CustomInput type="autocomplete" label="Cartão" hide-details="auto" v-model="formValue.conta_id" required :items="cards" itemTitle="descricao" itemValue="id" />
+    </v-col>
+
+    <v-col v-if="form.tipo_id && !tiposNormalize.includes(form.tipo_id)" cols="9">
+      <CustomInput
+        :disabled="!tipos.descricao"
+        type="text"
+        :label="tipos.descricao ?? 'Descrição'"
+        v-model="formValue.dados_bancarios.outhers"
+        :mask="maskDescriptionOuthers"
+        appen-innerColor="#118B9F"
+        append-inner-icon="mdi-content-copy"
+        @click:append-inner="pasteFromClipBoardDadosBancarios"
+        :required="tipos.obrigatorio"
+        hide-details="auto"
+      />
     </v-col>
   </v-row>
 

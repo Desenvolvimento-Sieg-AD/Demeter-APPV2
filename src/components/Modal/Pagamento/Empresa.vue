@@ -1,11 +1,11 @@
 <template>
   <CustomText title="Empresa" class="ml-3" size="18" color="secondary" :bold="true" />
-  <v-row class="pa-3 mb-n6">
+  <v-row class="pa-3" dense>
     <v-col cols="3">
       <CustomInput
         required
         type="select"
-        hide-details
+        hide-details="auto"
         itemValue="id"
         itemTitle="nome"
         :items="empresas"
@@ -19,7 +19,7 @@
       <CustomInput
         required
         type="autocomplete"
-        hide-details
+        hide-details="auto"
         itemValue="id"
         itemTitle="nome"
         :itemProps="itemProps"
@@ -34,7 +34,7 @@
     <v-col cols="3">
       <CustomInput
         required
-        hide-details
+        hide-details="auto"
         itemValue="id"
         itemTitle="nome"
         :items="setoresPadrao"
@@ -48,7 +48,7 @@
     <v-col cols="3">
       <CustomInput
         ref="projetoRef"
-        hide-details
+        hide-details="auto"
         item-value="id"
         label="Projeto"
         :required="requer_projeto"

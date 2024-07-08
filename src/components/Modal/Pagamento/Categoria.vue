@@ -1,10 +1,10 @@
 <template>
   <CustomText title="Categoria" class="ml-3" color="secondary" size="18" :bold="true" />
-  <v-row class="pa-3 mb-n6">
+  <v-row class="pa-3" dense>
     <v-col cols="2" md="3">
       <CustomInput
         required
-        hide-details
+        hide-details="auto"
         itemValue="id"
         v-model="formValue.grupo_id"
         :items="grupos"
@@ -18,7 +18,7 @@
     <v-col cols="4" md="3">
       <CustomInput
         required
-        hide-details
+        hide-details="auto"
         itemValue="id"
         itemTitle="nome"
         label="Categoria"

@@ -1,13 +1,14 @@
 <template>
-  <v-row no-gutters justify="space-between" align="center" class="mb-n14 mr-2">
-    <CustomText title="Fornecedor" class="ml-2 mb-n5 mt-n10" color="secondary" size="18" :bold="true" />
-    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" :disabled="route.params.id" />
-  </v-row>
-  <v-row class="pa-2" v-if="!formValue.fornecedor.internacional">
+  <div style="display: flex; justify-content: space-between; flex-direction: row; align-content: center; margin-bottom: -20px">
+    <CustomText title="Fornecedor" class="ml-3" color="secondary" size="18" :bold="true" />
+    <CustomInput type="checkbox" v-model="form.fornecedor.internacional" label="Internacional" :disabled="route.params.id" hide-details />
+  </div>
+
+  <v-row class="pa-3" v-if="!formValue.fornecedor.internacional" dense>
     <v-col cols="12" md="3">
       <CustomInput
         type="file"
-        hide-details
+        hide-details="auto"
         v-model="formValue.nf"
         :loading="loadingProcessFile"
         color="primary"
@@ -23,17 +24,18 @@
     </v-col>
 
     <v-col cols="12" md="3">
-      <CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" mask="numero-nf" />
+      <CustomInput type="text" label="Número NF/Cupom" v-model="form.numero_nf" mask="numero-nf" hide-details="auto" />
     </v-col>
 
     <v-col cols="12" md="6">
-      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="chave" />
+      <CustomInput type="text" label="Chave de Acesso" v-model="form.chave_nf" :max="52" mask="chave" hide-details="auto" />
     </v-col>
 
-    <v-col cols="12" md="3" class="mt-n7">
+    <v-col cols="12" md="3">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         type="text"
+        hide-details="auto"
         :label="documentFornecedor"
         v-model="formValue.fornecedor.documento"
         append-inner-icon="mdi-content-copy"
@@ -43,7 +45,7 @@
       />
     </v-col>
 
-    <v-col cols="12" md="3" class="mt-n7">
+    <v-col cols="12" md="3">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         hide-details
@@ -57,7 +59,7 @@
       />
     </v-col>
 
-    <v-col cols="12" md="6" class="mt-n7">
+    <v-col cols="12" md="6">
       <CustomInput
         :required="!formValue.fornecedor.internacional"
         hideDetails
@@ -73,11 +75,11 @@
     </v-col>
   </v-row>
 
-  <v-row v-else class="pa-3 mb-n10">
+  <v-row v-else class="pa-3" dense>
     <v-col>
       <CustomInput
         required
-        hideDetails
+        hide-details="auto"
         type="combobox"
         label="Fornecedor"
         :items="fornecedores"
@@ -89,7 +91,7 @@
     </v-col>
 
     <v-col>
-      <CustomInput type="text" label="Número Invoice" v-model="form.numero_nf" />
+      <CustomInput type="text" label="Número Invoice" v-model="form.numero_nf" hide-details="auto" />
     </v-col>
   </v-row>
 </template>
