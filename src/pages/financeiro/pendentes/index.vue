@@ -354,15 +354,18 @@ const openFile = (filePath) => {
   }
 }
 
+const openBase64File = async (pagamento) => {
+  await useOs().openBase64File(pagamento)
+}
+
 const openFiles = (pagamento) => {
   const statusAllowed = [3, 4]
 
   const anexo = pagamento.anexos_pagamento.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
   if (!anexo) return $toast.error('Anexo não encontrado')
 
-  const caminho = pagamento.privado ? pagamento.caminho_privado : pagamento.caminho_normal
-  // TODO TEST caminho
-  openFile(`${pagamento.diretorio_atual}/${anexo.nome}`)
+  if (!anexo.base64) return $toast.error('Arquivo não encontrado')
+  openBase64File(anexo.base64.data)
 }
 
 const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)

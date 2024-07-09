@@ -61,7 +61,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="existNF(item)">
-              <v-icon @click="openFile(`${path}${item.anexos_pagamento[0].caminho}`, item.privado)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
+              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -154,16 +154,34 @@ const valueLastMonth = ref(0)
 const valueActualMonth = ref(0)
 const valueToday = ref(0)
 
-const openFile = async (path, privado) => {
-  try {
+// const openFile = async (path, privado) => {
+//   try {
 
-    const caminho = privado ? caminho_privado : caminho_normal
-    await useOs().openFile(`${caminho}/${path}`)
+//     const caminho = privado ? caminho_privado : caminho_normal
+//     await useOs().openFile(`${caminho}/${path}`)
 
-  } catch (error) {
-    console.error('Erro ao abrir arquivo:', error.message)
-    $toast.error('Não foi possível abrir o arquivo')
-  }
+//   } catch (error) {
+//     console.error('Erro ao abrir arquivo:', error.message)
+//     $toast.error('Não foi possível abrir o arquivo')
+//   }
+// }
+
+const openFile = async (filePath) => {
+  await useOs().openFile(filePath)
+}
+
+const openBase64File = async (pagamento) => {
+  await useOs().openBase64File(pagamento)
+}
+
+const openFiles = (pagamento) => {
+  const statusAllowed = [3, 4]
+
+  const anexo = pagamento.anexos_pagamento.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
+  if (!anexo) return $toast.error('Anexo não encontrado')
+
+  if (!anexo.base64) return $toast.error('Arquivo não encontrado')
+  openBase64File(anexo.base64.data)
 }
 
 
