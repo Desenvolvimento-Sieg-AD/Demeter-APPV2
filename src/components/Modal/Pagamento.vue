@@ -37,11 +37,11 @@
             <CustomInput readonly label="Solicitante" hide-details v-model="pagamento.usuario.sigla" />
           </v-col>
 
-          <v-col cols="3">
+          <v-col cols="3" v-if="pagamento.setorSolicitante">
             <CustomInput readonly label="Setor Solicitante" hide-details v-model="pagamento.setorSolicitante.nome" />
           </v-col>
 
-          <v-col cols="3">
+          <v-col cols="3" v-if="pagamento.setorReferencia">
             <CustomInput readonly label="Setor Referência" hide-details v-model="pagamento.setorReferencia.nome" />
           </v-col>
 
@@ -107,7 +107,7 @@
             <CustomInput readonly label="Conta" hide-details v-model="pagamento.conta_empresa.descricao" />
           </v-col>
 
-          <v-col v-if="pagamento.tipo_pagamento.nome === 'PIX'" cols="2">
+          <v-col v-if="pagamento.tipo_pagamento.nome === 'PIX' && pagamento.tipo_chave_pix" cols="2">
             <CustomInput readonly label="Tipo de Chave" hide-details v-model="pagamento.tipo_chave_pix.nome" />
           </v-col>
 
