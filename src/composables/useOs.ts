@@ -25,7 +25,15 @@ export default function useOs() {
     const base64String = String.fromCharCode(...base64Array);
     
     const base64URL = `data:application/pdf;base64,${base64String}`;
-    return window.open(base64URL);
+    
+    const newWindow = window.open();
+    if (newWindow) {
+      newWindow.document.write(
+        `<iframe src="${base64URL}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`
+      );
+    } else {
+      console.error('Não foi possível abrir uma nova janela.');
+    }
   };  
 
   const copyFilePath = async (filePath: string) => {
