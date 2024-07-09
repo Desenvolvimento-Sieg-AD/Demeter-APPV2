@@ -72,7 +72,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="template">
             <div v-if="existDoc(item)">
-              <v-icon color="success" class="cursor-pointer" @click="openFile(`${path}${item.anexos_pagamento[1].caminho}`, item.privado)"> mdi-paperclip</v-icon>
+              <v-icon color="success" class="cursor-pointer" @click="openFiles(item)"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
