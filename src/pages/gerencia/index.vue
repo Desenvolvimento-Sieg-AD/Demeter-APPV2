@@ -349,8 +349,8 @@ const sendStatus = async (status, id) => {
     await getPage()
 
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao alterar status')
   }
 }
 
@@ -372,8 +372,8 @@ const approvePayment = async (ids) => {
     itens.value = paymentGerencia.data
 
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao aprovar pagamento')
   }
 }
 
@@ -416,8 +416,8 @@ const disapprovePayment = async (ids) => {
     $toast.success('Pagamento recusado com sucesso')
     itens.value = paymentGerencia.data
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao reprovar pagamento')
   }
 }
 
@@ -479,7 +479,7 @@ const getPage = async () => {
           totalCount: data.count
         }
       } catch (error) {
-        console.log(error.message)
+        console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
       }
     }

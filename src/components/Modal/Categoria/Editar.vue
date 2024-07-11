@@ -128,7 +128,7 @@ const sendValueCategorias = async (categorias) => {
 
     emit('close')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     $toast.error('Erro ao atualizar categorias do setor')
   }
 }

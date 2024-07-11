@@ -47,7 +47,10 @@ const linkValue = computed({
 
 const openFile = async () => {
 	const { success, message } = await useOs().openFile(props.link);
-	if (!success) $toast.error(message);
+	if (!success) {
+		console.error(message)
+		$toast.error('Erro ao abrir o arquivo');
+	}
 };
 </script>
 

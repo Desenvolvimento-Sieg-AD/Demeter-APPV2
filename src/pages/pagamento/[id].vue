@@ -161,8 +161,8 @@ const updatePayment = async (id, data) => {
     setTimeout(() => router.push(currentRoute.value), 750)
 
   } catch (error) {
-    console.log('Erro ao atualizar pagamento', error)
-    $toast.error('Erro ao atualizar pagamento', error)
+    console.error('Erro ao atualizar pagamento', error)
+    $toast.error('Erro ao atualizar pagamento')
   }
 }
 
@@ -176,7 +176,7 @@ const definePaymentImportant = async () => {
     const restantes = pagamentos.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto').sort((a, b) => a.nome.localeCompare(b.nome))
     paymentsType.value = [...priorizados, ...restantes]
   } catch (error) {
-    console.log('Erro ao buscar tipos de pagamento', error.message)
+    console.error('Erro ao buscar tipos de pagamento', error)
     $toast.error('Erro ao buscar tipos de pagamento')
   }
 }
@@ -314,8 +314,8 @@ const getPriceDollar = async () => {
 
     form.value.valor_total = price
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao buscar valor do dolar')
   }
 }
 

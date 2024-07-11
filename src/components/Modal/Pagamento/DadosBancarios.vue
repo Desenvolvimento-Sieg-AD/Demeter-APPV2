@@ -227,8 +227,8 @@ const getTiposChave = async () => {
 
     chavesPix.value = data
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao buscar tipos de chave pix')
   }
 }
 
@@ -242,8 +242,8 @@ const getCards = async () => {
 
     cards.value = data
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao buscar cartões')
   }
 }
 

@@ -137,7 +137,8 @@ const getGrupo = async () => {
 
     grupos.value = data
   } catch (error) {
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao buscar grupos')
   }
 }
 
@@ -150,7 +151,8 @@ const getEmpresas = async () => {
     empresas.value = data
     empresasIntegracao.value = data
   } catch (error) {
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao buscar empresas')
   }
 }
 
@@ -162,7 +164,8 @@ const getSetores = async () => {
 
     setores.value = data
   } catch (error) {
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao buscar setores')
   }
 }
 
@@ -186,7 +189,7 @@ const createCategory = async () => {
 
     emit('close')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     $toast.error('Erro ao criar categoria')
   }
 }
@@ -208,7 +211,7 @@ const updateCategory = async () => {
 
     emit('close')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     $toast.error('Erro ao atualizar categoria')
   }
 }
@@ -240,7 +243,7 @@ const getCategoria = async () => {
 
     categoria.setores_id = data.categorias_setor.map((setor) => setor.setor_id)
   } catch (error) {
-    console.log(error)
+    console.error(error)
     $toast.error('Erro ao buscar categoria')
   }
 }

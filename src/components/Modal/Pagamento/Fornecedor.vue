@@ -126,8 +126,8 @@ const processNfFile = async (file) => {
 
     validDocument(cpf_emitente, cnpj_emitente)
   } catch (error) {
-    console.error('Erro ao processar arquivo NF:', error.message)
-    $toast.error(error.message)
+    console.error('Erro ao processar arquivo NF:', error)
+    $toast.error('Erro ao processar arquivo NF')
   } finally {
     loadingProcessFile.value = false
   }

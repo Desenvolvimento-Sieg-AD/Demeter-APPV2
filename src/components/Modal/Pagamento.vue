@@ -297,7 +297,7 @@ const getPagamento = async () => {
 
     loading.value = false
   } catch (error) {
-    console.error('Erro ao buscar pagamento:', error.message)
+    console.error('Erro ao buscar pagamento:', error)
     $toast.error('Erro ao buscar pagamento')
   }
 }
@@ -314,7 +314,7 @@ const saveUpdatePagamento = async () => {
 
     emit('getPagamento')
   } catch (error) {
-    console.error('Erro ao atualizar pagamento:', error.message)
+    console.error('Erro ao atualizar pagamento:', error)
     $toast.error('Erro ao atualizar pagamento')
   }
 }
@@ -326,7 +326,7 @@ const openFile = async (path, privado) => {
     await useOs().openFile(`${caminho}/${path}`)
 
   } catch (error) {
-    console.error('Erro ao abrir arquivo:', error.message)
+    console.error('Erro ao abrir arquivo:', error)
     $toast.error('Não foi possível abrir o arquivo')
   }
 }
@@ -339,7 +339,7 @@ const copyFilePath = async (anexo, privado) => {
 
     $toast.success('Caminho do arquivo copiado')
   } catch (error) {
-    console.error('Erro ao copiar caminho do arquivo:', error.message)
+    console.error('Erro ao copiar caminho do arquivo:', error)
     $toast.error('Não foi possível copiar o caminho do arquivo')
   }
 }
@@ -349,7 +349,7 @@ const copyData = async (data) => {
     await useOs().copyFilePath(pagamento.value.chave_pix)
     $toast.success('Dados de pagamento copiado')
   } catch (error) {
-    console.log('Erro ao copiar dados de pagamento:', error.message)
+    console.log('Erro ao copiar dados de pagamento:', error)
     $toast.error('Não foi possível copiar os dados de pagamento')
   }
 }

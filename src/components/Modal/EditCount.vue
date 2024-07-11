@@ -147,8 +147,8 @@ const getPayment = async () => {
     getCategsUsuario()
     getEmpresas()
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Ocorreu um erro ao buscar o pagamento')
   }
 }
 
@@ -157,8 +157,8 @@ const getContasDisp = async () => {
     const { data } = await getContasDisponiveis(payment.value.empresa_id, payment.value.tipo_id)
     contasEmpresa.value = data
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Ocorreu um erro ao buscar as contas disponíveis')
   }
 }
 
@@ -167,8 +167,8 @@ const getEmpresas = async () => {
     const { data } = await getEmpresa()
     empresas.value = data
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Ocorreu um erro ao buscar as empresas')
   }
 }
 
@@ -192,8 +192,8 @@ const getCategsUsuario = async () => {
     categorias.value = data
 
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Ocorreu um erro ao buscar as categorias')
   }
 }
 
@@ -215,8 +215,8 @@ const saveUpdates = async () => {
     enableValue.value = false
     emit('update-success')
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Ocorreu um erro ao atualizar o pagamento')
   }
   loading.value = false
 }

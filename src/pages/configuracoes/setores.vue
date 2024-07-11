@@ -79,7 +79,7 @@ const getSetores = async () => {
 
     loadingTable.value = false
   } catch (error) {
-    console.error(error.message)
+    console.error(error)
     $toast.error('Erro ao buscar setores')
   }
 }

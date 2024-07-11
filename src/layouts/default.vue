@@ -56,7 +56,8 @@ const login = async () => {
 
     logged.value = true
   } catch (error) {
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao autenticar usuário')
     message.value = error.message ?? 'Erro ao autenticar usuário'
   }
 }

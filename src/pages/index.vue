@@ -303,8 +303,8 @@ const cancelPayment = async (ids) => {
     $toast.success('Pagamento cancelado com sucesso')
     await getPage()
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao cancelar pagamento')
   }
   justificativa.value = null
 }
@@ -365,7 +365,7 @@ const getPage = async () => {
 
         return { data: data.data ?? [], totalCount: data.count ?? 0 }
       } catch (error) {
-        console.log(error.message)
+        console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
         await customRef.value.refresh()
       }

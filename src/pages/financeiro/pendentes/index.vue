@@ -406,8 +406,8 @@ const sendStatus = async (status, id) => {
     
     await getPage()
   } catch (error) {
-    console.error(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao alterar o status')
   }
 }
 
@@ -466,7 +466,7 @@ const getPage = async () => {
 
         return { data: data.data, totalCount: data.count }
       } catch (error) {
-        console.log(error.message)
+        console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
       }
     }

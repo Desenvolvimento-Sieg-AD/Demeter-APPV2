@@ -214,7 +214,7 @@ const getClients = async () => {
 
     clients.value = data
   } catch (error) {
-    console.log(error.message)
+    console.log(error)
     $toast.error('Erro ao buscar clientes')
   }
 }
@@ -231,7 +231,7 @@ const getPaymentByClient = async () => {
     showPayments.value = payments.value.length > 0
     notExistPayments.value = payments.value.length === 0
   } catch (error) {
-    console.error(error.message)
+    console.error(error)
     $toast.error('Erro ao buscar pagamentos')
   } finally {
     loadingPayments.value = false
@@ -297,7 +297,7 @@ const sendPaidPayment = async (id) => {
 
     loading.value = false
   } catch (error) {
-    console.error(error.message)
+    console.error(error)
     $toast.error('Erro ao mover pagamento para provisionado')
   }
 }
@@ -316,7 +316,7 @@ const cancelPayment = async () => {
     enableModal.cancel = false
     justificativa.value = null
   } catch (error) {
-    console.error(error.message)
+    console.error(error)
     $toast.error('Erro ao cancelar pagamento')
   }
 }

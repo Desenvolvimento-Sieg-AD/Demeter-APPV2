@@ -134,8 +134,8 @@ const sendUpload = async () => {
 
     emit('update')
   } catch (error) {
-    console.log(error.message)
-    $toast.error(error.message)
+    console.error(error)
+    $toast.error('Erro ao enviar o arquivo')
   }
 }
 

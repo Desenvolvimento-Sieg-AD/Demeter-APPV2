@@ -114,8 +114,8 @@ const loadCategorias = async (setor_solicitante_id, internacional, nacional) => 
     grupos.value = tempGrupos.sort((a, b) => a.nome.localeCompare(b.nome))
     categorias.value = data
   } catch (error) {
-    console.error('Erro ao buscar categorias:', error.message)
-    $toast.error(error.message)
+    console.error('Erro ao buscar categorias:', error)
+    $toast.error('Erro ao buscar categorias')
   }
 }
 
