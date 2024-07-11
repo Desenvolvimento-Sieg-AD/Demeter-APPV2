@@ -59,7 +59,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
+              <v-icon @click="openFile(item, 3)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
             <div v-else> <v-tooltip text="Sem anexo" activator="parent" location="top" /><v-icon disabled color="gray">mdi-paperclip</v-icon> </div>
@@ -68,7 +68,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openFile(item, 4)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
 
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
@@ -300,18 +300,12 @@ const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
 const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
-const openFile = async (filePath) => {
-  await useOs().openFile(filePath)
-}
-
 const openBase64File = async (pagamento) => {
   await useOs().openBase64File(pagamento)
 }
 
-const openFiles = (pagamento) => {
-  const statusAllowed = [3, 4]
-
-  const anexo = pagamento.anexos_pagamento.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
+const openFile = (pagamento, tipo_anexo_id) => {
+  const anexo = pagamento.anexos_pagamento.find((anexo) => tipo_anexo_id == anexo.tipo_anexo_id)
   if (!anexo) return $toast.error('Anexo não encontrado')
 
   if (!anexo.base64) return $toast.error('Arquivo não encontrado')

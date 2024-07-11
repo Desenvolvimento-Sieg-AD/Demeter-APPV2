@@ -61,7 +61,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="existNF(item)">
-              <v-icon @click="openFiles(item)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
+              <v-icon @click="openFile(item, 3)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -72,7 +72,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="template">
             <div v-if="existDoc(item)">
-              <v-icon color="success" class="cursor-pointer" @click="openFiles(item)"> mdi-paperclip</v-icon>
+              <v-icon color="success" class="cursor-pointer" @click="openFile(item, 4)"> mdi-paperclip</v-icon>
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
             </div>
 
@@ -154,30 +154,12 @@ const valueLastMonth = ref(0)
 const valueActualMonth = ref(0)
 const valueToday = ref(0)
 
-// const openFile = async (path, privado) => {
-//   try {
-
-//     const caminho = privado ? caminho_privado : caminho_normal
-//     await useOs().openFile(`${caminho}/${path}`)
-
-//   } catch (error) {
-//     console.error('Erro ao abrir arquivo:', error.message)
-//     $toast.error('Não foi possível abrir o arquivo')
-//   }
-// }
-
-const openFile = async (filePath) => {
-  await useOs().openFile(filePath)
-}
-
 const openBase64File = async (pagamento) => {
   await useOs().openBase64File(pagamento)
 }
 
-const openFiles = (pagamento) => {
-  const statusAllowed = [3, 4]
-
-  const anexo = pagamento.anexos_pagamento.find((anexo) => statusAllowed.includes(anexo.tipo_anexo_id))
+const openFile = (pagamento, tipo_anexo_id) => {
+  const anexo = pagamento.anexos_pagamento.find((anexo) => tipo_anexo_id == anexo.tipo_anexo_id)
   if (!anexo) return $toast.error('Anexo não encontrado')
 
   if (!anexo.base64) return $toast.error('Arquivo não encontrado')

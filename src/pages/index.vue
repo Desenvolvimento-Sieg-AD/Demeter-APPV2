@@ -62,7 +62,7 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="template" v-if="isNotStatusAllowed(item.status)">
-            <v-btn v-if="isNF(item.anexos_pagamento)" flat icon variant="plain" @click="openFile(item.anexos_pagamento, 3, item.privado)">
+            <v-btn v-if="isNF(item.anexos_pagamento)" flat icon variant="plain" @click="openFile(item, 3)">
               <v-icon color="success" class="cursor-pointer" icon="mdi-paperclip" />
 
               <v-tooltip text="Abrir anexo" activator="parent" location="top" />
@@ -82,7 +82,7 @@
           <div class="template" v-if="isNotStatusAllowed(item.status)">
             <v-btn v-if="isDOC(item.anexos_pagamento)" flat icon variant="plain">
               <div v-if="item.anexos_pagamento?.length > 0">
-                <v-icon :color="colorDoc(item.anexos_pagamento)" class="cursor-pointer" icon="mdi-paperclip" @click="openDoc(item.anexos_pagamento, 4, item.privado)" />
+                <v-icon :color="colorDoc(item.anexos_pagamento)" class="cursor-pointer" icon="mdi-paperclip" @click="openFile(item, 4)" />
                 <v-tooltip :text="item.anexos_pagamento.length === 1 ? 'Abrir anexo' : nameFiles(item.anexos_pagamento)" activator="parent" location="top" />
               </div>
             </v-btn>
@@ -253,21 +253,16 @@ const openDoc = (anexos, tipo_anexo, privado) => {
   if (filterDoc && filterDoc.length !== 0) return openFile(filterDoc, tipo_anexo, privado)
 }
 
-const openFile = async (anexos, tipo_anexo, privado) => {
-  try {
-    const anexo = anexos.find((anexo) => anexo.tipo_anexo_id == tipo_anexo)
+const openBase64File = async (pagamento) => {
+  await useOs().openBase64File(pagamento)
+}
 
-    if (!anexo) throw new Error('Anexo não encontrado')
-    if (!anexo.caminho) return $toast.error('Anexo não encontrado')
+const openFile = (pagamento, tipo_anexo_id) => {
+  const anexo = pagamento.anexos_pagamento.find((anexo) => tipo_anexo_id == anexo.tipo_anexo_id)
+  if (!anexo) return $toast.error('Anexo não encontrado')
 
-    const caminho = privado ? caminho_privado : caminho_normal
-
-    const { success, message } = await useOs().openFile(`${caminho}${anexo.caminho}`)
-    if (!success) $toast.error(message)
-  } catch (error) {
-    $toast.error(error.message)
-    console.error(error)
-  }
+  if (!anexo.base64) return $toast.error('Arquivo não encontrado')
+  openBase64File(anexo.base64.data)
 }
 
 const movimentacaoAprovado = (item) => {
