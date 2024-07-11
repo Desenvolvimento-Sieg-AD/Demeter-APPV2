@@ -363,8 +363,6 @@ const getPage = async () => {
 
         if (!success) throw new Error(message)
 
-        console.log(data.count, data.totalCount)
-
         data.data.forEach((item) => {
           item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
           item.lote = item.movimentacoes_pagamento.at()?.lote

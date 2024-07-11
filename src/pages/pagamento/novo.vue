@@ -175,8 +175,9 @@ const sendForm = async () => {
 
     loading.value = false
   } catch (error) {
+    loading.value = false
     console.error(error)
-    $toast.error(error.message)
+    $toast.error('Erro ao criar uma solicitação de pagamento')
   }
 }
 
