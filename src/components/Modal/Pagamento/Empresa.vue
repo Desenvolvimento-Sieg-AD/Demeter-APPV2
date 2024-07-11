@@ -50,13 +50,13 @@
         ref="projetoRef"
         hide-details="auto"
         item-value="id"
+        item-title="nome"
         label="Projeto"
         :required="requer_projeto"
         :items="projetos"
-        item-title="nome"
         type="combobox"
         v-model="formValue.projeto_id"
-        @change="findProject"
+        @input="findProject"
         @blur="notExistProject"
         append-inner-icon="mdi-briefcase-plus-outline"
       />
@@ -168,7 +168,18 @@ const findProject = async (attrs, search) => {
   } catch (error) {}
 }
 
-const notExistProject = async () => (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id)) ? (enableModal.confirm = true) : null)
+const notExistProject = async () => {
+  if (formValue.value.projeto_id && typeof formValue.value.projeto_id === 'string' && formValue.value.projeto_id.length > 0) {
+    const project = projetos.value.find((project) => project.nome === formValue.value.projeto_id)
+    if (project) {
+      formValue.value.projeto_id = project.id
+    }
+    else {
+      enableModal.confirm = true
+    }
+  }
+  else if (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id))) { enableModal.confirm = true }
+}
 
 const createProject = async () => {
   try {

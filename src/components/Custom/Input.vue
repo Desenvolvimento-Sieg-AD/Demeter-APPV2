@@ -254,7 +254,9 @@
     :item-value="itemValue"
     :class="{ 'required-field field': required && (enableValue === null || enableValue.length === 0), field: true }"
     :delimiters="[',', ';', ' ']"
+    auto-select-first
     @update:modelValue="onChange"
+    @input="onInput"
     @focus="onFocus"
     @blur="onBlur"
   >
@@ -476,10 +478,14 @@ const props = defineProps({
 })
 
 const dayjs = useDayjs()
-const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur'])
+const emit = defineEmits(['update:modelValue', 'change', 'input', 'focus', 'blur'])
 
 const onChange = (attrs) => {
   emit('change', attrs, enableValue.value)
+}
+
+const onInput = (attrs) => {
+  emit('input', attrs, enableValue.value)
 }
 
 const onFocus = (attrs) => {
