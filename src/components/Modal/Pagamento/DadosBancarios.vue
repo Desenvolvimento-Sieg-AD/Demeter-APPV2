@@ -274,7 +274,7 @@ watch(
 )
 
 watch(
-  () => formValue.value.empresa_id,
+  () => formValue.value.tipo_id,
   (value) => {
     if (value == 5 || value == 6) {
       try {
