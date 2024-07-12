@@ -10,8 +10,6 @@ interface Windows extends Window {
 
 declare var window: Windows
 
-const { $toast } = useNuxtApp();
-
 export default function useOs() {
 
   const getUser = async () => {
@@ -23,8 +21,9 @@ export default function useOs() {
   }
 
   const openBase64File = async (pagamento: any, tipo_anexo_id: number) => {
+    const { $toast } = useNuxtApp();
+    
     try {
-
       const anexo = pagamento.anexos_pagamento.find((anexo: any) => tipo_anexo_id == anexo.tipo_anexo_id);
       if (!anexo) return $toast.error('Anexo não encontrado');
     
@@ -45,8 +44,8 @@ export default function useOs() {
       }
     }
     catch (error) {
-      console.error('Erro ao abrir o arquivo:', error);
       $toast.error('Não foi possível abrir o arquivo');
+      console.error('Erro ao abrir o arquivo:', error);
     }
   }
 
