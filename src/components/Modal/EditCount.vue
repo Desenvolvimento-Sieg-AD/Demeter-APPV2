@@ -205,7 +205,8 @@ const saveUpdates = async () => {
     const payload = {
       conta_id: form.conta_id,
       empresa_id: form.empresa_id,
-      categoria_id: form.categoria_id
+      categoria_id: form.categoria_id,
+      setor_solicitante_id: form.setor_solicitante_id,
     }
 
     const { success, message } = await updatePagamento(props.id, payload)
