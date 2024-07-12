@@ -300,16 +300,8 @@ const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
 const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
-const openBase64File = async (pagamento) => {
-  await useOs().openBase64File(pagamento)
-}
-
-const openFile = (pagamento, tipo_anexo_id) => {
-  const anexo = pagamento.anexos_pagamento.find((anexo) => tipo_anexo_id == anexo.tipo_anexo_id)
-  if (!anexo) return $toast.error('Anexo não encontrado')
-
-  if (!anexo.base64) return $toast.error('Arquivo não encontrado')
-  openBase64File(anexo.base64.data)
+const openFile = async (pagamento, tipo_anexo_id) => {
+  await useOs().openBase64File(pagamento, tipo_anexo_id)
 }
 
 const smallerIndex = (index, item) => index < item.length - 1
