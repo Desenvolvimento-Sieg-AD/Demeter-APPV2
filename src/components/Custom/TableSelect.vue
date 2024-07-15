@@ -362,7 +362,7 @@ defineExpose({
   },
   clearFilters: () => {
     clearFiltersAndRefreshToolbar()
-  },
+  }
 })
 
 const slotColumns = computed(() => props.columns.filter((el) => el.value != 'actions'))
@@ -429,6 +429,7 @@ const onCellPrepared = (e) => {
   if (e.row?.data?.situacao == 'enviado') {
     e.cellElement.style.backgroundColor = 'lightgray'
   }
+  companySelected()
 }
 
 const getValue = (data) => data.text
@@ -624,7 +625,7 @@ watch(
   color: rgba(149, 149, 149, 0.5) !important;
 }
 .dx-datagrid .dx-header-filter {
-  color: #F68A1A;
+  color: #f68a1a;
 }
 .dx-datagrid-content .dx-datagrid-table .dx-row > td,
 .dx-datagrid-content .dx-datagrid-table .dx-row > tr > td {
@@ -644,7 +645,7 @@ watch(
 <style scoped>
 .cff {
   font-size: 14px;
-  color: #F68A1A;
+  color: #f68a1a;
   font-weight: 700;
 }
 .dx-data-row {
