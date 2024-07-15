@@ -53,10 +53,13 @@
 
       <!-- version -->
       <div class="footer-version">
-        <p class="version-text">
-          <v-divider/>
-            v{{ version }}  - Homologação
-        </p>
+        <v-divider/>
+
+        <p class="version-text">{{ version }}</p>
+
+        <!-- <v-btn @click="toggleTheme" icon flat color="secondary" variant="text">
+          <v-icon>mdi-theme-light-dark</v-icon>
+        </v-btn> -->
       </div>
     </v-list>
   </v-navigation-drawer>
@@ -66,7 +69,10 @@
 //* IMPORTS
 
 import { useAuthStore } from '~/store/auth'
+import { useThemeStore } from '~/store/theme';
 const { authenticateUser } = useAuthStore()
+
+const { toggleTheme } = useThemeStore()
 const route = useRoute()
 
 const { actions } = useElectron()
@@ -79,7 +85,7 @@ const user = ref({})
 const activeOption = ref([])
 const selectedOption = ref([])
 const drawer = ref(true)
-let timer
+let timer;
 
 //* METHODS
 
@@ -121,7 +127,7 @@ const menuOptions = ref([
 
 const menuFooter = ref([
   { title: 'Manual de Uso', icon: 'mdi-book-open-outline', to: 'https://docs.google.com/document/d/1D8p-yGRfOW6jAeXyb8T5MlXcqLREeJRc/edit' },
-  { title: 'Formulário', icon: 'mdi-list-box-outline', to: 'https://docs.google.com/forms/d/e/1FAIpQLSc99PuYBdLKRUMMOT14M-iBNlMBAnQjtztTjl9e_vJzOP5YLQ/viewform' }
+  { title: 'Formulário', icon: 'mdi-list-box-outline', to: 'https://docs.google.com/forms/d/e/1FAIpQLSc99PuYBdLKRUMMOT14M-iBNlMBAnQjtztTjl9e_vJzOP5YLQ/viewform' },
 ])
 
 //* ACTIONS
@@ -177,7 +183,7 @@ watch(
 }
 
 .version-text {
-  margin: 0;
+  margin: 20px 0 0px;
   font-size: 14px;
   white-space: nowrap;
 }

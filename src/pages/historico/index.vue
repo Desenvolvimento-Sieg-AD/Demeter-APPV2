@@ -1,6 +1,5 @@
 <template>
   <div>
-    <CustomHeader title="Histórico de Solicitações" />
     <LayoutForm>
       <PaymentsValue :year="valueYear" :month="valueActualMonth" :lastMonth="valueLastMonth" :today="valueToday" />
 

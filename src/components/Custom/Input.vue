@@ -22,7 +22,7 @@
     :prefix="prefix"
     :readonly="readonly"
     validate-on="lazy blur"
-    :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
+    :class="required && !enableValue ? 'required-field' : ''"
     @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
@@ -58,7 +58,7 @@
     :persistent-hint="persistentHint"
     :maxlength="max"
     validate-on="lazy blur"
-    :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
+    :class="required && !enableValue ? 'required-field' : ''"
     @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
@@ -85,7 +85,7 @@
         :variant="variant"
         :density="density"
         :hide-details="hideDetails"
-        :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
+        :class="required && !enableValue ? 'required-field' : ''"
         :color="color"
         :readonly="readonly"
         :disabled="disabled"
@@ -153,7 +153,7 @@
     :hint="hint"
     :persistent-hint="persistentHint"
     validate-on="lazy blur"
-    :class="required && !enableValue ? 'required-field custom-text-field' : 'custom-text-field'"
+    :class="required && !enableValue ? 'required-field' : ''"
     @update:modelValue="onChange"
     @focus="onFocus"
     @blur="onBlur"
@@ -422,13 +422,13 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   readonly: { type: Boolean, default: false },
   counter: { type: [Boolean, Number], default: 300 },
-  backgroundColor: { type: String, default: '#FFF' },
+  backgroundColor: { type: String, default: 'bgquaternary' },
   hideDetails: { default: false },
   mask: { type: String, default: 'default' },
   rows: { type: Number, default: 1 },
   autogrow: { type: Boolean, default: false },
   //* Styles
-  color: { type: String, default: '#F68A1A' },
+  color: { type: String, default: 'primary' },
   rounded: { type: [Boolean, String, Number], default: 'md' },
   flat: { type: Boolean, default: true },
   //* Validations

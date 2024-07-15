@@ -1,46 +1,68 @@
 <template>
-  <v-app :theme="theme.name">
-    <div v-if="logged" class="pageClass">
+  <v-app :theme="theme" :style="`background-color: ${currentTheme.bgprimary}`">
+    <div v-if="logged" >
       <LayoutSidebar :user="user" />
 
       <transition name="page" appear>
-        <div class="aj">
-          <slot />
+        <div class="layout-block">
+          <v-breadcrumbs :items="breadcrumbs" color="primary" icon="mdi-home">
+            <template #title="{ item }">
+              <b>{{ item.title }}</b>
+            </template>
+          </v-breadcrumbs>
+
+          <v-divider />
+
+          <div class="layout-content">
+            <slot />
+          </div>
         </div>
       </transition>
     </div>
 
-    <div v-else class="unlogged">
-      <img src="/img/triste.png" />
+    <div v-else class="layout-error">
+      <v-card flat class="pa-6 layout-error-content">
+        <v-icon color="red" size="80">mdi-robot-dead-outline</v-icon>
+  
+        <h2>Não foi possível autenticar o usuário</h2>
+        <h3>Entre em contato com o suporte</h3>
+  
+        <br>
 
-      <h1>{{ message }}</h1>
-      <h1>Por favor, entre em contato com o responsável técnico.</h1>
-
-      <v-btn rounded class="my-2" :loading="loading" @click="reload">
-        <v-icon icon="mdi-reload" start />
-        Tentar novamente
-      </v-btn>
+        <v-alert icon="mdi-alert-outline" color="red" variant="tonal">
+          <span>{{ message }}</span>
+        </v-alert>
+        
+        <br>
+  
+        <v-btn class="my-2" :loading="loading" @click="reload" flat color="primary">
+          <v-icon icon="mdi-reload" start />
+          <b>Tentar novamente</b>
+        </v-btn>
+      </v-card>
     </div>
-
-    <!-- <LazyModalUpdateAvailable v-model:enable="enableModal.available" /> -->
   </v-app>
 </template>
 
 <script setup>
 import { useAuthStore } from '~/store/auth'
+import { useThemeStore } from '~/store/theme';
 
-const { authenticateUser, user } = useAuthStore()
-
-const theme = useTheme()
-
+const route = useRoute()
 const { $toast } = useNuxtApp()
 
-const logged = ref(false)
-const message = ref('')
-const loading = ref(false)
+const { authenticateUser, user } = useAuthStore()
+const { theme, currentTheme } = useThemeStore()
 
-const enableModal = reactive({
-  available: false
+const logged = ref(false);
+const message = ref('Erro não identificado');
+const loading = ref(false);
+
+const breadcrumbs = computed(() => {
+  const paths = route.path.split('/').filter((item) => item !== '').map((item) => capitalize(item));
+
+  if (paths.length === 0) return ['Pagamento']
+  return paths;
 })
 
 const login = async () => {
@@ -69,70 +91,37 @@ const reload = async () => {
   await useElectron().actions.reload()
   loading.value = false
 }
-
-const electron = useElectron()
-
-// const getUpdateAvailable = () => {
-//	electron.actions.updateAvailable((event, newVersion, version) => {
-//		if (newVersion) {
-//			enableModal.available = true;
-//		}
-//	});
-// };
-
-// getUpdateAvailable();
 </script>
 
 <style scoped>
-.aj {
-  margin-left: 60px !important;
-  max-width: calc(100vw - 60px) !important;
+.layout-block {
+  padding-left: 60px;
+  max-width: calc(100vw - 10px);
   z-index: 1;
 }
-.logo-fixo {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  width: 17%;
-  z-index: 0;
+.layout-content {
+  padding: 20px;
+  margin: auto;
 }
-.pageClass {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(240, 240, 240, 1);
-  background-size: cover;
-  background-position: center;
+.layout-content > * {
+  margin: auto;
 }
-.pageClass::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-}
-.unlogged {
-  background-color: #f68a1a;
-}
-.unlogged img {
-  width: 25%;
-  margin-bottom: 10px;
-}
-.unlogged {
+.layout-error {
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
   height: 100%;
 }
-.unlogged h1 {
-  color: white;
-  text-align: center;
-  font-size: x-large;
+.layout-error-content {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
+
 </style>
+
 <style>
 html {
   overflow: hidden !important;

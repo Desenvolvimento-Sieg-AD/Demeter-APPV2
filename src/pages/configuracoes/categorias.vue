@@ -1,6 +1,5 @@
 <template>
     <div>
-        <CustomHeader title="Configuração de Categorias" />
         <LayoutForm>
             <CustomTableSelect
                 ref="categoriasTable"

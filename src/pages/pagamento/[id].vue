@@ -1,7 +1,5 @@
 <template>
   <div>
-    <CustomHeader title="Editar Pagamento"/>
-
     <LayoutForm class="mb-12">
       <v-form ref="formValidate">
         <v-card flat class="card-pagamento">

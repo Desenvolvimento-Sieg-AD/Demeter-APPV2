@@ -1,13 +1,6 @@
 <template>
   <div>
-    <CustomHeader title="Solicitação de Pagamento">
-      <v-btn icon variant="plain" color="primary">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
-    </CustomHeader>
-
-    <v-card flat color="transparent">
-      <LayoutForm max-height="calc(100vh - 175px)">
+      <LayoutForm max-height="calc(100vh - 175px)" style="width: calc(100vw - 500px); min-width: 900px;">
         <v-form ref="formValidate">
           <ModalPagamentoEmpresa v-model:form="form" />
 
@@ -43,7 +36,6 @@
           </v-row>
         </v-form>
       </LayoutForm>
-    </v-card>
 
     <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
       <v-icon>mdi-arrow-left</v-icon>

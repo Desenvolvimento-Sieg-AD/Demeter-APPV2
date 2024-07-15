@@ -1,5 +1,4 @@
 <template>
-  <CustomHeader title="Enviar pagamentos - OMIE" />
   <LayoutForm>
     <v-form ref="form">
       <v-card class="card-box d-flex align-center" flat>
@@ -36,6 +35,7 @@
           <v-card
             v-for="(payment, index) in payments"
             :key="`${payment}-${index}`"
+            color="bgsecondary"
             :class="{
               'card-payment-box': true,
               'approved-box': payment.codigo_lancamento_omie,
@@ -394,19 +394,15 @@ watch(selectedClient, async () => {
 </script>
 <style scoped>
 .card-box {
-  background-color: white;
   border-radius: 6px;
   margin-bottom: 8px;
 }
-
 .row-text {
   margin: 10px;
 }
-
 .row-input {
   margin-left: 10px;
 }
-
 .icon-box {
   display: flex;
   justify-content: end;
@@ -428,7 +424,6 @@ watch(selectedClient, async () => {
 }
 
 .card-payment-box {
-  background-color: #f5f5f5;
   border-radius: 6px;
   margin: 10px;
   padding: 10px;
@@ -446,14 +441,14 @@ watch(selectedClient, async () => {
 }
 
 .approved-box {
-  background-color: #ddffdd;
+  background-color: #ddffdd!important;
 }
 
 .error-box {
-  background-color: #ffdddd;
+  background-color: #ffdddd!important;
 }
 
 .selected-box {
-  background-color: #118c9f60;
+  background-color: #118c9f60!important;
 }
 </style>

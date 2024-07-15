@@ -1,6 +1,5 @@
 <template>
   <div>
-    <CustomHeader :title="title" />
     <LayoutForm>
       <CustomTableSelect
         :columns="columns"

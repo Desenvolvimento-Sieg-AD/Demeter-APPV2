@@ -11,5 +11,5 @@
 		  "vue3-toastify/global",
 		  "@nuxt/types"
 		]
-	  }
+	}
 }

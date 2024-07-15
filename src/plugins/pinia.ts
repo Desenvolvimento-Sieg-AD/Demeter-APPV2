@@ -3,7 +3,7 @@ import { useAuthStore } from "~/store/auth";
 export default defineNuxtPlugin(({ $pinia }) => {
 	return {
 		provide: {
-			store: useAuthStore($pinia),
+			store: useAuthStore($pinia as any),
 		},
 	};
 });

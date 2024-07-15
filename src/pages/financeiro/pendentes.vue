@@ -1,23 +1,29 @@
 <template>
   <div>
-    <CustomHeader title="Financeiro - Pagamentos Provisionados" />
     <LayoutForm>
       <CustomTableSelect
+        ref="tableRef"
         pager
         store-state
         :items="itens"
         choose-columns
-        :page-size="15"
+        selectionCheck
         :loading="loadingTable"
         :columns="colums"
         :actions="actions"
         allowColumnResizing
         allow-column-reordering
-        key-stored="pagamentos-provisionados-table"
-        :allowed-page-sizes="[5, 10, 15, 25]"
-        companiesFilter
-        noDataText="Não há nenhuma solicitação provisionada"
+        key-stored="pagamentos-pendentes-table"
+        :allowed-page-sizes="[5, 10, 15, 25, 30]"
+        :page-size="15"
+        @selectionChanged="handleSelectionChange"
+        noDataText="Não há nenhuma solicitação de pagamento"
+        :paymentsSelecteds="itemsSelects.length >= 1"
         page="financeiro"
+        companiesFilter
+        @editPayment="openEditPayment"
+        @disapprovePayment="openDisapprovePayment"
+        @approvePayment="openApprovePayment"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -135,6 +141,27 @@
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
+
+    <LazyModalConfirmStatus
+      v-model:enable="enableModal.confirm"
+      v-model:justificativa="justificativa"
+      :confirm="confirm"
+      :message="messageConfirmStatus"
+      :item="viewPayment"
+      :actions="actionsModalConfirm"
+    />
+
+    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPage" />
+
+    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPage" />
+
+    <LazyModalConfirmAllStatus
+      v-if="enableModal.allConfirm"
+      v-model:enable="enableModal.allConfirm"
+      v-model:justificativa="justificativa"
+      :message="messageConfirmAllStatus"
+      :actions="modalActionsAprovedAll"
+    />
   </div>
 </template>
 
@@ -142,14 +169,16 @@
 // * IMPORT
 
 import CustomStore from 'devextreme/data/custom_store'
+import { getPagamentoByScope, postStatus, omie } from '@api'
 const { $toast } = useNuxtApp()
-const colums = getColumns('provisionados')
+const colums = getColumns('financeiro')
 const access = useRuntimeConfig()
 const caminho_normal = access.public.PAGAMENTO_PATH
 const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 
 // * DATA
 
+const confirm = ref('exportar')
 const itens = ref([])
 const viewPayment = ref({})
 const itemsSelects = ref([])
@@ -158,6 +187,7 @@ const loadingModal = ref(false)
 const loadingTable = ref(false)
 const clients = ref([])
 const link = ref('')
+const tableRef = ref(null)
 
 const enableModal = reactive({
   link: false,
@@ -170,6 +200,40 @@ const enableModal = reactive({
   exportToClient: false
 })
 
+// * COMPUTED && MODALS ACTIONS
+
+const status = {
+  approve: 3,
+  disapprove: 8,
+  revision: 2
+}
+
+const title = {
+  approve: 'Aprovar',
+  disapprove: 'Reprovar',
+  revision: 'Solicitar revisão'
+}
+
+const openApprovePayment = () => {
+  confirm.value = 'approve'
+  enableModal.allConfirm = true
+}
+
+const openDisapprovePayment = () => {
+  confirm.value = 'disapprove'
+  enableModal.allConfirm = true
+}
+
+const openRevisionPayment = () => {
+  confirm.value = 'revision'
+  enableModal.allConfirm = true
+}
+
+const openEditPayment = () => {
+  viewPayment.value = itemsSelects.value
+  enableModal.allEdit = true
+}
+
 const actions = computed(() => [
   {
     icon: 'mdi-eye',
@@ -180,8 +244,100 @@ const actions = computed(() => [
     },
     active: true,
     type: 'info'
+  },
+  {
+    icon: 'mdi-pencil',
+    tooltip: 'Editar',
+    click: (item) => {
+      viewPayment.value = item
+      enableModal.editCount = true
+    }
+  },
+  {
+    tooltip: 'Revisão',
+    icon: 'mdi-file-document-refresh',
+    click: (item) => {
+      viewPayment.value = item
+      enableModal.confirm = true
+      confirm.value = 'revision'
+    },
+    active: true,
+    disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
+    type: 'warning'
+  },
+  {
+    icon: 'mdi-close',
+    tooltip: 'Reprovar',
+    click: async (item) => {
+      viewPayment.value = item
+      enableModal.confirm = true
+      confirm.value = 'disapprove'
+    },
+    active: true,
+    disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
+    type: 'cancel'
+  },
+  {
+    icon: 'mdi-check',
+    tooltip: 'Aprovar',
+    disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
+    click: (item) => {
+      viewPayment.value = item
+      enableModal.confirm = true
+      confirm.value = 'approve'
+    },
+    active: true,
+    type: 'success'
   }
 ])
+
+const actionsModalConfirm = computed(() => [
+  {
+    icon: 'mdi-close',
+    title: 'Cancelar',
+    type: 'grey',
+    click: () => (enableModal.confirm = false)
+  },
+  {
+    icon: 'mdi-check',
+    title: title[confirm.value],
+    type: 'success',
+    loading: loadingModal.value,
+    click: async () => {
+      const status_id = status[confirm.value]
+      await sendStatus(status_id, [viewPayment.value.id])
+    },
+    width: '200px'
+  }
+])
+
+const modalActionsAprovedAll = computed(() => [
+  {
+    icon: 'mdi-close',
+    title: 'Cancelar',
+    type: 'grey',
+    click: () => (enableModal.allConfirm = false)
+  },
+  {
+    icon: 'mdi-check',
+    title: title[confirm.value],
+    type: 'success',
+    loading: loadingModal.value,
+    click: async () => await validBeforeSend()
+  },
+])
+
+const messageConfirmStatus = computed(() => {
+  if (confirm.value === 'approve') return 'Deseja realmente aprovar essa solicitação de pagamento?'
+  else if (confirm.value === 'revision') return 'Deseja realmente solicitar revisão dessa solicitação de pagamento?'
+  return 'Deseja realmente reprovar essa solicitação de pagamento?'
+})
+
+const messageConfirmAllStatus = computed(() => {
+  if (confirm.value === 'approve') return 'Deseja realmente aprovar todas as solicitações de pagamentos selecionadas?'
+  else if (confirm.value === 'revision') return 'Deseja realmente solicitar revisão todas as solicitações de pagamentos selecionadas?'
+  return 'Deseja realmente reprovar todas as solicitações de pagamentos selecionadas?'
+})
 
 // * METHODS
 
@@ -201,14 +357,48 @@ const classSetor = (item, index) => (smallerIndex(index, item.usuario.setores) ?
 
 const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
 
-const handleSelectionChange = (items) => (itemsSelects.value = items)
-
+const handleSelectionChange = (items) => {
+  itemsSelects.value = items
+}
 const validBeforeSend = async () => {
-  const status_id = confirm.value === 'approve' ? 3 : 8
+
+  const status_id = status[confirm.value]
 
   const lista_id = itemsSelects.value.map((item) => item.id)
 
   await sendStatus(status_id, lista_id)
+}
+
+const sendStatus = async (status, id) => {
+  try {
+    if (status === 8 && !justificativa.value) throw new Error('Justificativa é obrigatória para prosseguir!')
+
+    loadingModal.value = true
+
+    const justificativas = {
+      disapprove: justificativa.value,
+      approve: 'Aprovado pelo Financeiro',
+      revision: justificativa.value
+    }
+
+    const justificativaValue = justificativas[confirm.value]
+
+    const { success, message } = await postStatus({ id, status, justificativa: justificativaValue })
+
+    if (!success) throw new Error(message)
+
+    $toast.success('Status alterado com sucesso')
+    loadingModal.value = false
+    enableModal.confirm = false
+    enableModal.allConfirm = false
+    
+    await tableRef.value.clearFilters()
+    
+    await getPage()
+  } catch (error) {
+    console.error(error)
+    $toast.error('Erro ao alterar o status')
+  }
 }
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
@@ -217,7 +407,7 @@ function formatFilter(filterArray) {
   const formattedFilters = []
 
   for (let i = 0; i < filterArray.length; i++) {
-    if (filterArray[i] === 'or' || filterArray[i] === '=') continue
+    if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue
     if (filterArray[i] === filterArray['filterValue']) continue
 
     const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
@@ -228,7 +418,6 @@ function formatFilter(filterArray) {
 
   return formattedFilters
 }
-
 const getPage = async () => {
   itens.value = new CustomStore({
     key: 'id',
@@ -248,7 +437,7 @@ const getPage = async () => {
       }, {})
 
       try {
-        const { success, message, data } = await useApi(`/pagamento/scope/financeiroProvisionados`, {
+        const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
           query: {
             paging: true,
             limit: mergedObject.take,
@@ -265,10 +454,7 @@ const getPage = async () => {
           item.lote = item.movimentacoes_pagamento.at()?.lote
         })
 
-        return {
-          data: data.data,
-          totalCount: data.count
-        }
+        return { data: data.data, totalCount: data.count }
       } catch (error) {
         console.error(error)
         $toast.error('Erro ao carregar os pagamentos')

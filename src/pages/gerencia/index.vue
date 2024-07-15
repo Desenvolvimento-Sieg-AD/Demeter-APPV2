@@ -1,6 +1,5 @@
 <template>
   <div>
-    <CustomHeader title="Gerência - Aprovação de Pagamentos" />
     <LayoutForm>
       <PaymentsValue :year="year" :month="month" :lastMonth="lastMonth" :today="today" />
 

@@ -1,14 +1,5 @@
 import type { IpcRendererEvent } from 'electron'
 
-interface Windows extends Window {
-  electronAPI: {
-    reload: () => Promise<any>
-    sendToken: (token: string) => Promise<any>
-    updateAvailable: (callback: (event: IpcRendererEvent, version: string) => void) => void
-    getVersion: () => any
-  }
-}
-
 declare var window: Windows
 
 export default function useElectron() {

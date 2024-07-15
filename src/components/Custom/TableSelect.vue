@@ -89,24 +89,24 @@
         </v-btn>
       </template>
       <template #companiesFilter>
-        <v-btn @click="companyFilter('Sieg')" class="dx-button dx-button-mode-contained mr-2" color="#118B9F" :variant="companies.includes('Sieg') ? 'tonal' : 'outlined'">
+        <v-btn @click="companyFilter('Sieg')" class="dx-button dx-button-mode-contained mr-2" color="primary" :variant="companies.includes('Sieg') ? 'tonal' : 'outlined'">
           <v-tooltip activator="parent" location="bottom" text="SIEG APOIO ADMINISTRATIVO LTDA" />
           Sieg
         </v-btn>
-        <v-btn @click="companyFilter('B2G')" class="dx-button dx-button-mode-contained mr-2" color="#6A1748" :variant="companies.includes('B2G') ? 'tonal' : 'outlined'">
+        <v-btn @click="companyFilter('B2G')" class="dx-button dx-button-mode-contained mr-2" color="b2gcolor" :variant="companies.includes('B2G') ? 'tonal' : 'outlined'">
           <v-tooltip activator="parent" location="bottom" text="B2G COMERCIO DE EQUIPAMENTOS LIMITADA" />
           B2G
         </v-btn>
-        <v-btn @click="companyFilter('18Gigas')" class="dx-button dx-button-mode-contained mr-2" color="#191919" :variant="companies.includes('18Gigas') ? 'tonal' : 'outlined'">
+        <v-btn @click="companyFilter('18Gigas')" class="dx-button dx-button-mode-contained mr-2" color="d18gcolor" :variant="companies.includes('18Gigas') ? 'tonal' : 'outlined'">
           <v-tooltip activator="parent" location="bottom" text="18 GIGAS COMERCIO DE EQUIPAMENTOS LTDA" />
           18Gigas
         </v-btn>
 
-        <v-btn @click="companyFilter('Ribeiro')" class="dx-button dx-button-mode-contained mr-2" color="#FF8600" :variant="companies.includes('Ribeiro') ? 'tonal' : 'outlined'">
+        <v-btn @click="companyFilter('Ribeiro')" class="dx-button dx-button-mode-contained mr-2" color="ribracolor" :variant="companies.includes('Ribeiro') ? 'tonal' : 'outlined'">
           <v-tooltip activator="parent" location="bottom" text="RIBEIRO APOIO ADMINISTRATIVO E COMERCIO LTDA" />
           Ribeiro
         </v-btn>
-        <v-btn @click="companyFilter('Kolsen')" class="dx-button dx-button-mode-contained mr-2" color="#9BA681" :variant="companies.includes('Kolsen') ? 'tonal' : 'outlined'">
+        <v-btn @click="companyFilter('Kolsen')" class="dx-button dx-button-mode-contained mr-2" color="kolsencolor" :variant="companies.includes('Kolsen') ? 'tonal' : 'outlined'">
           <v-tooltip activator="parent" location="bottom" text="KOLTUN E ANDERSEN COM. E FAB. DE EQUIP. DE TEC. LTDA." />
           Kolsen
         </v-btn>
@@ -362,7 +362,7 @@ defineExpose({
   },
   clearFilters: () => {
     clearFiltersAndRefreshToolbar()
-  },
+  }
 })
 
 const slotColumns = computed(() => props.columns.filter((el) => el.value != 'actions'))
@@ -624,7 +624,7 @@ watch(
   color: rgba(149, 149, 149, 0.5) !important;
 }
 .dx-datagrid .dx-header-filter {
-  color: #F68A1A;
+  color: #f68a1a;
 }
 .dx-datagrid-content .dx-datagrid-table .dx-row > td,
 .dx-datagrid-content .dx-datagrid-table .dx-row > tr > td {
@@ -644,7 +644,7 @@ watch(
 <style scoped>
 .cff {
   font-size: 14px;
-  color: #F68A1A;
+  color: #f68a1a;
   font-weight: 700;
 }
 .dx-data-row {

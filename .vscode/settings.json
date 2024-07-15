@@ -3,6 +3,10 @@
     "**/.git": true,
     "**/__extensions": true
   },
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
   "scss.lint.unknownAtRules": "ignore",
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "editor.formatOnSave": false
 }

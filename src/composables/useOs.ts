@@ -1,24 +1,10 @@
-interface Windows extends Window {
-  electronAPI: {
-    getUser: () => Promise<any>,
-    openFile: (filePath: string) => Promise<any>,
-    openBase64File: (base64: number[]) => void,
-    copyFilePath: (filePath: string) => Promise<any>,
-    sendLink: (link: string) => Promise<any>,
-  }
-}
-
 declare var window: Windows
 
 export default function useOs() {
 
-  const getUser = async () => {
-    return await window.electronAPI.getUser()
-  }
+  const getUser = async () => await window.electronAPI.getUser()
 
-  const openFile = async (filePath: string) => {
-    return await window.electronAPI.openFile(filePath)
-  }
+  const openFile = async (filePath: string) => await window.electronAPI.openFile(filePath)
 
   const openBase64File = async (pagamento: any, tipo_anexo_id: number) => {
     const { $toast } = useNuxtApp();
@@ -49,13 +35,9 @@ export default function useOs() {
     }
   }
 
-  const copyFilePath = async (filePath: string) => {
-    return await window.electronAPI.copyFilePath(filePath)
-  }
+  const copyFilePath = async (filePath: string) => await window.electronAPI.copyFilePath(filePath)
 
-  const sendLink = async (link: string) => {
-    return await window.electronAPI.sendLink(link)
-  }
+  const sendLink = async (link: string) => await window.electronAPI.sendLink(link)
 
   return { getUser, openFile, openBase64File, copyFilePath, sendLink }
 }

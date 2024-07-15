@@ -1,4 +1,4 @@
-const dark = {
+export const dark = {
   primary: '#118B9F',
   secondary: '#F68A1A',
   danger: '#D9534F',
@@ -14,10 +14,14 @@ const dark = {
   bgprimary: '#1C1C1C',
   bgsecondary: '#333333',
   bgtertiary: '#4F4F4F',
-  bgquaternary: '#666666'
+  bgquaternary: '#666666',
+  b2gcolor: '#6A1748',
+  d18gcolor: '#FFFFFF',
+  ribracolor: '#FF8600',
+  kolsencolor: '#9BA681'
 }
 
-const light = {
+export const light = {
   primary: '#118B9F',
   secondary: '#F68A1A',
   danger: '#D9534F',
@@ -33,7 +37,11 @@ const light = {
   bgprimary: '#EDEDED',
   bgsecondary: '#F2F2F2',
   bgtertiary: '#F7F7F7',
-  bgquaternary: '#FFFFFF'
+  bgquaternary: '#FFFFFF',
+  b2gcolor: '#6A1748',
+  d18gcolor: '#191919',
+  ribracolor: '#FF8600',
+  kolsencolor: '#9BA681'
 }
 
 export default { dark, light }
