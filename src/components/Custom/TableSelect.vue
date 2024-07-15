@@ -429,6 +429,7 @@ const onCellPrepared = (e) => {
   if (e.row?.data?.situacao == 'enviado') {
     e.cellElement.style.backgroundColor = 'lightgray'
   }
+  companySelected()
 }
 
 const getValue = (data) => data.text
