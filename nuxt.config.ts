@@ -51,6 +51,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiURL: process.env.NUXT_API_URL,
+      LOG_PATH: process.env.NUXT_LOG_PATH,
       PAGAMENTO_PATH: process.env.NUXT_PAGAMENTO_PATH,
       PAGAMENTO_PRIVADO_PATH: process.env.NUXT_PAGAMENTO_PRIVADO_PATH
     }

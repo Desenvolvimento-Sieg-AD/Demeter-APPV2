@@ -19,17 +19,18 @@
                 enableAddButton
                 @add="enableModal.create = true"
                 allow-column-reordering
+                height="calc(100vh - 170px)"
             >
             <template #[`item-grupo.nome`]="{data: { data: item } } ">
                 <v-chip :text="item.grupo.nome" color="primary" variant="tonal"/>
             </template>
 
             <template #item-nacional="{data: { data: item } } ">
-                <v-chip :text="item.nacional ? 'Sim' : 'Não'" :color="item.nacional ? 'success' : 'red'" variant="flat"/>
+                <v-chip :text="item.nacional ? 'Sim' : 'Não'" :color="item.nacional ? 'success' : 'red'" variant="tonal"/>
             </template>
 
             <template #item-internacional="{data: { data: item } } ">
-                <v-chip :text="item.internacional ? 'Sim' : 'Não'" :color="item.internacional ? 'success' : 'red'" variant="flat"/>
+                <v-chip :text="item.internacional ? 'Sim' : 'Não'" :color="item.internacional ? 'success' : 'red'" variant="tonal"/>
             </template>
 
             <template #item-descricao="{data: { data: item } } ">
@@ -37,11 +38,11 @@
             </template>
 
             <template #item-ativo="{data: { data: item } } ">
-                <v-chip :text="item.ativo ? 'Ativo' : 'Inativo'" :color="item.ativo ? 'success' : 'red'" variant="flat"/>
+                <v-chip :text="item.ativo ? 'Ativo' : 'Inativo'" :color="item.ativo ? 'success' : 'red'" variant="tonal"/>
             </template>
 
             <template #item-requer_projeto="{data: { data: item } } ">
-                <v-chip :text="item.requer_projeto ? 'Sim' : 'Não'" :color="item.requer_projeto ? 'success' : 'red'" variant="flat"/>
+                <v-chip :text="item.requer_projeto ? 'Sim' : 'Não'" :color="item.requer_projeto ? 'success' : 'red'" variant="tonal"/>
             </template>
 
             </CustomTableSelect>

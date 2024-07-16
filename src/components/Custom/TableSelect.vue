@@ -391,14 +391,14 @@ const onFocusedRowChanging = (e) => {
 }
 
 const colors = {
-  confirm: '#F68A1A',
+  confirm: '#118B9F',
   cancel: '#F44336',
   info: 'info',
   success: 'success',
   excel: '#008000'
 }
 
-const getActionColor = (type) => colors[type] || '#F68A1A'
+const getActionColor = (type) => colors[type] || '#118B9F'
 
 const getActionDisabled = (action, item) => (action.disabled ? action.disabled(item.data, item.rowIndex, props.items) : false)
 
@@ -625,7 +625,7 @@ watch(
   color: rgba(149, 149, 149, 0.5) !important;
 }
 .dx-datagrid .dx-header-filter {
-  color: #f68a1a;
+  color: #118B9F;
 }
 .dx-datagrid-content .dx-datagrid-table .dx-row > td,
 .dx-datagrid-content .dx-datagrid-table .dx-row > tr > td {
@@ -645,7 +645,7 @@ watch(
 <style scoped>
 .cff {
   font-size: 14px;
-  color: #f68a1a;
+  color: #118B9F;
   font-weight: 700;
 }
 .dx-data-row {

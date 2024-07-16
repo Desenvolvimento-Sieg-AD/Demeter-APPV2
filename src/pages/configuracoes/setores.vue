@@ -14,6 +14,7 @@
         key-stored="setores-table"
         allowColumnResizing
         allow-column-reordering
+        height="calc(100vh - 170px)"
       >
         <template #[`item-usuarios.length`]="{ data: { data: item } }">
           {{ textUser(item.usuarios) }}
@@ -21,7 +22,7 @@
           <!-- <v-tooltip v-for="(usuario, index) in item.usuarios" :key="index" :text="textUser(item.usuarios)" activator="parent" location="top" /> -->
         </template>
         <template #item-categorias="{ data: { data: item } }">
-          <v-chip :text="categoriasLength(item.grupo_categoria)" color="primary" variant="flat" />
+          <v-chip :text="categoriasLength(item.grupo_categoria)" color="primary" variant="tonal" />
         </template>
       </CustomTableSelect>
     </LayoutForm>
@@ -92,4 +93,3 @@ const textUser = (usuarios) => usuarios.map((usuario) => usuario.sigla).join(', 
 
 await getSetores()
 </script>
-<style scoped></style>

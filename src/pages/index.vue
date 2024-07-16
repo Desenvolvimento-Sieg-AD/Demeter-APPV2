@@ -138,23 +138,17 @@
 <script setup>
 //* IMPORTS
 import CustomStore from 'devextreme/data/custom_store'
-import { getPagamentoByScope, postStatus } from '@api'
+import { postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const router = useRouter()
-const access = useRuntimeConfig()
 const columns = getColumns('usuario')
 
 //* DATA
 
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
-
-const title = ref('Pagamentos')
 const loading = ref(false)
 const pagamento = ref({})
 const pagamentos = ref([])
 const tipo_anexo_id = ref(null)
-const loadingTable = ref(false)
 const justificativa = ref(null)
 const customRef = ref(null)
 
@@ -245,11 +239,6 @@ const colorDoc = (anexos) => {
   const docs = anexos.filter((anexo) => anexo.tipo_anexo_id === 4)
   if (docs.length > 1) return 'purple'
   return 'success'
-}
-
-const openDoc = (anexos, tipo_anexo, privado) => {
-  const filterDoc = anexos.filter((anexo) => anexo.tipo_anexo_id === tipo_anexo)
-  if (filterDoc && filterDoc.length !== 0) return openFile(filterDoc, tipo_anexo, privado)
 }
 
 const openFile = async (pagamento, tipo_anexo_id) => {
@@ -355,7 +344,8 @@ const getPage = async () => {
         })
 
         return { data: data.data ?? [], totalCount: data.count ?? 0 }
-      } catch (error) {
+      } 
+      catch (error) {
         console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
         await customRef.value.refresh()

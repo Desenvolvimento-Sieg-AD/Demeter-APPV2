@@ -65,19 +65,15 @@ const route = useRoute()
 const router = useRouter()
 const form = ref(initFormState())
 
-const access = useRuntimeConfig()
-const path = access.public.PAGAMENTO_PATH
-
 //* DATA
 
-const loading = ref(false)
 const priceNow = ref(null)
 const paymentsType = ref([])
 const formValidate = ref(null)
 
 // * COMPUTEDS
 
-const currentRoute = computed(() => route.query.edit === 'true' ? `/` : {path: '/financeiro/aprovadas', query: { client_id: route.query.client_id }})
+const currentRoute = computed(() => route.query.edit === 'true' ? `/` : { path: '/financeiro/aprovadas', query: { client_id: route.query.client_id }})
 
 const sendRoute = () => router.push(currentRoute.value) 
 
@@ -87,10 +83,6 @@ const documentRequired = computed(() => {
   const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
   return type?.requer_documento
 })
-
-const isExpired = computed(() => dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')))
-
-const validDateToCard = computed(() => isExpired.value && form.value.tipo_id !== 5 && form.value.tipo_id !== 6)
 
 const actionsForm = [
   {
@@ -158,7 +150,8 @@ const updatePayment = async (id, data) => {
 
     setTimeout(() => router.push(currentRoute.value), 750)
 
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao atualizar pagamento', error)
     $toast.error('Erro ao atualizar pagamento')
   }
@@ -173,7 +166,8 @@ const definePaymentImportant = async () => {
     const priorizados = pagamentos.filter((p) => p.nome === 'PIX' || p.nome === 'Boleto')
     const restantes = pagamentos.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto').sort((a, b) => a.nome.localeCompare(b.nome))
     paymentsType.value = [...priorizados, ...restantes]
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar tipos de pagamento', error)
     $toast.error('Erro ao buscar tipos de pagamento')
   }
@@ -183,8 +177,8 @@ await definePaymentImportant()
 
 function createFileFromAnexo(anexo) {
   if (!anexo) return { file: null, folder: null }
-  const folder = `${path}${anexo.caminho}`
-  const file = new File([folder], anexo.nome, { type: anexo.tipo_arquivo.mime })
+
+  const file = new File([anexo.caminho], anexo.nome, { type: anexo.tipo_arquivo.mime })
   return { file, folder }
 }
 
@@ -240,7 +234,8 @@ const getPagamento = async (id) => {
     if (!success) throw new Error(message)
 
     formatPaymentData(data)
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar pagamento:', error)
     $toast.error('Erro ao buscar pagamento')
   }
@@ -311,7 +306,8 @@ const getPriceDollar = async () => {
     priceNow.value = price
 
     form.value.valor_total = price
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar valor do dolar')
   }
@@ -325,7 +321,8 @@ watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
     if (nv) {
       paymentsType.value = paymentsType.value.filter((type) => type.internacional)
       await getPriceDollar()
-    } else await definePaymentImportant()
+    } 
+    else await definePaymentImportant()
   },
   { immediate: true }
 )

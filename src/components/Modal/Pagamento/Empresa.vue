@@ -1,21 +1,22 @@
 <template>
-  <CustomText title="Empresa" class="ml-3" size="18" color="secondary" :bold="true" />
+  <LayoutTitle title="Empresa" />
+
   <v-row class="pa-3" dense>
-    <v-col cols="3">
+    <v-col cols="12" sm="6" md="2">
       <CustomInput
         required
         type="select"
         hide-details="auto"
         itemValue="id"
-        itemTitle="nome"
+        itemTitle="apelido"
         :items="empresas"
-        label="Empresa pagadora"
+        label="Empresa"
         v-model="formValue.empresa_id"
         append-inner-icon="mdi-domain"
       />
     </v-col>
 
-    <v-col cols="3">
+    <v-col cols="12" sm="6" md="3">
       <CustomInput
         required
         type="autocomplete"
@@ -24,14 +25,14 @@
         itemTitle="nome"
         :itemProps="itemProps"
         :items="setores"
-        label="Seu setor"
+        label="Setor"
         v-model="formValue.setor_solicitante_id"
         append-inner-icon="mdi-domain"
         :disabled="setores.length <= 1 || !formValue.empresa_id"
       />
     </v-col>
 
-    <v-col cols="3">
+    <v-col cols="12" sm="6" md="3">
       <CustomInput
         required
         hide-details="auto"
@@ -45,7 +46,7 @@
       />
     </v-col>
 
-    <v-col cols="3">
+    <v-col cols="12" sm="6" md="4">
       <CustomInput
         ref="projetoRef"
         hide-details="auto"
@@ -173,12 +174,12 @@ const notExistProject = async () => {
     const project = projetos.value.find((project) => project.nome === formValue.value.projeto_id)
     if (project) {
       formValue.value.projeto_id = project.id
-    }
-    else {
+    } else {
       enableModal.confirm = true
     }
+  } else if (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id))) {
+    enableModal.confirm = true
   }
-  else if (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id))) { enableModal.confirm = true }
 }
 
 const createProject = async () => {

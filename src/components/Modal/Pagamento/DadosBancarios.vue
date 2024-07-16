@@ -1,7 +1,50 @@
 <template>
-  <CustomText title="Pagamento" class="ml-3" size="18" color="secondary" :bold="true" />
+  <LayoutTitle title="Pagamento">
+    <div>
+      <CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="primary" />
+      <CustomInput type="checkbox" v-if="userIsAllowed" label="Privado" v-model="formValue.privado" hide-details color="primary" />
+    </div>
+  </LayoutTitle>
+
   <v-row class="pa-3" dense>
-    <v-col cols="4">
+    <v-col v-if="isInternacional" cols="12" sm="6" md="2">
+      <CustomInput type="text" mask="money" currency="USD" required label="Valor em Dólar" v-model="formValue.valor_total_dolar" hide-details="auto" />
+    </v-col>
+
+    <v-col cols="12" sm="6" md="2">
+      <CustomInput
+        type="text"
+        mask="money"
+        currency="BRL"
+        required
+        :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'"
+        v-model="formValue.valor_total"
+        hide-details="auto"
+      />
+    </v-col>
+
+    <v-col cols="12" sm="6" md="2">
+      <CustomInput type="date" required label="Data de vencimento" v-model="formValue.data_vencimento" :messages="messagesDate()" :min="minDate" hide-details="auto" />
+    </v-col>
+
+    <v-col cols="12" sm="6" :md="!isInternacional ? '8' : '6'">
+      <CustomInput type="text" label="Observações" v-model="formValue.dados_complementares" hide-details />
+    </v-col>
+  </v-row>
+
+  <v-row v-if="formValue.urgente" class="pa-3" dense style="margin-top: -22px;">
+    <v-col cols="12" sm="12" md="12">
+      <CustomInput 
+        :required="formValue.urgente" 
+        label="Justificativa da urgência" 
+        v-model="formValue.justificativa_urgente" 
+        hide-details="auto"
+      />
+    </v-col>
+  </v-row>
+
+  <v-row class="pa-3" dense style="margin-top: -22px;">
+    <v-col cols="12" sm="6" md="3">
       <CustomInput
         append-inner-icon="mdi-cash-clock"
         type="select"
@@ -16,32 +59,8 @@
       />
     </v-col>
 
-    <v-col cols="3">
-      <CustomInput type="date" required label="Data de vencimento" v-model="formValue.data_vencimento" :messages="messagesDate()" :min="minDate" hide-details="auto" />
-    </v-col>
-
-    <v-col v-if="isInternacional" cols="2">
-      <CustomInput type="text" mask="money" currency="USD" required label="Valor em Dólar" v-model="formValue.valor_total_dolar" hide-details="auto" />
-    </v-col>
-
-    <v-col cols="2">
-      <CustomInput
-        type="text"
-        mask="money"
-        currency="BRL"
-        required
-        :label="isInternacional ? 'Valor Estimado ' : 'Valor Total'"
-        v-model="formValue.valor_total"
-        hide-details="auto"
-      />
-    </v-col>
-
-    <v-col cols="1">
-      <CustomInput type="checkbox" label="Urgente" v-model="formValue.urgente" hide-details color="primary" />
-    </v-col>
-
-    <v-col cols="1" v-if="userIsAllowed">
-      <CustomInput type="checkbox" label="Privado" v-model="formValue.privado" hide-details color="primary" />
+    <v-col v-if="form.tipo_id === 5 || form.tipo_id === 6" cols="3">
+      <CustomInput type="autocomplete" label="Cartão" hide-details="auto" v-model="formValue.conta_id" required :items="cards" itemTitle="descricao" itemValue="id" />
     </v-col>
 
     <v-col v-if="formValue.tipo_id === 1" cols="3">
@@ -58,7 +77,7 @@
       />
     </v-col>
 
-    <v-col v-if="form.tipo_id === 1 && formValue.tipo_chave_pix_id" cols="4">
+    <v-col v-if="form.tipo_id === 1 && formValue.tipo_chave_pix_id" cols="6">
       <CustomInput
         v-if="formValue.tipo_chave_pix_id !== 4"
         :disabled="!tipos.descricao && !formValue.tipo_chave_pix_id"
@@ -86,26 +105,6 @@
       />
     </v-col>
 
-    <v-col v-if="form.tipo_id === 2" cols="3">
-      <CustomInput type="text" mask="number" hide-details="auto" label="Banco" v-model="formValue.dados_bancarios.banco" required :max="3" />
-    </v-col>
-
-    <v-col v-if="form.tipo_id === 2" cols="3">
-      <CustomInput type="text" mask="number" hide-details="auto" label="Agência" v-model="formValue.dados_bancarios.agencia" required :max="4" />
-    </v-col>
-
-    <v-col v-if="form.tipo_id === 2" cols="3">
-      <CustomInput type="text" mask="number" hide-details="auto" label="Conta" v-model="formValue.dados_bancarios.conta" required />
-    </v-col>
-
-    <v-col v-if="form.tipo_id === 2" cols="3">
-      <CustomInput type="text" mask="number" hide-details="auto" label="Dígito" v-model="formValue.dados_bancarios.digito" required :max="1" />
-    </v-col>
-
-    <v-col v-if="form.tipo_id === 5 || form.tipo_id === 6" cols="3">
-      <CustomInput type="autocomplete" label="Cartão" hide-details="auto" v-model="formValue.conta_id" required :items="cards" itemTitle="descricao" itemValue="id" />
-    </v-col>
-
     <v-col v-if="form.tipo_id && !tiposNormalize.includes(form.tipo_id)" cols="9">
       <CustomInput
         :disabled="!tipos.descricao"
@@ -120,13 +119,25 @@
         hide-details="auto"
       />
     </v-col>
-  </v-row>
 
-  <v-row v-if="formValue.urgente" class="pa-3 mt-n11">
-    <v-col>
-      <CustomInput type="textarea" :required="formValue.urgente" :rows="1" label="Justificativa da urgência" v-model="formValue.justificativa_urgente" :counter="600" />
+    <v-col v-if="form.tipo_id === 2" cols="2">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Banco" v-model="formValue.dados_bancarios.banco" required :max="3" />
+    </v-col>
+
+    <v-col v-if="form.tipo_id === 2" cols="2">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Agência" v-model="formValue.dados_bancarios.agencia" required :max="4" />
+    </v-col>
+
+    <v-col v-if="form.tipo_id === 2" cols="2">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Conta" v-model="formValue.dados_bancarios.conta" required />
+    </v-col>
+
+    <v-col v-if="form.tipo_id === 2" cols="1">
+      <CustomInput type="text" mask="number" hide-details="auto" label="Dígito" v-model="formValue.dados_bancarios.digito" required :max="1" />
     </v-col>
   </v-row>
+
+  
 </template>
 <script setup>
 import { useAuthStore } from '~/store/auth'
@@ -157,7 +168,7 @@ const chavesPix = ref([])
 
 const emailRules = [(v) => /.+@.+\..+/.test(v) || 'E-mail inválido']
 
-const tiposNormalize = [2, 5, 6]
+const tiposNormalize = [1, 2, 5, 6]
 
 const isExpired = computed(() => dayjs(formValue.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')))
 

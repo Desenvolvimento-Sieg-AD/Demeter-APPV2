@@ -6,7 +6,7 @@
       <v-col v-else-if="pagamento">
         <v-row align="center" class="mb-2">
           <v-col cols="5" class="d-flex align-center justify-start pb-0">
-            <h3 style="color: #F68A1A">Dados do Pagamento</h3>
+            <h3 style="color: #118B9F">Dados do Pagamento</h3>
           </v-col>
           <v-col cols="7" class="d-flex align-center justify-end pb-0 ga-2">
             <v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
@@ -175,10 +175,9 @@
 <script setup>
 //* IMPORTS
 
-import { getPagamentoById, updatePagamento } from '@api/pagamento'
+import { getPagamentoById } from '@api/pagamento'
 const { $toast } = useNuxtApp()
 const dayjs = useDayjs()
-const access = useRuntimeConfig()
 
 //* PROPS
 
@@ -194,8 +193,6 @@ const emit = defineEmits(['update:enable', 'getPagamento'])
 
 //* DATA
 
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const pagamento = ref(null)
 const loading = ref(false)
 const urgente = ref(null)
@@ -296,36 +293,18 @@ const getPagamento = async () => {
     numero_nf.value = pagamento.value.numero_nf ?? 'Não informado'
 
     loading.value = false
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar pagamento:', error)
     $toast.error('Erro ao buscar pagamento')
   }
 }
 
-const saveUpdatePagamento = async () => {
-  try {
-    const { success, message } = await updatePagamento(pagamento.value.id, pagamento.value)
-
-    if (!success) throw new Error(message)
-
-    $toast.success('Pagamento atualizado com sucesso')
-
-    enableValue.value = false
-
-    emit('getPagamento')
-  } catch (error) {
-    console.error('Erro ao atualizar pagamento:', error)
-    $toast.error('Erro ao atualizar pagamento')
-  }
-}
-
 const openFile = async (path, privado) => {
   try {
-
-    const caminho = privado ? caminho_privado : caminho_normal
-    await useOs().openFile(`${caminho}/${path}`)
-
-  } catch (error) {
+    await useOs().openFile(path)
+  } 
+  catch (error) {
     console.error('Erro ao abrir arquivo:', error)
     $toast.error('Não foi possível abrir o arquivo')
   }
@@ -334,23 +313,13 @@ const openFile = async (path, privado) => {
 const copyFilePath = async (anexo, privado) => {
   try {
 
-    const caminho = privado ? caminho_privado : caminho_normal
-    await useOs().copyFilePath(`${caminho}/${anexo.caminho}`)
+    await useOs().copyFilePath(anexo.caminho)
 
     $toast.success('Caminho do arquivo copiado')
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao copiar caminho do arquivo:', error)
     $toast.error('Não foi possível copiar o caminho do arquivo')
-  }
-}
-
-const copyData = async (data) => {
-  try {
-    await useOs().copyFilePath(pagamento.value.chave_pix)
-    $toast.success('Dados de pagamento copiado')
-  } catch (error) {
-    console.log('Erro ao copiar dados de pagamento:', error)
-    $toast.error('Não foi possível copiar os dados de pagamento')
   }
 }
 

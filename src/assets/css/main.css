@@ -92,3 +92,8 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
 .v-input {
     min-height: 44px !important;
 } */
+
+.pagamento-title {
+    font-size: 18px;
+    font-weight: 600;
+}

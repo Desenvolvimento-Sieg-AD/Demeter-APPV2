@@ -24,6 +24,7 @@
         @editPayment="openEditPayment"
         @disapprovePayment="openDisapprovePayment"
         @approvePayment="openApprovePayment"
+        height="calc(100vh - 170px)"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -169,12 +170,9 @@
 // * IMPORT
 
 import CustomStore from 'devextreme/data/custom_store'
-import { getPagamentoByScope, postStatus, omie } from '@api'
+import { postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const colums = getColumns('financeiro')
-const access = useRuntimeConfig()
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 
 // * DATA
 
@@ -185,8 +183,6 @@ const itemsSelects = ref([])
 const justificativa = ref(null)
 const loadingModal = ref(false)
 const loadingTable = ref(false)
-const clients = ref([])
-const link = ref('')
 const tableRef = ref(null)
 
 const enableModal = reactive({
@@ -418,6 +414,7 @@ function formatFilter(filterArray) {
 
   return formattedFilters
 }
+
 const getPage = async () => {
   itens.value = new CustomStore({
     key: 'id',

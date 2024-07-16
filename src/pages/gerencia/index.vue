@@ -6,7 +6,7 @@
       <v-divider class="my-2" />
       <CustomTableSelect
         ref="tableRef"
-        height="calc(100vh - 240px)"
+        height="calc(100vh - 220px)"
         :columns="colums"
         :items="itens"
         :actions="actions"
@@ -144,11 +144,7 @@ import CustomStore from 'devextreme/data/custom_store'
 import { getPagamentoByScope, postStatus } from '@api'
 const paymentGerencia = await getPagamentoByScope('gerencia')
 const { $toast } = useNuxtApp()
-const access = useRuntimeConfig()
 const colums = getColumns('gerencia')
-
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 
 const enableModal = reactive({
   confirm: false,
@@ -345,29 +341,6 @@ const sendStatus = async (status, id) => {
   }
 }
 
-const approvePayment = async (ids) => {
-  if (ids.length === 0) {
-    loadingModal.value = false
-    return $toast.error('Selecione ao menos um pagamento')
-  }
-
-  try {
-    const { success, message } = await postStatus({ id: ids, status: 3, justificativa: 'Aprovado', lote: ids.length > 1 })
-
-    if (!success) throw new Error(message)
-
-    loadingModal.value = false
-    enableModal.confirm = false
-    enableModal.allConfirm = false
-    $toast.success('Pagamento aprovado com sucesso')
-    itens.value = paymentGerencia.data
-
-  } catch (error) {
-    console.error(error)
-    $toast.error('Erro ao aprovar pagamento')
-  }
-}
-
 const valiDisapprovePayment = () => {
   if (idsSelect.value.length === 0) {
     loadingModal.value = false
@@ -381,34 +354,6 @@ const valiDisapprovePayment = () => {
   if (!ambos.value && (!justificativa.clientes || !justificativa.financeiro)) {
     loadingModal.value = false
     return $toast.error('Informe a justificativa')
-  }
-}
-
-const disapprovePayment = async (ids) => {
-  valiDisapprovePayment()
-
-  try {
-    const payload = {
-      id: ids,
-      status: 4,
-      justificativa: ambos.value ? justificativa.ambos : null,
-      justificativaCliente: ambos.value ? null : justificativa.clientes,
-      justificativaFinanceiro: ambos.value ? null : justificativa.financeiro,
-      ambos: ambos.value,
-      lote: ids.length > 1
-    }
-
-    const { success, message } = await postStatus(payload)
-    if (!success) throw new Error(message)
-
-    enableModal.reprove = false
-    enableModal.allConfirm = false
-    loadingModal.value = false
-    $toast.success('Pagamento recusado com sucesso')
-    itens.value = paymentGerencia.data
-  } catch (error) {
-    console.error(error)
-    $toast.error('Erro ao reprovar pagamento')
   }
 }
 
@@ -429,6 +374,7 @@ function formatFilter(filterArray) {
 
   return formattedFilters
 }
+
 const getPage = async () => {
   itens.value = new CustomStore({
     key: 'id',
@@ -469,7 +415,8 @@ const getPage = async () => {
           data: data.data,
           totalCount: data.count
         }
-      } catch (error) {
+      } 
+      catch (error) {
         console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
       }

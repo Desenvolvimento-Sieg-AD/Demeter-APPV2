@@ -4,6 +4,7 @@
       <PaymentsValue :year="valueYear" :month="valueActualMonth" :lastMonth="valueLastMonth" :today="valueToday" />
 
       <v-divider class="my-2" />
+      
       <CustomTableSelect
         :columns="colums"
         :items="itens"
@@ -21,7 +22,7 @@
         :page-size="15"
         companiesFilter
         pager
-        height="calc(100vh - 240px)"
+        height="calc(100vh - 220px)"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -136,13 +137,8 @@
 
 <script setup>
 import CustomStore from 'devextreme/data/custom_store'
-import { getPagamentoByScope } from '@api'
-
 const { $toast } = useNuxtApp()
 
-const access = useRuntimeConfig()
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const colums = getColumns('historico')
 const itens = ref([])
 const enableModal = ref(false)
@@ -156,7 +152,6 @@ const valueToday = ref(0)
 const openFile = async (pagamento, tipo_anexo_id) => {
   await useOs().openBase64File(pagamento, tipo_anexo_id)
 }
-
 
 const actions = computed(() => [
   {
@@ -201,6 +196,7 @@ function formatFilter(filterArray) {
 
   return formattedFilters
 }
+
 const getPage = async () => {
   itens.value = new CustomStore({
     key: 'id',
@@ -248,7 +244,8 @@ const getPage = async () => {
         })
 
         return { data: data.data, totalCount: data.count }
-      } catch (error) {
+      } 
+      catch (error) {
         console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
       }

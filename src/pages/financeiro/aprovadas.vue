@@ -1,37 +1,36 @@
 <template>
   <LayoutForm>
     <v-form ref="form">
-      <v-card class="card-box d-flex align-center" flat>
-        <v-col cols="4">
-          <CustomText title="Cliente" color="#118B9F" size="20" :bold="true" />
-          <CustomInput
-            label="Selecione o cliente"
-            type="autocomplete"
-            v-model="selectedClient"
-            :items="clients"
-            itemValue="id"
-            noDataText="Nenhum cliente com pagamentos aprovados"
-            itemTitle="apelido"
-            class="mt-4"
-            hide-details="auto"
-          />
-        </v-col>
-      </v-card>
+      <div class="d-flex" style="flex-direction: column; justify-content: center; align-items: start">
+        <LayoutTitle title="Cliente" />
+
+        <CustomInput
+          label="Selecione o cliente"
+          type="autocomplete"
+          v-model="selectedClient"
+          :items="clients"
+          itemValue="id"
+          noDataText="Nenhum cliente com pagamentos aprovados"
+          itemTitle="apelido"
+          hide-details="auto"
+          class="px-3 pb-3 pt-1"
+          style="width: 400px"
+        />
+      </div>
 
       <v-divider />
 
       <LayoutLoading v-if="loadingPayments" />
 
-      <v-card class="card-box" flat v-else-if="showPayments">
-        <v-row no-gutters class="row-text" justify="space-between">
-          <CustomText title="Pagamentos" color="#118B9F" size="20" :bold="true" />
+      <div v-else-if="showPayments">
+        <LayoutTitle title="Pagamentos">
           <div>
             <CustomText class="mr-5" v-if="countPayments > 0" :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
             <v-chip color="#F68A1A" text="Pagamentos aprovados pela gerência"></v-chip>
           </div>
-        </v-row>
+        </LayoutTitle>
 
-        <v-card height="calc(100vh - 345px)" style="overflow-y: auto">
+        <v-card height="calc(100vh - 345px)" flat style="overflow-y: auto">
           <v-card
             v-for="(payment, index) in payments"
             :key="`${payment}-${index}`"
@@ -46,9 +45,9 @@
             @click="selectPayment(payment.id)"
             :disabled="payment.codigo_lancamento_omie"
           >
-            <v-row justify="space-between">
+            <v-row justify="space-between" dense>
               <v-col cols="10">
-                <v-row>
+                <v-row dense>
                   <v-col cols="5">
                     <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" color="primary" disabled hide-details />
                   </v-col>
@@ -61,19 +60,38 @@
                     <CustomInput label="Vencimento" v-model="payment.data_vencimento" color="primary" disabled hide-details />
                   </v-col>
 
-                  <v-col cols="2">
-                    <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="primary" disabled hide-details />
+                  <v-col cols="auto" >
+                    <v-chip color="blue" text="Internacional" v-if="!payment.internacional" />
+                    <v-chip color="secondary" text="Urgente" v-if="!payment.urgente" />
                   </v-col>
 
-                  <v-col cols="5" v-if="payment.projeto">
+                  <v-col cols="3">
+                    <CustomInput label="Categoria" v-model="payment.categoria.nome" color="primary" disabled hide-details />
+                  </v-col>
+
+                  <v-col cols="4" v-if="payment.projeto">
                     <CustomInput label="Projeto" v-model="payment.projeto.nome" color="primary" disabled hide-details v-if="payment.projeto" />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Método" v-model="payment.tipo_pagamento.nome" color="primary" disabled hide-details />
+                    <CustomInput label="Tipo" v-model="payment.tipo_pagamento.nome" color="primary" disabled hide-details />
                   </v-col>
 
-                  <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
+                  <v-col cols="2">
+                    <CustomInput label="Solicitante" v-model="payment.usuario.nome" color="primary" disabled hide-details />
+                  </v-col>
+
+                  
+
+                  <!-- <v-col cols="2">
+                    <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="primary" disabled hide-details />
+                  </v-col> -->
+
+                  
+
+                  
+
+                  <!-- <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
                     <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="primary" disabled hide-details />
                   </v-col>
 
@@ -99,7 +117,7 @@
 
                   <v-col cols="2" v-if="isCartao(payment.tipo_pagamento.nome) && payment.conta_empresa">
                     <CustomInput label="Número do Cartão" v-model="payment.conta_empresa.descricao" color="primary" disabled hide-details />
-                  </v-col>
+                  </v-col> -->
                 </v-row>
               </v-col>
 
@@ -148,7 +166,7 @@
             </v-row>
           </v-card>
         </v-card>
-      </v-card>
+      </div>
 
       <v-row no-gutters align="center" justify="center" class="my-10" v-else-if="notExistPayments">
         <CustomText title="Não existe pagamentos nesse cliente" color="primary" size="20" :bold="true" class="text-center" />
@@ -393,10 +411,7 @@ watch(selectedClient, async () => {
 })
 </script>
 <style scoped>
-.card-box {
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
+
 .row-text {
   margin: 10px;
 }
@@ -425,8 +440,7 @@ watch(selectedClient, async () => {
 
 .card-payment-box {
   border-radius: 6px;
-  margin: 10px;
-  padding: 10px;
+  padding: 14px 14px 7px;
 }
 
 .btn-send {
