@@ -275,7 +275,7 @@ const getPagamento = async () => {
 
     pagamento.value = data
 
-    dados_bancarios.value = JSON.parse(pagamento?.value.dados_bancarios)
+    dados_bancarios.value = pagamento?.value.dados_bancarios
 
     dados_conta.value = `${dados_bancarios?.value?.conta} - ${dados_bancarios?.value?.digito}`
 
@@ -290,7 +290,6 @@ const getPagamento = async () => {
     loading.value = false
   } 
   catch (error) {
-    console.error('Erro ao buscar pagamento:', error)
     $toast.error('Erro ao buscar pagamento')
   }
 }

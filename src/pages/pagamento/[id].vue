@@ -49,9 +49,8 @@
 <script setup>
 // * IMPORTS
 
-import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
+import { getPagamentoTipo, getOnePayment, updatePagamento } from '@api'
 import { postStatus } from '~/api/pagamento'
-import { set } from '~~/node_modules/nuxt/dist/app/compat/capi'
 
 import { useAuthStore } from '../../store/auth'
 
@@ -176,29 +175,31 @@ const definePaymentImportant = async () => {
 await definePaymentImportant()
 
 function createFileFromAnexo(anexo) {
-  if (!anexo) return { file: null, folder: null }
+  if (!anexo) return null
 
-  const file = new File([anexo.caminho], anexo.nome, { type: anexo.tipo_arquivo.mime })
-  return { file, folder }
+  const base64String = String.fromCharCode(...anexo.base64.data);
+  const file = new File([base64String], anexo.nome, { type: anexo.tipo_arquivo.mime })
+
+  return file
 }
 
 function formatPaymentData(data) {
   const fileDOC = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 4)
   const fileNF = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 3)
 
-  const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC)
-  const { file: nf, folder: pathNF } = createFileFromAnexo(fileNF)
+  const doc = createFileFromAnexo(fileDOC)
+  const nf = createFileFromAnexo(fileNF)
 
-  const dados_bancarios = data.dados_bancarios ? JSON.parse(data.dados_bancarios) : {}
+  const dados_bancarios = data.dados_bancarios
 
   dados_bancarios.outhers
 
   form.value = {
     nf: nf ? [nf] : null,
     doc: doc ? [doc] : null,
-    pathNF,
+    pathNF: nf.path,
     ...data,
-    pathDoc,
+    pathDoc: doc.path,
     fornecedor: {
       id: data.fornecedor_id,
       nome: data.fornecedor.razao_social,
