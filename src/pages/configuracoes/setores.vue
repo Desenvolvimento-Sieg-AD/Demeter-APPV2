@@ -84,10 +84,13 @@ const getSetores = async () => {
   }
 }
 
-const categoriasLength = (grupos) =>
-  grupos.reduce((acc, grupo) => {
+const categoriasLength = (grupos) => {
+  const total = grupos.reduce((acc, grupo) => {
     return acc + grupo.categorias.length
   }, 0)
+
+  return `${total}`
+}
 
 const textUser = (usuarios) => usuarios.map((usuario) => usuario.sigla).join(', ')
 

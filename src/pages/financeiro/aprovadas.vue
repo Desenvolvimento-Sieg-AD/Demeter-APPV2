@@ -81,15 +81,9 @@
                     <CustomInput label="Solicitante" v-model="payment.usuario.nome" color="primary" disabled hide-details />
                   </v-col>
 
-                  
-
                   <!-- <v-col cols="2">
                     <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="primary" disabled hide-details />
-                  </v-col> -->
-
-                  
-
-                  
+                  </v-col> -->                  
 
                   <!-- <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
                     <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="primary" disabled hide-details />

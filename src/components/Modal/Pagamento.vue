@@ -4,17 +4,14 @@
       <LayoutLoading v-if="loading" />
 
       <v-col v-else-if="pagamento">
-        <v-row align="center" class="mb-2">
-          <v-col cols="5" class="d-flex align-center justify-start pb-0">
-            <h3 style="color: #118B9F">Dados do Pagamento</h3>
-          </v-col>
-          <v-col cols="7" class="d-flex align-center justify-end pb-0 ga-2">
+        <LayoutTitle title="Dados do Pagamento" :margin="false" >
+          <div>
             <v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
             <v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1" />
             <v-chip v-if="pagamento.updatedByUser?.sigla" class="text-body-2" :text="textUpdatedByUser" color="primary"/>
             <v-chip v-if="pagamento.privado" text="Privado" class="text-body-2" color="red-accent-4"></v-chip>
-          </v-col>
-        </v-row>
+          </div>
+        </LayoutTitle>
 
         <v-row class="my-2" v-if="statusCancelados">
           <v-col>
@@ -143,22 +140,20 @@
 
         </v-row>
 
-        <v-divider class="my-6" v-if="pagamento?.anexos_pagamento?.length > 0" />
+        <v-divider class="mt-6 mb-2" v-if="pagamento?.anexos_pagamento?.length > 0" />
 
         <v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
 
-          <v-col cols="12">
-            <h3 style="color: #F68A1A">Arquivos</h3>
-          </v-col>
+          <LayoutTitle title="Arquivos" :margin="false"/>
 
           <v-row class="d-flex flex-wrap mr-2" no-gutters>
             <div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id" class="d-flex align-center mb-2 mr-2">
-              <v-card flat color="#F7F5F5" @click="openFile(anexo.caminho, pagamento.privado)" class="d-flex flex-row align-center mr-2" width="450px">
+              <v-card flat color="#F7F5F5" @click="copyPath(anexo.caminho)" class="d-flex flex-row align-center mr-2" width="450px">
                 <v-icon color="primary" class="ml-2 mr-2">mdi-file-document</v-icon>
                 <v-card-text>
                   {{ anexo.nome }}
                 </v-card-text>
-                <v-btn icon @click.stop="copyFilePath(anexo.caminho, pagamento.privado)" flat color="transparent" class="ml-auto">
+                <v-btn icon @click.stop="copyPath(anexo.caminho)" flat color="transparent" class="ml-auto">
                   <v-icon color="primary" class="cursor-pointer">mdi-content-copy</v-icon>
                   <v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
                 </v-btn>
@@ -310,12 +305,9 @@ const openFile = async (path, privado) => {
   }
 }
 
-const copyFilePath = async (anexo, privado) => {
+const copyPath = async (anexo) => {
   try {
-
-    await useOs().copyFilePath(anexo.caminho)
-
-    $toast.success('Caminho do arquivo copiado')
+    await useOs().copyFilePath(anexo)
   } 
   catch (error) {
     console.error('Erro ao copiar caminho do arquivo:', error)
