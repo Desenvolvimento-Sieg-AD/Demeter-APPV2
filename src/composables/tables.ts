@@ -158,20 +158,20 @@ const tabelas: ITables = {
     { title: 'Ações', type: 'text', value: 'actions', width: 120, fixed: true }
   ],
   setores: [
-    { title: 'Setor', value: 'nome', sortable: true, filterable: true, visible: true, width: 410 },
-    { title: 'Sigla', value: 'sigla', sortable: true, filterable: true, visible: true, width: 410 },
-    { title: 'Usuarios', value: 'usuarios.length', visible: true, width: 410 },
-    { title: 'Categorias', value: 'categorias', visible: true, width: 410, align: 'center' },
+    { title: 'Setor', value: 'nome', sortable: true, filterable: true, visible: true },
+    { title: 'Sigla', value: 'sigla', sortable: true, filterable: true, visible: true },
+    { title: 'Usuarios', value: 'usuarios.length', visible: true },
+    { title: 'Categorias', value: 'categorias', visible: true, align: 'center' },
     { title: 'Ações', value: 'actions', width: 120, fixed: true }
   ],
   categorias: [
-    { title: 'Categoria', value: 'nome', sortable: true, filterable: true, visible: true, width: 350 },
-    { title: 'Descrição', value: 'descricao', sortable: true, filterable: true, visible: true, width: 350 },
-    { title: 'Grupo', value: 'grupo.nome', sortable: true, filterable: true, visible: true, width: 350 },
-    { title: 'Ativo', value: 'ativo', sortable: true, filterable: true, visible: true, width: 150 },
-    { title: 'Nacional', value: 'nacional', sortable: true, filterable: true, visible: true, width: 150 },
-    { title: 'Internacional', value: 'internacional', sortable: true, filterable: true, visible: true, width: 150 },
-    { title: 'Projeto Obrigatório', value: 'requer_projeto', sortable: true, filterable: true, visible: true, width: 150 },
+    { title: 'Categoria', value: 'nome', sortable: true, filterable: true, visible: true },
+    { title: 'Descrição', value: 'descricao', sortable: true, filterable: true, visible: true },
+    { title: 'Grupo', value: 'grupo.nome', sortable: true, filterable: true, visible: true },
+    { title: 'Ativo', value: 'ativo', sortable: true, filterable: true, visible: true },
+    { title: 'Nacional', value: 'nacional', sortable: true, filterable: true, visible: true },
+    { title: 'Internacional', value: 'internacional', sortable: true, filterable: true, visible: true },
+    { title: 'Requer Proj.', value: 'requer_projeto', sortable: true, filterable: true, visible: true },
     { title: 'Ações', value: 'actions', width: 120, fixed: true }
   ]
 }

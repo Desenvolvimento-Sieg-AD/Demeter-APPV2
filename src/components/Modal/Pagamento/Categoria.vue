@@ -1,5 +1,6 @@
 <template>
-  <CustomText title="Categoria" class="ml-3" color="secondary" size="18" :bold="true" />
+  <LayoutTitle title="Categoria" />
+
   <v-row class="pa-3" dense>
     <v-col cols="2" md="3">
       <CustomInput

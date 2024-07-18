@@ -4,17 +4,14 @@
       <LayoutLoading v-if="loading" />
 
       <v-col v-else-if="pagamento">
-        <v-row align="center" class="mb-2">
-          <v-col cols="5" class="d-flex align-center justify-start pb-0">
-            <h3 style="color: #F68A1A">Dados do Pagamento</h3>
-          </v-col>
-          <v-col cols="7" class="d-flex align-center justify-end pb-0 ga-2">
+        <LayoutTitle title="Dados do Pagamento" :margin="false" >
+          <div>
             <v-chip :color="ultimaMovimentacao.status_pagamento.cor" :text="ultimaMovimentacao.status_pagamento.nome" hide-details />
             <v-chip v-if="pagamento.urgente" color="red" text="Urgente" hide-details prepend-icon="mdi-alert" class="ml-1" />
             <v-chip v-if="pagamento.updatedByUser?.sigla" class="text-body-2" :text="textUpdatedByUser" color="primary"/>
             <v-chip v-if="pagamento.privado" text="Privado" class="text-body-2" color="red-accent-4"></v-chip>
-          </v-col>
-        </v-row>
+          </div>
+        </LayoutTitle>
 
         <v-row class="my-2" v-if="statusCancelados">
           <v-col>
@@ -143,22 +140,20 @@
 
         </v-row>
 
-        <v-divider class="my-6" v-if="pagamento?.anexos_pagamento?.length > 0" />
+        <v-divider class="mt-6 mb-2" v-if="pagamento?.anexos_pagamento?.length > 0" />
 
         <v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
 
-          <v-col cols="12">
-            <h3 style="color: #F68A1A">Arquivos</h3>
-          </v-col>
+          <LayoutTitle title="Arquivos" :margin="false"/>
 
           <v-row class="d-flex flex-wrap mr-2" no-gutters>
             <div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id" class="d-flex align-center mb-2 mr-2">
-              <v-card flat color="#F7F5F5" @click="openFile(anexo.caminho, pagamento.privado)" class="d-flex flex-row align-center mr-2" width="450px">
+              <v-card flat color="#F7F5F5" @click="copyPath(anexo.caminho)" class="d-flex flex-row align-center mr-2" width="450px">
                 <v-icon color="primary" class="ml-2 mr-2">mdi-file-document</v-icon>
                 <v-card-text>
                   {{ anexo.nome }}
                 </v-card-text>
-                <v-btn icon @click.stop="copyFilePath(anexo.caminho, pagamento.privado)" flat color="transparent" class="ml-auto">
+                <v-btn icon @click.stop="copyPath(anexo.caminho)" flat color="transparent" class="ml-auto">
                   <v-icon color="primary" class="cursor-pointer">mdi-content-copy</v-icon>
                   <v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
                 </v-btn>
@@ -175,10 +170,9 @@
 <script setup>
 //* IMPORTS
 
-import { getPagamentoById, updatePagamento } from '@api/pagamento'
+import { getPagamentoById } from '@api/pagamento'
 const { $toast } = useNuxtApp()
 const dayjs = useDayjs()
-const access = useRuntimeConfig()
 
 //* PROPS
 
@@ -194,8 +188,6 @@ const emit = defineEmits(['update:enable', 'getPagamento'])
 
 //* DATA
 
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 const pagamento = ref(null)
 const loading = ref(false)
 const urgente = ref(null)
@@ -283,7 +275,7 @@ const getPagamento = async () => {
 
     pagamento.value = data
 
-    dados_bancarios.value = JSON.parse(pagamento?.value.dados_bancarios)
+    dados_bancarios.value = pagamento?.value.dados_bancarios
 
     dados_conta.value = `${dados_bancarios?.value?.conta} - ${dados_bancarios?.value?.digito}`
 
@@ -296,61 +288,29 @@ const getPagamento = async () => {
     numero_nf.value = pagamento.value.numero_nf ?? 'Não informado'
 
     loading.value = false
-  } catch (error) {
-    console.error('Erro ao buscar pagamento:', error)
+  } 
+  catch (error) {
     $toast.error('Erro ao buscar pagamento')
-  }
-}
-
-const saveUpdatePagamento = async () => {
-  try {
-    const { success, message } = await updatePagamento(pagamento.value.id, pagamento.value)
-
-    if (!success) throw new Error(message)
-
-    $toast.success('Pagamento atualizado com sucesso')
-
-    enableValue.value = false
-
-    emit('getPagamento')
-  } catch (error) {
-    console.error('Erro ao atualizar pagamento:', error)
-    $toast.error('Erro ao atualizar pagamento')
   }
 }
 
 const openFile = async (path, privado) => {
   try {
-
-    const caminho = privado ? caminho_privado : caminho_normal
-    await useOs().openFile(`${caminho}/${path}`)
-
-  } catch (error) {
+    await useOs().openFile(path)
+  } 
+  catch (error) {
     console.error('Erro ao abrir arquivo:', error)
     $toast.error('Não foi possível abrir o arquivo')
   }
 }
 
-const copyFilePath = async (anexo, privado) => {
+const copyPath = async (anexo) => {
   try {
-
-    const caminho = privado ? caminho_privado : caminho_normal
-    await useOs().copyFilePath(`${caminho}/${anexo.caminho}`)
-
-    $toast.success('Caminho do arquivo copiado')
-  } catch (error) {
+    await useOs().copyFilePath(anexo)
+  } 
+  catch (error) {
     console.error('Erro ao copiar caminho do arquivo:', error)
     $toast.error('Não foi possível copiar o caminho do arquivo')
-  }
-}
-
-const copyData = async (data) => {
-  try {
-    await useOs().copyFilePath(pagamento.value.chave_pix)
-    $toast.success('Dados de pagamento copiado')
-  } catch (error) {
-    console.log('Erro ao copiar dados de pagamento:', error)
-    $toast.error('Não foi possível copiar os dados de pagamento')
   }
 }
 

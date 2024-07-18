@@ -194,7 +194,7 @@ const loadingAction = (action) => (action != undefined ? action : false);
 	overflow-y: hidden;
 }
 .modal-header {
-	background-color: #F68A1A;
+	background-color: #118B9F;
 	color: white;
 	padding: 10px 15px !important;
 	height: auto;

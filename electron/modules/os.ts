@@ -16,9 +16,11 @@ export default (mainWindow: BrowserWindow) => {
 
   const copyFilePath = async (filePath: string) => {
     try {
+      
       clipboard.writeText(filePath)
       return { success: true }
-    } catch (err) {
+    } 
+    catch (err) {
       console.error('Erro ao copiar caminho do arquivo:', err)
       return { success: false, message: err }
     }

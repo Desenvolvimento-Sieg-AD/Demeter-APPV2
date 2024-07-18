@@ -1,55 +1,28 @@
 <template>
   <div>
-      <LayoutForm max-height="calc(100vh - 175px)" style="width: calc(100vw - 500px); min-width: 900px;">
-        <v-form ref="formValidate">
-          <ModalPagamentoEmpresa v-model:form="form" />
+    <LayoutForm height="auto" style="width: calc(100vw - 500px); min-width: 1100px">
+      <v-form ref="formValidate">
+        <ModalPagamentoEmpresa v-model:form="form" />
 
-          <v-divider class="mt-2 mb-2" />
+        <ModalPagamentoFornecedor v-model:form="form" />
 
-          <ModalPagamentoFornecedor v-model:form="form" />
+        <ModalPagamentoCategoria v-model:form="form" :documentRequired="documentRequired" />
 
-          <v-divider class="mt-2 mb-2" />
+        <ModalPagamentoObservacoes v-model:form="form" :user="user" />
 
-          <ModalPagamentoCategoria v-model:form="form" :documentRequired="documentRequired" />
+        <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
+      </v-form>
+    </LayoutForm>
 
-          <v-divider class="mt-2 mb-2" />
-
-          <ModalPagamentoObservacoes v-model:form="form" :user="user" />
-
-          <v-divider class="mt-2 mb-2" />
-
-          <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
-
-          <v-row class="mt-5 mb-3 d-flex justify-center align-center ga-2">
-            <v-btn
-              v-for="(action, index) of actionsForm"
-              :key="`${action}-${index}`"
-              :color="action.color"
-              @click="action.onClick()"
-              width="200"
-              height="43"
-              :loading="action.loading"
-            >
-              <v-icon size="large" :icon="action.icon" />
-              <v-tooltip :text="action.title" location="bottom" activator="parent" />
-            </v-btn>
-          </v-row>
-        </v-form>
-      </LayoutForm>
-
-    <v-btn class="btn-flutter" variant="plain" icon color="primary" v-if="routeId" @click="router.push('/financeiro/aprovadas')">
-      <v-icon>mdi-arrow-left</v-icon>
-      <v-tooltip text="Voltar" activator="parent" location="right"></v-tooltip>
-    </v-btn>
+    <Action :buttons="actionsForm" />
   </div>
 </template>
 
 <script setup>
 // * IMPORTS
 
-import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
+import { getPagamentoTipo, postPagamento } from '@api'
 import { useAuthStore } from '~/store/auth'
-import { set } from '~~/node_modules/nuxt/dist/app/compat/capi'
 
 const { $toast } = useNuxtApp()
 
@@ -58,11 +31,7 @@ const { user } = useAuthStore()
 const setores = computed(() => user.setores)
 
 const route = useRoute()
-const router = useRouter()
 const form = ref(initFormState())
-
-const access = useRuntimeConfig()
-const path = access.public.PAGAMENTO_PATH
 
 //* DATA
 
@@ -90,16 +59,18 @@ const actionsForm = [
     title: 'Limpar campos',
     icon: 'mdi-trash-can-outline',
     color: 'red',
-    onClick: () => reset()
+    active: true,
+    tooltip: 'Resetar campos',
+    click: () => reset(),
+    loading: loading.value
   },
   {
     title: routeId.value ? 'Atualizar' : 'Salvar',
     icon: 'mdi-content-save',
     color: 'green',
-    onClick: () => {
-      if (routeId.value) updatePayment(Number(routeId.value), form.value)
-      else sendForm()
-    },
+    active: true,
+    tooltip: 'Salvar',
+    click: () => sendForm(),
     loading: loading.value
   }
 ]
@@ -125,12 +96,10 @@ function buildFormData() {
       formData.append('dados_bancarios', JSON.stringify(form.value.dados_bancarios))
       continue
     }
-
     if (key === 'nf' && form.value.nf.length > 0) {
       formData.append('nf', form.value.nf[0])
       continue
     }
-
     if (key === 'doc' && form.value.doc.length > 0) {
       for (let i = 0; i < form.value.doc.length; i++) {
         formData.append('doc', form.value.doc[i])
@@ -166,27 +135,11 @@ const sendForm = async () => {
     reset()
 
     loading.value = false
-  } catch (error) {
+  } 
+  catch (error) {
     loading.value = false
     console.error(error)
     $toast.error('Erro ao criar uma solicitação de pagamento')
-  }
-}
-
-const updatePayment = async (id, data) => {
-  try {
-    const payload = buildFormData()
-
-    const { success, message } = await updatePagamento(id, payload)
-
-    if (!success) throw new Error(message)
-
-    $toast.success(message)
-
-    setTimeout(() => router.push('/financeiro/aprovadas'), 750)
-  } catch (error) {
-    console.error('Erro ao atualizar pagamento', error)
-    $toast.error('Erro ao atualizar pagamento')
   }
 }
 
@@ -204,69 +157,14 @@ const definePaymentImportant = async () => {
     const priorizados = pagamentos.filter((p) => p.nome === 'PIX' || p.nome === 'Boleto')
     const restantes = pagamentos.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto').sort((a, b) => a.nome.localeCompare(b.nome))
     paymentsType.value = [...priorizados, ...restantes]
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar tipos de pagamento', error)
     $toast.error('Erro ao buscar tipos de pagamento')
   }
 }
 
 await definePaymentImportant()
-
-function createFileFromAnexo(anexo) {
-  if (!anexo) return { file: null, folder: null }
-  const folder = `${path}${anexo.caminho}`
-  const file = new File([folder], anexo.nome, { type: anexo.tipo_arquivo.mime })
-  return { file, folder }
-}
-
-function formatPaymentData(data) {
-  const fileDOC = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 4)
-  const fileNF = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 3)
-
-  const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC)
-  const { file: nf, folder: pathNF } = createFileFromAnexo(fileNF)
-
-  form.value = {
-    nf,
-    doc: [doc],
-    pathNF,
-    ...data,
-    pathDoc,
-    projeto_id: data.projeto_id,
-    categoria_id: data.categoria.id,
-    grupo_id: data.categoria.grupo.id,
-    tipo_chave_pix_id: data.tipo_chave_pix_id,
-    dados_bancarios: formatBankingData(data),
-    data_vencimento: dayjs(data.data_vencimento).format('YYYY-MM-DD')
-  }
-}
-
-function formatBankingData(data) {
-  const dadosBancarios = JSON.parse(data.dados_bancarios)
-  switch (form.value.tipo_id) {
-    case 1:
-      dadosBancarios.outhers = dadosBancarios.chave_pix.replace(/[\D]/g, '')
-      break
-    case 3:
-      const { banco, agencia, conta, digito } = dadosBancarios
-      return { banco, agencia, conta, digito, ...dadosBancarios }
-    default:
-      return dadosBancarios
-  }
-}
-
-const getPagamento = async (id) => {
-  try {
-    const { success, data, message } = await getOnePayment(id, 'geral')
-
-    if (!success) throw new Error(message)
-
-    formatPaymentData(data)
-  } catch (error) {
-    console.error('Erro ao buscar pagamento:', error)
-    $toast.error('Erro ao buscar pagamento')
-  }
-}
 
 // * Função para limpar o formulário
 
@@ -333,7 +231,8 @@ const getPriceDollar = async () => {
     priceNow.value = price
 
     form.value.valor_total = price
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar valor do dolar')
   }

@@ -1,6 +1,6 @@
 <template>
   <v-container class="form-container" fluid>
-    <v-card style="overflow-y: auto" flat max-height="calc(100vh - 130px)" height="100%" width="100%">
+    <v-card style="overflow-y: auto" flat :max-height="maxHeight" :height="height" :width="width" min>
       <v-card-text>
         <slot />
       </v-card-text>
@@ -12,6 +12,9 @@
 const props = defineProps({
   actionButtons: { type: Array, default: [] },
   submit: { type: Function, default: () => {} },
+  maxHeight: { type: String, default: 'calc(100vh - 130px)' },
+  height: { type: String, default: '100%' },
+  width: { type: String, default: '100%' },
   titleColor: { type: String, default: '#F68A1A' },
   titleSize: { type: String, default: '24' },
   titleBold: { type: Boolean, default: true },

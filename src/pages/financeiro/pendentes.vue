@@ -24,6 +24,7 @@
         @editPayment="openEditPayment"
         @disapprovePayment="openDisapprovePayment"
         @approvePayment="openApprovePayment"
+        height="calc(100vh - 170px)"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -169,12 +170,9 @@
 // * IMPORT
 
 import CustomStore from 'devextreme/data/custom_store'
-import { getPagamentoByScope, postStatus, omie } from '@api'
+import { postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const colums = getColumns('financeiro')
-const access = useRuntimeConfig()
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 
 // * DATA
 
@@ -185,8 +183,6 @@ const itemsSelects = ref([])
 const justificativa = ref(null)
 const loadingModal = ref(false)
 const loadingTable = ref(false)
-const clients = ref([])
-const link = ref('')
 const tableRef = ref(null)
 
 const enableModal = reactive({
@@ -403,6 +399,19 @@ const sendStatus = async (status, id) => {
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
+
+  for (let i = 0; i < filterArray.length; i++) {
+    if (filterArray[i] === 'or' || filterArray[i] === '=' || filterArray[i] === 'and') continue
+    if (filterArray[i] === filterArray['filterValue']) continue
+
+    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
+    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
+
+    formattedFilters.push({ fieldName, value })
+  }
+
+  return formattedFilters
+}
 
 const getPage = async () => {
   itens.value = new CustomStore({

@@ -49,9 +49,8 @@
 <script setup>
 // * IMPORTS
 
-import { getPagamentoTipo, postPagamento, getOnePayment, updatePagamento } from '@api'
+import { getPagamentoTipo, getOnePayment, updatePagamento } from '@api'
 import { postStatus } from '~/api/pagamento'
-import { set } from '~~/node_modules/nuxt/dist/app/compat/capi'
 
 import { useAuthStore } from '../../store/auth'
 
@@ -65,19 +64,15 @@ const route = useRoute()
 const router = useRouter()
 const form = ref(initFormState())
 
-const access = useRuntimeConfig()
-const path = access.public.PAGAMENTO_PATH
-
 //* DATA
 
-const loading = ref(false)
 const priceNow = ref(null)
 const paymentsType = ref([])
 const formValidate = ref(null)
 
 // * COMPUTEDS
 
-const currentRoute = computed(() => route.query.edit === 'true' ? `/` : {path: '/financeiro/aprovadas', query: { client_id: route.query.client_id }})
+const currentRoute = computed(() => route.query.edit === 'true' ? `/` : { path: '/financeiro/aprovadas', query: { client_id: route.query.client_id }})
 
 const sendRoute = () => router.push(currentRoute.value) 
 
@@ -87,10 +82,6 @@ const documentRequired = computed(() => {
   const type = paymentsType.value.find((tipo) => form.value.tipo_id === tipo.id)
   return type?.requer_documento
 })
-
-const isExpired = computed(() => dayjs(form.value.data_vencimento).isBefore(dayjs().subtract(1, 'day')))
-
-const validDateToCard = computed(() => isExpired.value && form.value.tipo_id !== 5 && form.value.tipo_id !== 6)
 
 const actionsForm = [
   {
@@ -158,7 +149,8 @@ const updatePayment = async (id, data) => {
 
     setTimeout(() => router.push(currentRoute.value), 750)
 
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao atualizar pagamento', error)
     $toast.error('Erro ao atualizar pagamento')
   }
@@ -173,7 +165,8 @@ const definePaymentImportant = async () => {
     const priorizados = pagamentos.filter((p) => p.nome === 'PIX' || p.nome === 'Boleto')
     const restantes = pagamentos.filter((p) => p.nome !== 'PIX' && p.nome !== 'Boleto').sort((a, b) => a.nome.localeCompare(b.nome))
     paymentsType.value = [...priorizados, ...restantes]
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar tipos de pagamento', error)
     $toast.error('Erro ao buscar tipos de pagamento')
   }
@@ -182,29 +175,31 @@ const definePaymentImportant = async () => {
 await definePaymentImportant()
 
 function createFileFromAnexo(anexo) {
-  if (!anexo) return { file: null, folder: null }
-  const folder = `${path}${anexo.caminho}`
-  const file = new File([folder], anexo.nome, { type: anexo.tipo_arquivo.mime })
-  return { file, folder }
+  if (!anexo) return null
+
+  const base64String = String.fromCharCode(...anexo.base64.data);
+  const file = new File([base64String], anexo.nome, { type: anexo.tipo_arquivo.mime })
+
+  return file
 }
 
 function formatPaymentData(data) {
   const fileDOC = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 4)
   const fileNF = data.anexos_pagamento?.find((anexo) => anexo.tipo_anexo_id === 3)
 
-  const { file: doc, folder: pathDoc } = createFileFromAnexo(fileDOC)
-  const { file: nf, folder: pathNF } = createFileFromAnexo(fileNF)
+  const doc = createFileFromAnexo(fileDOC)
+  const nf = createFileFromAnexo(fileNF)
 
-  const dados_bancarios = data.dados_bancarios ? JSON.parse(data.dados_bancarios) : {}
+  const dados_bancarios = data.dados_bancarios
 
   dados_bancarios.outhers
 
   form.value = {
     nf: nf ? [nf] : null,
     doc: doc ? [doc] : null,
-    pathNF,
+    pathNF: nf.path,
     ...data,
-    pathDoc,
+    pathDoc: doc.path,
     fornecedor: {
       id: data.fornecedor_id,
       nome: data.fornecedor.razao_social,
@@ -240,7 +235,8 @@ const getPagamento = async (id) => {
     if (!success) throw new Error(message)
 
     formatPaymentData(data)
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar pagamento:', error)
     $toast.error('Erro ao buscar pagamento')
   }
@@ -311,7 +307,8 @@ const getPriceDollar = async () => {
     priceNow.value = price
 
     form.value.valor_total = price
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar valor do dolar')
   }
@@ -325,7 +322,8 @@ watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
     if (nv) {
       paymentsType.value = paymentsType.value.filter((type) => type.internacional)
       await getPriceDollar()
-    } else await definePaymentImportant()
+    } 
+    else await definePaymentImportant()
   },
   { immediate: true }
 )

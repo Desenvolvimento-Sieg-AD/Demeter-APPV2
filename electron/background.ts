@@ -20,9 +20,11 @@ autoUpdater.autoInstallOnAppQuit = true
 autoUpdater.disableWebInstaller = true
 ;(autoUpdater.logger as typeof log).transports.file.level = 'info'
 
-log.transports.file.resolvePathFn = () => join('A:/Dev TI/Demeter', './logs/main.log')
+process.env.LOG_PATH = 'D:\Demeter\logs'
 
-const caminho_log = 'A:/Dev TI/Demeter/logs/main.log'
+log.transports.file.resolvePathFn = () => join(process.env.LOG_PATH!, 'main.log')
+
+const caminho_log = join(process.env.LOG_PATH!, 'main.log')
 
 function sendStatusToWindow(text: string, teste?: any) {
   log.info(text, teste)
@@ -56,8 +58,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 1024,
-    minWidth: 1024,
-    minHeight: 676,
+    minWidth: 1280,
+    minHeight: 720,
     backgroundColor: '#FFF',
     webPreferences: {
       devTools: !isProduction,

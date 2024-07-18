@@ -10,7 +10,7 @@
 			:disabled="active ? false : true"
 			:loading="loading"
 		>
-			<v-tooltip :text="toolTip" activator="parent" location="top" />
+			<v-tooltip :text="tooltip" activator="parent" location="top" />
 			<v-icon color="white" style="font-size: 24px">{{ icon }}</v-icon>
 		</v-btn>
 		<v-badge v-if="badge > 0" color="error" offset-y="-20" :content="badge" />
@@ -21,7 +21,7 @@
 const props = defineProps({
 	type: String,
 	icon: String,
-	toolTip: String,
+	tooltip: String,
 	click: Function,
 	loading: Boolean,
 	visible: Boolean,

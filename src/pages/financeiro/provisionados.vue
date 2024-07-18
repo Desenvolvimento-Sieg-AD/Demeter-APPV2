@@ -17,6 +17,7 @@
         companiesFilter
         noDataText="Não há nenhuma solicitação provisionada"
         page="financeiro"
+        height="calc(100vh - 170px)"
       >
         <template #item-usuario="{ data: { data: item } }">
           <div>
@@ -143,20 +144,13 @@
 import CustomStore from 'devextreme/data/custom_store'
 const { $toast } = useNuxtApp()
 const colums = getColumns('provisionados')
-const access = useRuntimeConfig()
-const caminho_normal = access.public.PAGAMENTO_PATH
-const caminho_privado = access.public.PAGAMENTO_PRIVADO_PATH
 
 // * DATA
 
 const itens = ref([])
 const viewPayment = ref({})
 const itemsSelects = ref([])
-const justificativa = ref(null)
-const loadingModal = ref(false)
 const loadingTable = ref(false)
-const clients = ref([])
-const link = ref('')
 
 const enableModal = reactive({
   link: false,
@@ -199,16 +193,6 @@ const smallerIndex = (index, item) => index < item.length - 1
 const classSetor = (item, index) => (smallerIndex(index, item.usuario.setores) ? 'mr-2' : '')
 
 const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
-
-const handleSelectionChange = (items) => (itemsSelects.value = items)
-
-const validBeforeSend = async () => {
-  const status_id = confirm.value === 'approve' ? 3 : 8
-
-  const lista_id = itemsSelects.value.map((item) => item.id)
-
-  await sendStatus(status_id, lista_id)
-}
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
