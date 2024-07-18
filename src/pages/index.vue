@@ -280,40 +280,25 @@ const cancelPayment = async (ids) => {
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
-function formatFilter(filterArray) {
-  const formattedFilters = []
-
-  for (let i = 0; i < filterArray.length; i++) {
-    if (filterArray[i] === 'or' || filterArray[i] === '=') continue
-    if (filterArray[i] === filterArray['filterValue']) continue
-
-    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
-    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
-
-    formattedFilters.push({ fieldName, value })
-  }
-
-  return formattedFilters
-}
 
 const getPage = async () => {
   pagamentos.value = new CustomStore({
     key: 'id',
     async load(loadOptions) {
       const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
-
+    
       const queryString = paramsName
         .filter((paramName) => isNotEmpty(loadOptions[paramName]))
         .map((paramName) => {
           if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
           return { [paramName]: loadOptions[paramName] }
         })
-
+       
       const mergedObject = queryString.reduce((acc, obj) => {
         Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
         return acc
       }, {})
-
+   
       try {
         const { success, message, data } = await useApi(`/pagamento/scope/usuario`, {
           query: {
