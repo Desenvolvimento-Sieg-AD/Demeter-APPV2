@@ -360,18 +360,6 @@ const valiDisapprovePayment = () => {
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
 
 
-  for (let i = 0; i < filterArray.length; i++) {
-    if (filterArray[i] === 'or' || filterArray[i] === '=') continue
-    if (filterArray[i] === filterArray['filterValue']) continue
-
-    const fieldName = Array.isArray(filterArray[i]) ? filterArray[i][0] : filterArray[i]
-    const value = Array.isArray(filterArray[i]) ? filterArray[i]['filterValue'] : filterArray['filterValue']
-
-    formattedFilters.push({ fieldName, value })
-  }
-
-  return formattedFilters
-}
 
 const getPage = async () => {
   itens.value = new CustomStore({
