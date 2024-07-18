@@ -98,7 +98,8 @@ const login = async () => {
     if (!success) throw new Error('Erro ao autenticar usuário')
 
     user.value = data
-  } catch (error) {
+  } 
+	catch (error) {
     console.error('Erro ao autenticar usuário:', error)
   }
 }

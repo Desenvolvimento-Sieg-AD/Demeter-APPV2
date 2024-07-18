@@ -71,29 +71,28 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFile(item, 3)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
-
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+            <div v-if="notaFiscal(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </div>
 
             <div v-else>
               <v-icon disabled color="gray"> mdi-paperclip </v-icon>
-              <v-tooltip text="Sem anexo" activator="parent" location="top" />
+              <v-tooltip text="Sem Nota Fiscal" activator="parent" location="top" />
             </div>
           </div>
         </template>
 
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFile(item, 4)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+            <div v-if="documentoAnexo(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
             </div>
 
             <div v-else>
               <v-icon disabled color="gray">mdi-paperclip</v-icon>
-              <v-tooltip text="Sem anexo" activator="parent" location="top" />
+              <v-tooltip text="Sem Anexo" activator="parent" location="top" />
             </div>
           </div>
         </template>
@@ -142,6 +141,8 @@
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
+    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="viewPayment.id" @getPagamento="getPage()" />
+
 
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
@@ -173,6 +174,7 @@ import CustomStore from 'devextreme/data/custom_store'
 import { postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const colums = getColumns('financeiro')
+const { openBase64File } = useOs()
 
 // * DATA
 
@@ -193,7 +195,8 @@ const enableModal = reactive({
   editCount: false,
   pagamento: false,
   allConfirm: false,
-  exportToClient: false
+  exportToClient: false,
+  edit: false
 })
 
 // * COMPUTED && MODALS ACTIONS
@@ -220,11 +223,6 @@ const openDisapprovePayment = () => {
   enableModal.allConfirm = true
 }
 
-const openRevisionPayment = () => {
-  confirm.value = 'revision'
-  enableModal.allConfirm = true
-}
-
 const openEditPayment = () => {
   viewPayment.value = itemsSelects.value
   enableModal.allEdit = true
@@ -246,12 +244,12 @@ const actions = computed(() => [
     tooltip: 'Editar',
     click: (item) => {
       viewPayment.value = item
-      enableModal.editCount = true
+      enableModal.edit = true
     }
   },
   {
     tooltip: 'Revisão',
-    icon: 'mdi-file-document-refresh',
+    icon: 'mdi-refresh',
     click: (item) => {
       viewPayment.value = item
       enableModal.confirm = true
@@ -259,7 +257,7 @@ const actions = computed(() => [
     },
     active: true,
     disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
-    type: 'warning'
+    type: 'revision'
   },
   {
     icon: 'mdi-close',
@@ -337,13 +335,9 @@ const messageConfirmAllStatus = computed(() => {
 
 // * METHODS
 
-const openFile = async (pagamento, tipo_anexo_id) => {
-  await useOs().openBase64File(pagamento, tipo_anexo_id)
-}
+const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
-const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
-
-const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
+const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
 const defineDocument = (tipo) => (tipo === 'juridico' ? maskCnpj(item.fornecedor.documento) : maskCpf(item.fornecedor.documento))
 
@@ -391,7 +385,8 @@ const sendStatus = async (status, id) => {
     await tableRef.value.clearFilters()
     
     await getPage()
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao alterar o status')
   }
@@ -452,7 +447,8 @@ const getPage = async () => {
         })
 
         return { data: data.data, totalCount: data.count }
-      } catch (error) {
+      } 
+	catch (error) {
         console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
       }

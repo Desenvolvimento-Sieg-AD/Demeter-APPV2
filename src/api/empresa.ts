@@ -3,7 +3,8 @@ export async function getEmpresa() {
 		const { success, message, data } = await useApi(`/empresa`);
 		if (!success) throw new Error(message);
 		return { success, message, data };
-	} catch (error) {
+	} 
+	catch (error) {
 		return { success: false, message: error, data: null };
 	}
 }
@@ -13,7 +14,8 @@ export async function getConta() {
 		const { success, message, data } = await useApi(`/empresa/conta`);
 		if (!success) throw new Error(message);
 		return { success, message, data };
-	} catch (error) {
+	} 
+	catch (error) {
 		return { success: false, message: error, data: null };
 	}
 }
@@ -23,7 +25,8 @@ export async function getCard() {
 		const { success, message, data } = await useApi(`/empresa/conta/cards`);
 		if (!success) throw new Error(message);
 		return { success, message, data };
-	} catch (error) {
+	} 
+	catch (error) {
 		return { success: false, message: error, data: null };
 	}
 }
@@ -36,7 +39,8 @@ export async function getClientByPayment() {
 
 		return { success, message, data }
 
-	} catch (error) {
+	} 
+	catch (error) {
 		return { success: false, message: error }
 	}
 }

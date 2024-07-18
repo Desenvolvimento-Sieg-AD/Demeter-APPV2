@@ -57,7 +57,8 @@ export const useAuthStore = defineStore('auth', {
 				this.authenticated = true;
 
         return { success: true, user: data.user }
-      } catch (error) {
+      } 
+	catch (error) {
         return { success: false, message: error.message }
       }
     },
@@ -76,7 +77,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { success } = await useApi('/status')
         if (!success) throw new Error('API indisponível, entre em contato com o Desenvolvimento')
-      } catch (error) {
+      } 
+	catch (error) {
         throw new Error(error.message)
       }
     }

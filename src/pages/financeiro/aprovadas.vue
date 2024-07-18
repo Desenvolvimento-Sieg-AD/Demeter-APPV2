@@ -61,8 +61,8 @@
                   </v-col>
 
                   <v-col cols="auto" >
-                    <v-chip color="blue" text="Internacional" v-if="!payment.internacional" />
-                    <v-chip color="secondary" text="Urgente" v-if="!payment.urgente" />
+                    <v-chip color="blue" text="Internacional" v-if="payment.internacional" />
+                    <v-chip color="secondary" text="Urgente" v-if="payment.urgente" />
                   </v-col>
 
                   <v-col cols="3">
@@ -225,7 +225,8 @@ const getClients = async () => {
     if (!success) throw new Error(message)
 
     clients.value = data
-  } catch (error) {
+  } 
+	catch (error) {
     console.log(error)
     $toast.error('Erro ao buscar clientes')
   }
@@ -242,7 +243,8 @@ const getPaymentByClient = async () => {
 
     showPayments.value = payments.value.length > 0
     notExistPayments.value = payments.value.length === 0
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar pagamentos')
   } finally {
@@ -278,7 +280,8 @@ const sendOmie = async () => {
       payment.enviado_externo = true
 
       successCount++
-    } catch (error) {
+    } 
+	catch (error) {
       payment.retorno_externo = { codigo_status: codigo, descricao_status: error.message, codigo_status: codigo, color: '#e75c51' }
       payment.enviado_externo = true
 
@@ -308,7 +311,8 @@ const sendPaidPayment = async (id) => {
     await getPaymentByClient()
 
     loading.value = false
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao mover pagamento para provisionado')
   }
@@ -327,7 +331,8 @@ const cancelPayment = async () => {
 
     enableModal.cancel = false
     justificativa.value = null
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao cancelar pagamento')
   }

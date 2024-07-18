@@ -22,7 +22,8 @@ export async function getPagamentoTipo() {
     const { success, message, data } = await useApi(`/pagamento/tipo`)
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -32,7 +33,8 @@ export async function getPagamentoByScope(scope: string) {
     const { success, message, data } = await useApi(`/pagamento/scope/${scope}`)
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -46,7 +48,8 @@ export async function getProjects(search: string) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -62,7 +65,8 @@ export async function createProjectAPI(nome: string){
 
     return { success, message, data }
 
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -73,7 +77,8 @@ export async function getOnePayment(id: number, scope: string) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -85,7 +90,8 @@ export async function getPagamentoByClient(client_id: number) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -102,7 +108,8 @@ export async function postPagamento(formData: FormData) {
 
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -129,7 +136,8 @@ export async function existNFEqual(numero_nf: string, fornecedor_id: string) {
     if (!success) throw new Error(message)
 
     return { success, message, data, exist: data.exist }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -146,7 +154,8 @@ export async function postUpload(formData: FormData, id: Number) {
 
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -160,7 +169,8 @@ export async function postStatus(status: StatusManage) {
 
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -177,7 +187,8 @@ export async function updatePagamento(id: Number, payload: PagamentoUpdate) {
 
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -190,7 +201,8 @@ export async function alterCountAll(ids: Number[], conta_id: Number, empresa_id:
 
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -204,7 +216,8 @@ export async function omie(send: any) {
 
     if (!success) throw new Error(message)
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -215,7 +228,8 @@ export async function getPagamentoById(id: Number) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -226,7 +240,8 @@ export async function getTiposChavePix() {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }

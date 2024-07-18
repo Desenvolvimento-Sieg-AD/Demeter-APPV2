@@ -64,29 +64,28 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFile(item, 3)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
-
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+            <div v-if="notaFiscal(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </div>
 
             <div v-else>
               <v-icon disabled color="gray"> mdi-paperclip </v-icon>
-              <v-tooltip text="Sem anexo" activator="parent" location="top" />
+              <v-tooltip text="Sem Nota Fiscal" activator="parent" location="top" />
             </div>
           </div>
         </template>
 
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFile(item, 4)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+            <div v-if="documentoAnexo(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
             </div>
 
             <div v-else>
               <v-icon disabled color="gray">mdi-paperclip</v-icon>
-              <v-tooltip text="Sem anexo" activator="parent" location="top" />
+              <v-tooltip text="Sem Anexo" activator="parent" location="top" />
             </div>
           </div>
         </template>
@@ -119,7 +118,6 @@
           <div class="d-flex align-center justify-center text-center">
             <div v-for="(set, index) in item.usuario.setores" :key="index" :class="classSetor(item, index)">
               <v-tooltip :text="set.nome" activator="parent" location="top" />
-
               {{ defineNameSetor(set.sigla, item, index) }}
             </div>
           </div>
@@ -144,6 +142,7 @@
 import CustomStore from 'devextreme/data/custom_store'
 const { $toast } = useNuxtApp()
 const colums = getColumns('provisionados')
+const { openBase64File } = useOs()
 
 // * DATA
 
@@ -178,13 +177,9 @@ const actions = computed(() => [
 
 // * METHODS
 
-const openFile = async (pagamento, tipo_anexo_id) => {
-  await useOs().openBase64File(pagamento, tipo_anexo_id)
-}
+const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
-const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
-
-const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
+const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
 const defineDocument = (tipo) => (tipo === 'juridico' ? maskCnpj(item.fornecedor.documento) : maskCpf(item.fornecedor.documento))
 
@@ -252,7 +247,8 @@ const getPage = async () => {
           data: data.data,
           totalCount: data.count
         }
-      } catch (error) {
+      } 
+	catch (error) {
         console.error(error)
         $toast.error('Erro ao carregar os pagamentos')
       }

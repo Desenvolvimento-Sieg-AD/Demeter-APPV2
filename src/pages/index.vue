@@ -61,16 +61,15 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="template" v-if="isNotStatusAllowed(item.status)">
-            <v-btn v-if="isNF(item.anexos_pagamento)" flat icon variant="plain" @click="openFile(item, 3)">
-              <v-icon color="success" class="cursor-pointer" icon="mdi-paperclip" />
+            <v-btn v-if="notaFiscal(item.anexos_pagamento)" flat icon variant="plain" @click="openBase64File(notaFiscal(item.anexos_pagamento))">
+              <v-icon color="blue" class="cursor-pointer" icon="mdi-paperclip" />
 
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+              <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </v-btn>
 
             <v-btn flat icon variant="plain" v-else :disabled="lastStatus(item) !== 'Pendente'">
               <v-icon color="primary" class="cursor-pointer" @click="uploadFile(item, 3)" icon="mdi-paperclip-plus" />
-
-              <v-tooltip text="Anexar arquivo" activator="parent" location="top" />
+              <v-tooltip text="Anexar Nota Fiscal" activator="parent" location="top" />
             </v-btn>
           </div>
         </template>
@@ -79,19 +78,14 @@
 
         <template #item-doc="{ data: { data: item } }">
           <div class="template" v-if="isNotStatusAllowed(item.status)">
-            <v-btn v-if="isDOC(item.anexos_pagamento)" flat icon variant="plain">
-              <div v-if="item.anexos_pagamento?.length > 0">
-                <v-icon :color="colorDoc(item.anexos_pagamento)" class="cursor-pointer" icon="mdi-paperclip" @click="openFile(item, 4)" />
-                <v-tooltip :text="item.anexos_pagamento.length === 1 ? 'Abrir anexo' : nameFiles(item.anexos_pagamento)" activator="parent" location="top" />
-              </div>
+            <v-btn v-if="documentoAnexo(item.anexos_pagamento)" flat icon variant="plain">
+              <v-icon color="blue" class="cursor-pointer" icon="mdi-paperclip" @click="openBase64File(documentoAnexo(item.anexos_pagamento))" />
+              <v-tooltip text="Abrir Arquivo" activator="parent" location="top" />
             </v-btn>
 
             <v-btn flat icon variant="plain" v-else :disabled="lastStatus(item) !== 'Pendente'">
-              <div>
-                <v-icon class="cursor-pointer" color="primary" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
-
-                <v-tooltip text="Anexar arquivo" activator="parent" location="top" />
-              </div>
+              <v-icon class="cursor-pointer" color="primary" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
+              <v-tooltip text="Anexar Arquivo" activator="parent" location="top" />
             </v-btn>
           </div>
         </template>
@@ -129,9 +123,9 @@
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id" @getPagamento="getPage()" />
-
-    <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :item="pagamento" :actions="modalActions" />
+    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="pagamento.id" @getPagamento="getPage()" />
     <LazyModalUpload v-model:enable="enableModal.upload" :item="pagamento" @update="getPage" :tipo_anexo_id="tipo_anexo_id" />
+    <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :item="pagamento" :actions="modalActions" />
   </div>
 </template>
 
@@ -142,6 +136,8 @@ import { postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const router = useRouter()
 const columns = getColumns('usuario')
+
+const { openBase64File } = useOs()
 
 //* DATA
 
@@ -155,7 +151,8 @@ const customRef = ref(null)
 const enableModal = reactive({
   cancel: false,
   upload: false,
-  pagamento: false
+  pagamento: false,
+  edit: false
 })
 
 // * ACTIONS
@@ -200,15 +197,14 @@ const handleCancel = (item) => {
 }
 
 const handleEdit = (item) => {
-  const status_id = item.movimentacoes_pagamento[0].status_pagamento.id
-  const path = `../pagamento/${item.id}`
-  router.push({ path, query: { edit: true, revision: status_id === 2 } })
+  pagamento.value = item
+  enableModal.edit = true
 }
 
 const isDisabled = (item) => !statusDisabled.value.includes(item.movimentacoes_pagamento[0].status_pagamento.id)
 
 const isEditable = (item) => {
-  const statusEditable = [1, 2, 3, 8, 9]
+  const statusEditable = [1, 2, 10]
   return !statusEditable.includes(item.movimentacoes_pagamento[0].status_pagamento.id)
 }
 
@@ -235,12 +231,6 @@ const modalActions = [
 
 //* METHODS
 
-const colorDoc = (anexos) => {
-  const docs = anexos.filter((anexo) => anexo.tipo_anexo_id === 4)
-  if (docs.length > 1) return 'purple'
-  return 'success'
-}
-
 const openFile = async (pagamento, tipo_anexo_id) => {
   await useOs().openBase64File(pagamento, tipo_anexo_id)
 }
@@ -250,11 +240,9 @@ const movimentacaoAprovado = (item) => {
   return findAprovado ? formatDate(findAprovado.data_inicio) : 'Em análise'
 }
 
-const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
+const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
-const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
-
-const nameFiles = (anexos) => anexos.map((anexo) => `${anexo.nome}`).join('; ')
+const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
 const documentByType = (tipo, documento) => {
   if (!documento) return ''
@@ -282,7 +270,8 @@ const cancelPayment = async (ids) => {
     enableModal.cancel = false
     $toast.success('Pagamento cancelado com sucesso')
     await getPage()
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao cancelar pagamento')
   }

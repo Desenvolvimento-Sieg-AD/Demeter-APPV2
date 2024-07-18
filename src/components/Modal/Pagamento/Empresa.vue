@@ -71,6 +71,7 @@
     />
   </v-row>
 </template>
+
 <script setup>
 import { getProjects, getEmpresa, existRelationSetorWithEmpresa, createProjectAPI, getSetoresPadrao } from '@api'
 import { useAuthStore } from '~/store/auth'
@@ -108,21 +109,6 @@ const formValue = computed({
   set: (value) => emit('update:form', value)
 })
 
-const defineFileTitle = (fileName) => {
-  if (fileName && fileName.length > 20) return fileName.replace(/.\w+$/g, '')
-  return fileName
-}
-
-const openFile = async (folder) => {
-  try {
-    if (!folder) return
-    await useOs().openFile(folder)
-  } catch (error) {
-    console.error(error)
-    $toast.error('Erro ao abrir arquivo')
-  }
-}
-
 const existRelation = async () => {
   try {
     if (!formValue.value.empresa_id) return
@@ -133,7 +119,8 @@ const existRelation = async () => {
       setor.disabled = false
       if (!data) setor.disabled = true
     }
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao verificar relação entre setor e empresa')
   }
@@ -166,7 +153,10 @@ const findProject = async (attrs, search) => {
     projetos.value = data
 
     await projetoRef?.value?.click()
-  } catch (error) {}
+  } 
+  catch (error) {
+
+  }
 }
 
 const notExistProject = async () => {
@@ -174,10 +164,12 @@ const notExistProject = async () => {
     const project = projetos.value.find((project) => project.nome === formValue.value.projeto_id)
     if (project) {
       formValue.value.projeto_id = project.id
-    } else {
+    } 
+    else {
       enableModal.confirm = true
     }
-  } else if (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id))) {
+  } 
+  else if (formValue.value.projeto_id && isNaN(Number(formValue.value.projeto_id))) {
     enableModal.confirm = true
   }
 }
@@ -193,7 +185,8 @@ const createProject = async () => {
     enableModal.confirm = false
 
     findProject(null, data.nome)
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao criar projeto')
   }
@@ -201,4 +194,3 @@ const createProject = async () => {
 
 watch(() => formValue.value.empresa_id, existRelation)
 </script>
-<style scoped></style>

@@ -9,17 +9,10 @@
 </template>
 
 <script setup>
-const { $toast } = useNuxtApp()
-
-import { useAuthStore } from '~/store/auth'
-const { user } = useAuthStore()
-
 const props = defineProps({
   form: { type: Object, required: true },
   user: { type: Object, required: true }
 })
-
-const projetos = ref([])
 
 const formValue = computed({
   get: () => props.form,

@@ -123,10 +123,12 @@ const processNfFile = async (file) => {
     formValue.value.valor_total = parseFloat(valor_total)
 
     validDocument(cpf_emitente, cnpj_emitente)
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao processar arquivo NF:', error)
     $toast.error('Erro ao processar arquivo NF')
-  } finally {
+  } 
+  finally {
     loadingProcessFile.value = false
   }
 }
@@ -173,20 +175,24 @@ const verifyFornecedor = async (type) => {
 
       if (data) {
         await getDataFornecedor(data)
-      } else {
+      } 
+      else {
         formValue.value.fornecedor.nome = null
         formValue.value.fornecedor.id = null
       }
-    } else if (type === 'nome') {
+    } 
+    else if (type === 'nome') {
       const { data } = await getFornecedorByDocumentOrName(null, nome, formValue.value.fornecedor.internacional)
 
       if (data) {
         await getDataFornecedor(data)
-      } else {
+      } 
+      else {
         formValue.value.fornecedor.id = null
       }
     }
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar fornecedor:', error)
     $toast.error('Erro ao buscar fornecedor')
   }
@@ -211,7 +217,8 @@ const getFornecedores = async () => {
     if (!success) throw new Error(message)
 
     fornecedores.value = data
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar fornecedores:', error)
     $toast.error('Erro ao buscar fornecedores')
   }
@@ -240,7 +247,8 @@ const pasteFromClipboard = async () => {
   try {
     const text = await navigator.clipboard.readText()
     formValue.fornecedor.documento = text
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao acessar a área de transferência:', error)
   }
 }
@@ -252,22 +260,18 @@ const clearFornecedor = () => {
   }
 }
 
-watch(
-  () => formValue.value.fornecedor.internacional,
-  async (value) => {
-    clearFornecedor()
+// WATCHERS
 
-    const { data } = await getFornecedor(value)
-    fornecedores.value = data
-  }
-)
+watch(() => formValue.value.fornecedor.internacional, async (value) => {
+  clearFornecedor()
 
-watch(
-  () => formValue.value.nf,
-  async (value) => {
-    if (route.params.id) return
-    if (value && value.length > 0) await processNfFile(value[0])
-  }
-)
+  const { data } = await getFornecedor(value)
+  fornecedores.value = data
+})
+
+watch(() => formValue.value.nf, async (value) => {
+  if (route.params.id) return;
+  if (value && value.length > 0) await processNfFile(value[0])
+})
+
 </script>
-<style scoped></style>

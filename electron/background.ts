@@ -107,7 +107,8 @@ app.whenReady().then(async () => {
   modules.forEach((module) => {
     try {
       if (mainWindow) module(mainWindow)
-    } catch (err: any) {
+    } 
+	catch (err: any) {
       console.log('[!] Module error: ', err.message || err)
     }
   })
@@ -227,7 +228,8 @@ async function sendStatusToDEV(resultado: string, versao_atualizada: string, men
     if (response.status !== 200) {
       log.info(`Error sending status to DEV: ${response.status}`)
     }
-  } catch (error) {
+  } 
+	catch (error) {
     log.info('Error in sendStatusToDEV', error)
   }
 }

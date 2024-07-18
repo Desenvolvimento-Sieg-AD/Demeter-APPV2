@@ -34,12 +34,12 @@
             <CustomInput readonly label="Solicitante" hide-details v-model="pagamento.usuario.sigla" />
           </v-col>
 
-          <v-col cols="3" v-if="pagamento.setorSolicitante">
-            <CustomInput readonly label="Setor Solicitante" hide-details v-model="pagamento.setorSolicitante.nome" />
+          <v-col cols="3" v-if="pagamento.setor_solicitante">
+            <CustomInput readonly label="Setor Solicitante" hide-details v-model="pagamento.setor_solicitante.nome" />
           </v-col>
 
-          <v-col cols="3" v-if="pagamento.setorReferencia">
-            <CustomInput readonly label="Setor Referência" hide-details v-model="pagamento.setorReferencia.nome" />
+          <v-col cols="3" v-if="pagamento.setor_referencia">
+            <CustomInput readonly label="Setor Referência" hide-details v-model="pagamento.setor_referencia.nome" />
           </v-col>
 
           <v-col cols="3">
@@ -142,26 +142,35 @@
 
         <v-divider class="mt-6 mb-2" v-if="pagamento?.anexos_pagamento?.length > 0" />
 
-        <v-row align="center" class="mb-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0">
+        <LayoutTitle title="Arquivos" :margin="false"/>
 
-          <LayoutTitle title="Arquivos" :margin="false"/>
+        <v-row align="start" justify="start" class="mb-2 d-flex flex-wrap mr-2" no-gutters v-if="pagamento?.anexos_pagamento?.length > 0" style="height: 70px; overflow-y: auto">
 
-          <v-row class="d-flex flex-wrap mr-2" no-gutters>
-            <div v-for="anexo in pagamento.anexos_pagamento" :key="anexo.id" class="d-flex align-center mb-2 mr-2">
-              <v-card flat color="#F7F5F5" @click="copyPath(anexo.caminho)" class="d-flex flex-row align-center mr-2" width="450px">
-                <v-icon color="primary" class="ml-2 mr-2">mdi-file-document</v-icon>
-                <v-card-text>
-                  {{ anexo.nome }}
-                </v-card-text>
-                <v-btn icon @click.stop="copyPath(anexo.caminho)" flat color="transparent" class="ml-auto">
-                  <v-icon color="primary" class="cursor-pointer">mdi-content-copy</v-icon>
-                  <v-tooltip text="Copiar local do arquivo" activator="parent" location="bottom" />
-                </v-btn>
-              </v-card>
-            </div>
-          </v-row>
-          
+          <v-card flat color="bgtertiary" @click="openBase64File(arquivoNF)" class="d-flex flex-row align-center ma-2" width="300px" height="52px" v-if="arquivoNF">
+            <v-icon color="primary" class="mx-2">mdi-file-document</v-icon>
+            <v-card-text>
+              <h3>Nota Fiscal</h3>
+            </v-card-text>
+            <v-btn icon @click.stop="copyFilePath(arquivoNF.caminho)" flat color="transparent" class="ml-auto">
+              <v-icon color="primary" class="cursor-pointer">mdi-content-copy</v-icon>
+              <v-tooltip text="Copiar local do arquivo" activator="parent" location="top" />
+            </v-btn>
+            <v-tooltip :text="`Abrir arquivo ${arquivoNF.nome}`" activator="parent" location="bottom" />
+          </v-card>
+
+          <v-card flat color="bgtertiary" @click="openBase64File(arquivoPagamento)" class="d-flex flex-row align-center ma-2" width="300px" height="52px" v-if="arquivoPagamento">
+            <v-icon color="primary" class="mx-2">mdi-file-document</v-icon>
+            <v-card-text>
+              <h3>Arquivo anexo</h3>
+            </v-card-text>
+            <v-btn icon @click.stop="copyFilePath(arquivoPagamento.caminho)" flat color="transparent" class="ml-auto">
+              <v-icon color="primary" class="cursor-pointer">mdi-content-copy</v-icon>
+              <v-tooltip text="Copiar local do arquivo" activator="parent" location="top" />
+            </v-btn>
+            <v-tooltip :text="`Abrir arquivo ${arquivoPagamento.nome}`" activator="parent" location="bottom" />
+          </v-card>
         </v-row>
+          
       </v-col>
     </template>
   </Modal>
@@ -173,6 +182,7 @@
 import { getPagamentoById } from '@api/pagamento'
 const { $toast } = useNuxtApp()
 const dayjs = useDayjs()
+const { openBase64File, copyFilePath } = useOs()
 
 //* PROPS
 
@@ -196,6 +206,8 @@ const dados_conta = ref(null)
 const outhers = ref(null)
 const chave_nf = ref(null)
 const numero_nf = ref(null)
+const arquivoNF = ref(null);
+const arquivoPagamento = ref(null);
 
 const isTED = computed(() => pagamento.value.tipo_pagamento.nome === 'TED')
 
@@ -286,6 +298,9 @@ const getPagamento = async () => {
     chave_nf.value = pagamento.value.chave_nf ?? 'Não informado'
 
     numero_nf.value = pagamento.value.numero_nf ?? 'Não informado'
+
+    arquivoNF.value = data.anexos_pagamento.find((anexo) => anexo.tipo_anexo_id === 3);
+    arquivoPagamento.value = data.anexos_pagamento.find((anexo) => anexo.tipo_anexo_id === 4);
 
     loading.value = false
   } 

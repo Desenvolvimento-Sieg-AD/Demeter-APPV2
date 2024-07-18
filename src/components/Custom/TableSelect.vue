@@ -395,7 +395,9 @@ const colors = {
   cancel: '#F44336',
   info: 'info',
   success: 'success',
-  excel: '#008000'
+  excel: '#008000',
+  warning: 'warning',
+  revision: 'purple',
 }
 
 const getActionColor = (type) => colors[type] || '#118B9F'

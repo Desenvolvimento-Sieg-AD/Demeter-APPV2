@@ -5,11 +5,11 @@ export async function getFornecedor(internacional: boolean = false) {
 		});
 		if (!success) throw new Error(message);
 		return { success, message, data };
-	} catch (error) {
+	} 
+	catch (error) {
 		return { success: false, message: error, data: null };
 	}
 }
-
 
 export async function getFornecedorByDocumentOrName(documento: any = null, name: any = null, internacional: boolean = false) {
 	try {
@@ -19,7 +19,19 @@ export async function getFornecedorByDocumentOrName(documento: any = null, name:
 		});
 		if (!success) throw new Error(message);
 		return { success, message, data };
-	} catch (error) {
+	} 
+	catch (error) {
+		return { success: false, message: error, data: null };
+	}
+}
+
+export async function getFornecedorById(fornecedor_id: number) {
+	try {
+		const { success, message, data } = await useApi(`/fornecedor/${fornecedor_id}`);
+		if (!success) throw new Error(message);
+		return { success, message, data };
+	} 
+	catch (error) {
 		return { success: false, message: error, data: null };
 	}
 }

@@ -5,7 +5,7 @@
 
       <transition name="page" appear>
         <div class="layout-block">
-          <v-breadcrumbs :items="breadcrumbs" color="primary" icon="mdi-home">
+          <v-breadcrumbs :items="breadcrumbs" color="primary" icon="mdi-home" >
             <template #title="{ item }">
               <b>{{ item.title }}</b>
             </template>
@@ -49,6 +49,7 @@ import { useAuthStore } from '~/store/auth'
 import { useThemeStore } from '~/store/theme';
 
 const route = useRoute()
+const router = useRouter()
 const { $toast } = useNuxtApp()
 
 const { authenticateUser, user } = useAuthStore()
@@ -77,7 +78,8 @@ const login = async () => {
     if (!success) throw new Error(message)
 
     logged.value = true
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao autenticar usuário')
     message.value = error.message ?? 'Erro ao autenticar usuário'
@@ -91,6 +93,9 @@ const reload = async () => {
   await useElectron().actions.reload()
   loading.value = false
 }
+
+const goHome = () => router.push('/')
+
 </script>
 
 <style scoped>

@@ -8,7 +8,8 @@ export default (mainWindow: BrowserWindow) => {
     try {
       await shell.openPath(filePath)
       return { success: true }
-    } catch (err) {
+    } 
+	catch (err) {
       console.error('Erro ao abrir arquivo:', err)
       return { success: false, message: err }
     }

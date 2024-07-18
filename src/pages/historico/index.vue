@@ -60,25 +60,28 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-if="existNF(item)">
-              <v-icon @click="openFile(item, 3)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+            <div v-if="notaFiscal(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </div>
 
-            <div v-else> <v-tooltip text="Sem anexo" activator="parent" location="top" /><v-icon disabled color="gray">mdi-paperclip</v-icon> </div>
+            <div v-else>
+              <v-icon disabled color="gray"> mdi-paperclip </v-icon>
+              <v-tooltip text="Sem Nota Fiscal" activator="parent" location="top" />
+            </div>
           </div>
         </template>
 
         <template #item-doc="{ data: { data: item } }">
-          <div class="template">
-            <div v-if="existDoc(item)">
-              <v-icon color="success" class="cursor-pointer" @click="openFile(item, 4)"> mdi-paperclip</v-icon>
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+          <div class="d-flex align-center justify-center text-center">
+            <div v-if="documentoAnexo(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
             </div>
 
             <div v-else>
-              <v-icon disabled>mdi-paperclip</v-icon>
-              <v-tooltip text="Sem anexo" activator="parent" location="top" />
+              <v-icon disabled color="gray">mdi-paperclip</v-icon>
+              <v-tooltip text="Sem Anexo" activator="parent" location="top" />
             </div>
           </div>
         </template>
@@ -138,6 +141,7 @@
 <script setup>
 import CustomStore from 'devextreme/data/custom_store'
 const { $toast } = useNuxtApp()
+const { openBase64File } = useOs()
 
 const colums = getColumns('historico')
 const itens = ref([])
@@ -148,10 +152,6 @@ const valueYear = ref(0)
 const valueLastMonth = ref(0)
 const valueActualMonth = ref(0)
 const valueToday = ref(0)
-
-const openFile = async (pagamento, tipo_anexo_id) => {
-  await useOs().openBase64File(pagamento, tipo_anexo_id)
-}
 
 const actions = computed(() => [
   {
@@ -169,9 +169,9 @@ const actions = computed(() => [
 
 const smallerIndex = (index, item) => index < item.length - 1
 
-const existNF = (nf) => nf.anexos_pagamento.some((anexo) => anexo.tipo_anexo_id === 3)
+const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
-const existDoc = (doc) => doc.anexos_pagamento.some((anexo) => anexo.tipo_anexo_id === 4)
+const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
 const classSetor = (item, index) => (smallerIndex(index, item.usuario.setores) ? 'mr-2' : '')
 

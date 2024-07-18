@@ -94,7 +94,8 @@ const getGruposWithCategorias = async () => {
     grupos.value.sort((a, b) => a.nome.localeCompare(b.nome))
 
     loading.value = false
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
   }
 }
@@ -127,7 +128,8 @@ const sendValueCategorias = async (categorias) => {
     enableValue.value = false
 
     emit('close')
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao atualizar categorias do setor')
   }

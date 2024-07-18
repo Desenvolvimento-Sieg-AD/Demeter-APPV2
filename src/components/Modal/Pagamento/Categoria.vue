@@ -55,12 +55,9 @@
 </template>
 
 <script setup>
-import { getFornecedor, getCategoriasByGrupo, getCategoriasUsuario } from '@api'
-
-const route = useRoute()
+import { getCategoriasUsuario } from '@api'
 
 const { $toast } = useNuxtApp()
-const { data: fornecedores } = await getFornecedor()
 
 const grupos = ref([])
 const categorias = ref([])
@@ -83,16 +80,6 @@ const selectedCategories = computed(() => categorias.value.filter((categoria) =>
 
 const defineFileTitle = (fileName) => (fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName)
 
-watch(
-  () => formValue.value.grupo_id,
-  async (newValue, oldValue) => {
-    if (oldValue && newValue !== oldValue) {
-      formValue.value.categoria_id = null
-      await categoriaRef?.value?.click()
-    }
-  },
-  { immediate: true }
-)
 
 const loadCategorias = async (setor_solicitante_id, internacional, nacional) => {
   try {
@@ -114,30 +101,33 @@ const loadCategorias = async (setor_solicitante_id, internacional, nacional) => 
 
     grupos.value = tempGrupos.sort((a, b) => a.nome.localeCompare(b.nome))
     categorias.value = data
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Erro ao buscar categorias:', error)
     $toast.error('Erro ao buscar categorias')
   }
 }
 
-watch(
-  () => formValue.value.setor_solicitante_id,
-  async (value) => {
-    if (value) loadCategorias(value, null, true)
-  },
-  { immediate: true }
-)
-
 onMounted(() => {
   if (formValue.value.setor_solicitante_id) loadCategorias(formValue.value.setor_solicitante_id, null, true)
 })
 
-watch(
-  () => formValue.value.fornecedor.internacional,
-  async (value) => {
-    if (value) loadCategorias(formValue.value.setor_solicitante_id, value, null)
-    else loadCategorias(formValue.value.setor_solicitante_id, null, true)
-  },
-  { immediate: true }
-)
+// WATCHERS
+
+watch(() => formValue.value.setor_solicitante_id, async (value) => {
+  if (value) loadCategorias(value, null, true)
+}, { immediate: true })
+
+watch(() => formValue.value.grupo_id, async (newValue, oldValue) => {
+  if (oldValue && newValue !== oldValue) {
+    formValue.value.categoria_id = null
+    await categoriaRef?.value?.click()
+  }
+}, { immediate: true })
+
+watch(() => formValue.value.fornecedor.internacional, async (value) => {
+  if (value) loadCategorias(formValue.value.setor_solicitante_id, value, null)
+  else loadCategorias(formValue.value.setor_solicitante_id, null, true)
+}, { immediate: true })
+
 </script>

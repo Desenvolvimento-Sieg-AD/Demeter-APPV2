@@ -57,24 +57,28 @@
 
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-if="isNF(item.anexos_pagamento)">
-              <v-icon @click="openFile(item, 3)" color="success" class="cursor-pointer"> mdi-paperclip</v-icon>
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
+            <div v-if="notaFiscal(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </div>
-            <div v-else> <v-tooltip text="Sem anexo" activator="parent" location="top" /><v-icon disabled color="gray">mdi-paperclip</v-icon> </div>
-          </div>
-        </template>
-        <template #item-doc="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            <div v-if="isDOC(item.anexos_pagamento)">
-              <v-icon @click="openFile(item, 4)" color="success" class="cursor-pointer"> mdi-paperclip </v-icon>
 
-              <v-tooltip text="Abrir anexo" activator="parent" location="top" />
-            </div>
             <div v-else>
               <v-icon disabled color="gray"> mdi-paperclip </v-icon>
+              <v-tooltip text="Sem Nota Fiscal" activator="parent" location="top" />
+            </div>
+          </div>
+        </template>
 
-              <v-tooltip text="Sem anexo" activator="parent" location="top" />
+        <template #item-doc="{ data: { data: item } }">
+          <div class="d-flex align-center justify-center text-center">
+            <div v-if="documentoAnexo(item.anexos_pagamento)">
+              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
+            </div>
+
+            <div v-else>
+              <v-icon disabled color="gray">mdi-paperclip</v-icon>
+              <v-tooltip text="Sem Anexo" activator="parent" location="top" />
             </div>
           </div>
         </template>
@@ -116,6 +120,8 @@
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="getPage()" />
+    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="itemView.id" @getPagamento="getPage()" />
+
 
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
@@ -141,16 +147,17 @@
 <script setup>
 import CustomStore from 'devextreme/data/custom_store'
 
-import { getPagamentoByScope, postStatus } from '@api'
-const paymentGerencia = await getPagamentoByScope('gerencia')
+import { postStatus } from '@api'
 const { $toast } = useNuxtApp()
 const colums = getColumns('gerencia')
+const { openBase64File } = useOs()
 
 const enableModal = reactive({
   confirm: false,
   reprove: false,
   pagamento: false,
-  allConfirm: false
+  allConfirm: false,
+  edit: false
 })
 
 const confirm = ref('delete')
@@ -230,6 +237,17 @@ const actions = ref([
     type: 'cancel'
   },
   {
+    tooltip: 'Revisão',
+    icon: 'mdi-refresh',
+    click: (item) => {
+      itemView.value = item
+      enableModal.confirm = true
+      confirm.value = 'revision'
+    },
+    active: true,
+    type: 'revision'
+  },
+  {
     icon: 'mdi-check-bold',
     tooltip: 'Aprovar',
     click: (item) => {
@@ -257,6 +275,7 @@ const modalActionsConfirm = computed(() => [
     loading: loadingModal.value,
     click: async () => {
       if (confirm.value === 'approve') await sendStatus(4, [itemView.value.id])
+      if (confirm.value === 'revision') await sendStatus(2, [itemView.value.id])
       else await sendStatus(9, [itemView.value.id])
     }
   }
@@ -275,8 +294,9 @@ const modalActionsConfirmAll = computed(() => [
     type: 'success',
     loading: loadingModal.value,
     click: async () => {
-      const status_id = confirm.value === 'approve' ? 4 : 9
-      sendStatus(status_id, idsSelect.value)
+      if (confirm.value === 'approve') await sendStatus(4, idsSelect.value)
+      if (confirm.value === 'revision') await sendStatus(2, idsSelect.value)
+      else await sendStatus(9, idsSelect.value)
     }
   }
 ])
@@ -291,13 +311,9 @@ const openDisapprovePayment = () => {
   enableModal.allConfirm = true
 }
 
-const isNF = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
+const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
-const isDOC = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
-
-const openFile = async (pagamento, tipo_anexo_id) => {
-  await useOs().openBase64File(pagamento, tipo_anexo_id)
-}
+const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
 const smallerIndex = (index, item) => index < item.length - 1
 
@@ -309,12 +325,14 @@ const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuari
 
 const messageConfirmStatus = () => {
   if (confirm.value === 'approve') return 'Deseja realmente aprovar esse pagamento?'
+  if (confirm.value === 'revision') return 'Deseja realmente enviar para revisão esse pagamento?'
   return 'Deseja realmente reprovar esse pagamento?'
 }
 
 const messageConfirmStatusAll = () => {
-  if (confirm.value === 'delete') return 'Deseja realmente reprovar todos os pagamentos selecionados?'
-  return 'Deseja realmente aprovar todos os pagamentos selecionados?'
+  if (confirm.value === 'approve') return 'Deseja realmente aprovar todos os pagamentos selecionados?'
+  if (confirm.value === 'revision') return 'Deseja realmente enviar para revisão todos os pagamentos selecionados?'
+  return 'Deseja realmente reprovar todos os pagamentos selecionados?'
 }
 
 const sendStatus = async (status, id) => {
@@ -335,7 +353,8 @@ const sendStatus = async (status, id) => {
     
     await getPage()
 
-  } catch (error) {
+  } 
+	catch (error) {
     console.error(error)
     $toast.error('Erro ao alterar status')
   }

@@ -127,7 +127,8 @@ export default (mainWindow: BrowserWindow) => {
       if (response.status !== 200) {
         log.info(`Error sending status to DEV: ${response.status}`)
       }
-    } catch (error) {
+    } 
+	catch (error) {
       log.info('Error in sendStatusToDEV', error)
     }
   }

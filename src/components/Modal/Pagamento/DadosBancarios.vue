@@ -141,11 +141,9 @@
 </template>
 <script setup>
 import { useAuthStore } from '~/store/auth'
-import { getPagamentoTipo, getTiposChavePix, getCard, getContasDisponiveis } from '@api'
+import { getTiposChavePix, getContasDisponiveis } from '@api'
 
 const dayjs = useDayjs()
-
-const route = useRoute()
 
 const emit = defineEmits(['update:form'])
 
@@ -186,11 +184,6 @@ const maskDescriptionOuthers = computed(() => {
 
 const validDateToCard = computed(() => isExpired.value && formValue.value.tipo_id !== 5 && formValue.value.tipo_id !== 6)
 
-const labelValue = computed(() => {
-  if (formValue.value.fornecedor.internacional) return 'Valor Estimado em Reais'
-  return 'Valor Total'
-})
-
 const isInternacional = computed(() => formValue.value.fornecedor.internacional)
 
 const messagesDate = () => {
@@ -218,16 +211,10 @@ const pasteFromClipBoardDadosBancarios = async () => {
   try {
     const text = await navigator.clipboard.readText()
     formValue.value.dados_bancarios.outhers = text
-  } catch (error) {
+  } 
+	catch (error) {
     console.error('Erro ao acessar a área de transferência:', error)
   }
-}
-
-const dateRules = (v) => {
-  if (formValue.value.tipo_id === 5 || formValue.value.tipo_id === 6) {
-    return dayjs(v).isAfter(dayjs().subtract(30, 'day')) || 'Data inválida'
-  }
-  return true
 }
 
 const getTiposChave = async () => {
@@ -237,7 +224,8 @@ const getTiposChave = async () => {
     if (!success) throw new Error(message)
 
     chavesPix.value = data
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar tipos de chave pix')
   }
@@ -252,7 +240,8 @@ const getCards = async () => {
     if (!success) throw new Error(message)
 
     cards.value = data
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar cartões')
   }
@@ -260,41 +249,31 @@ const getCards = async () => {
 
 await getTiposChave()
 
-watch(
-  () => formValue.value.tipo_chave_pix_id,
-  async (newValue, oldValue) => {
-    if (newValue !== oldValue && oldValue) {
-      formValue.value.dados_bancarios.outhers = null
-    }
-  },
-  { immediate: true }
-)
+watch(() => formValue.value.tipo_chave_pix_id, async (newValue, oldValue) => {
+  if (newValue !== oldValue && oldValue) {
+    formValue.value.dados_bancarios.outhers = null
+  }
+}, { immediate: true })
 
-watch(
-  () => formValue.value.tipo_id,
-  (value) => {
-    if (value == 5 || value == 6) {
-      try {
-        getCards()
-      } catch (error) {
-        console.error(error.message)
-      }
+watch(() => formValue.value.tipo_id, (value) => {
+  if (value == 5 || value == 6) {
+    try {
+      getCards()
+    } 
+	catch (error) {
+      console.error(error.message)
     }
-  },
-  { immediate: true }
-)
+  }
+}, { immediate: true })
 
-watch(
-  () => formValue.value.tipo_id,
-  (value) => {
-    if (value == 5 || value == 6) {
-      try {
-        getCards()
-      } catch (error) {
-        console.error(error.message)
-      }
+watch(() => formValue.value.tipo_id, (value) => {
+  if (value == 5 || value == 6) {
+    try {
+      getCards()
+    } 
+	catch (error) {
+      console.error(error.message)
     }
-  },
-  { immediate: true }
-)
+  }
+}, { immediate: true })
 </script>

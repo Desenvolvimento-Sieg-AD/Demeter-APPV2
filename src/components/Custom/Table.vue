@@ -280,7 +280,8 @@ const colors = {
   confirm: '#118B9F',
   cancel: '#F44336',
   info: 'info',
-  success: 'success'
+  success: 'success',
+  warning: 'purple'
 }
 
 //* COMPUTED

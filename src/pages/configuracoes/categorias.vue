@@ -87,7 +87,8 @@ const getCategorias = async () => {
 
         categorias.value = data
 
-    } catch (error) {
+    } 
+	catch (error) {
         console.error(error)
         $toast.error('Erro ao buscar categorias')
     }

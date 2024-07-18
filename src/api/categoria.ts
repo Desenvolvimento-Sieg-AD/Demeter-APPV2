@@ -4,7 +4,8 @@ export async function getCategorias() {
     if (!success) throw new Error(message)
 
     return { success, message, data: data.grupo }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -15,7 +16,8 @@ export async function getCategoriaById(id: number) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error }
   }
 }
@@ -26,7 +28,8 @@ export async function getCategoriasWithGrupo(){
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -40,7 +43,8 @@ export async function getCategoriasUsuario(setor_id: number, internacional: bool
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -50,7 +54,8 @@ export async function getCategoriasUsuarioById(id: number) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -61,7 +66,8 @@ export async function getCategoriasByGrupo(id: number) {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error }
   }
 }
@@ -72,7 +78,8 @@ export async function getGrupos() {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -83,7 +90,8 @@ export async function getGrupoWithCategoria() {
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error, data: null }
   }
 }
@@ -95,7 +103,8 @@ export async function existRelationSetorWithEmpresa(setor_id: number, empresa_id
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error }
   }
 }
@@ -109,7 +118,8 @@ export async function createCategoria(options: { nome: string, descricao: string
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error }
   }
 }
@@ -123,7 +133,8 @@ export async function updateCategoria(id: number, options: { nome: string, descr
     if (!success) throw new Error(message)
 
     return { success, message, data }
-  } catch (error) {
+  } 
+	catch (error) {
     return { success: false, message: error }
   }
 }

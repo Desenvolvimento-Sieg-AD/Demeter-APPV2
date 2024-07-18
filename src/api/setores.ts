@@ -8,7 +8,8 @@ export async function getSetoresPadrao() {
       const { success, message, data } = await useApi(`/setor/`)
       if (!success) throw new Error(message)
       return { success, message, data }
-    } catch (error) {
+    } 
+	catch (error) {
       return { success: false, message: error, data: null }
     }
   }
@@ -18,7 +19,8 @@ export async function getSetoresCategorias() {
       const { success, message, data } = await useApi(`/setor/setores-categoria/`)
       if (!success) throw new Error(message)
       return { success, message, data }
-    } catch (error) {
+    } 
+	catch (error) {
       return { success: false, message: error, data: null }
     }
 }
@@ -28,7 +30,8 @@ export async function getSetor (id: number) {
         const { success, message, data } = await useApi(`/setor/${id}`)
         if (!success) throw new Error(message)
         return { success, message, data }
-    } catch (error) {
+    } 
+	catch (error) {
         return { success: false, message: error, data: null }
     }
 }
@@ -43,7 +46,8 @@ export async function updateCategoriaSetor (options: IUpdateCategoriaSetor) {
         )
         if (!success) throw new Error(message)
         return { success, message }
-    } catch (error) {
+    } 
+	catch (error) {
         return { success: false, message: error }
     }
 }
