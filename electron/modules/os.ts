@@ -1,5 +1,6 @@
 import { BrowserWindow, shell, clipboard, ipcMain } from 'electron'
-import os from 'os'
+import os from 'os';
+import { existsSync } from 'fs';
 
 export default (mainWindow: BrowserWindow) => {
   const user = () => os.userInfo()
@@ -12,6 +13,16 @@ export default (mainWindow: BrowserWindow) => {
 	catch (err) {
       console.error('Erro ao abrir arquivo:', err)
       return { success: false, message: err }
+    }
+  }
+
+  const hasFile = (filePath: string) => {
+    try {
+      return existsSync(filePath)
+    }
+    catch (err) {
+      console.error('Erro ao verificar arquivo:', err)
+      return false
     }
   }
 
@@ -37,5 +48,9 @@ export default (mainWindow: BrowserWindow) => {
 
   ipcMain.handle('os:copyFilePath', async (_event, filePath: string) => {
     return await copyFilePath(filePath)
+  })
+
+  ipcMain.handle('os:hasFile', async (_event, filePath: string) => {
+    return hasFile(filePath)
   })
 }

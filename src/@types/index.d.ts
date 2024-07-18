@@ -6,8 +6,8 @@ interface Windows extends Window {
     getVersion: () => any,
     getUser: () => Promise<any>,
     openFile: (filePath: string) => Promise<any>,
-    openBase64File: (base64: number[]) => void,
     copyFilePath: (filePath: string) => Promise<any>,
+    hasFile: (filePath: string) => Promise<any>,
     sendLink: (link: string) => Promise<any>,
   }
 }

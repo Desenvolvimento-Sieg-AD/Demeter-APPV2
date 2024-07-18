@@ -10,11 +10,15 @@ export default function useOs() {
     const { $toast } = useNuxtApp();
 
     try {
-      
-      if (arquivo.base64) {
-        if (!arquivo.tipo_arquivo) return $toast.error('Tipo de arquivo não encontrado');
 
-        const base64String = String.fromCharCode(...arquivo.base64.data);
+      const exists = await window.electronAPI.hasFile(arquivo.caminho);
+      if (exists) {
+        await window.electronAPI.openFile(arquivo.caminho);
+      }
+      else if (arquivo.base64) {
+        if (!arquivo.tipo_arquivo) throw new Error('Tipo do arquivo não definido');
+
+        const base64String = base64ArrayToString(arquivo.base64.data)
         const base64URL = `data:${arquivo.tipo_arquivo.mime};base64,${base64String}`;
         
         const newWindow = window.open();
@@ -24,16 +28,16 @@ export default function useOs() {
           );
         } 
         else {
-          console.error('Não foi possível abrir uma nova janela.');
+          throw new Error('Não foi possível abrir o arquivo');
         }
       }
       else {
-        const newWindow = window.open(arquivo.caminho);
+        throw new Error('Arquivo não encontrado');
       }
     }
     catch (error) {
       $toast.error('Não foi possível abrir o arquivo');
-      console.error('Erro ao abrir o arquivo:', error);
+      console.error('Erro ao abrir o arquivo:', error.message);
     }
   }
 
@@ -43,4 +47,16 @@ export default function useOs() {
   const sendLink = async (link: string) => await window.electronAPI.sendLink(link)
 
   return { getUser, openFile, openBase64File, copyFilePath, sendLink }
+}
+
+const base64ArrayToString = (byteArray: any) => {
+  let result = '';
+  const chunkSize = 5000; // Tamanho do chunk para evitar o erro
+
+  for (let i = 0; i < byteArray.length; i += chunkSize) {
+    const chunk = byteArray.slice(i, i + chunkSize);
+    result += String.fromCharCode(...chunk);
+  }
+
+  return result;
 }
