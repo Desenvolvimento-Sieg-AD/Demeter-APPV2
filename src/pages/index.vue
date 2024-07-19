@@ -60,16 +60,16 @@
         // * Anexo de NF
 
         <template #item-anexo="{ data: { data: item } }">
-          <div class="template" v-if="isNotStatusAllowed(item.status)">
-            <v-btn v-if="notaFiscal(item.anexos_pagamento)" flat icon variant="plain" @click="openBase64File(notaFiscal(item.anexos_pagamento))">
+          <div class="template" >
+            <v-btn v-if="notaFiscal(item.anexos_pagamento)" :disabled="validStatus(item)" flat icon variant="plain" @click="openBase64File(notaFiscal(item.anexos_pagamento))">
               <v-icon color="blue" class="cursor-pointer" icon="mdi-paperclip" />
-
               <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </v-btn>
 
-            <v-btn flat icon variant="plain" v-else :disabled="lastStatus(item) !== 'Pendente'">
-              <v-icon color="primary" class="cursor-pointer" @click="uploadFile(item, 3)" icon="mdi-paperclip-plus" />
+            <v-btn flat icon variant="plain" v-else :disabled="validStatus(item)" @click="triggerInput(item.id, 'nf')">
+              <v-icon color="green" class="cursor-pointer" icon="mdi-paperclip-plus" />
               <v-tooltip text="Anexar Nota Fiscal" activator="parent" location="top" />
+              <input type="file" ref="notaFiscalInput" v-show="false" @change="handleNFChange">
             </v-btn>
           </div>
         </template>
@@ -77,15 +77,16 @@
         //* Anexo de DOC
 
         <template #item-doc="{ data: { data: item } }">
-          <div class="template" v-if="isNotStatusAllowed(item.status)">
-            <v-btn v-if="documentoAnexo(item.anexos_pagamento)" flat icon variant="plain">
+          <div class="template">
+            <v-btn v-if="documentoAnexo(item.anexos_pagamento)" :disabled="validStatus(item)" flat icon variant="plain">
               <v-icon color="blue" class="cursor-pointer" icon="mdi-paperclip" @click="openBase64File(documentoAnexo(item.anexos_pagamento))" />
               <v-tooltip text="Abrir Arquivo" activator="parent" location="top" />
             </v-btn>
 
-            <v-btn flat icon variant="plain" v-else :disabled="lastStatus(item) !== 'Pendente'">
-              <v-icon class="cursor-pointer" color="primary" @click="uploadFile(item, 4)" icon="mdi-paperclip-plus" />
+            <v-btn flat icon variant="plain" v-else :disabled="validStatus(item)" @click="triggerInput(item.id, 'doc')">
+              <v-icon class="cursor-pointer" color="green" icon="mdi-paperclip-plus" />
               <v-tooltip text="Anexar Arquivo" activator="parent" location="top" />
+              <input type="file" ref="arquivoInput" v-show="false" @change="handleArquivoChange">
             </v-btn>
           </div>
         </template>
@@ -133,6 +134,7 @@
 //* IMPORTS
 import CustomStore from 'devextreme/data/custom_store'
 import { postStatus } from '@api'
+import { createArquivo } from '~/api';
 const { $toast } = useNuxtApp()
 const router = useRouter()
 const columns = getColumns('usuario')
@@ -147,6 +149,10 @@ const pagamentos = ref([])
 const tipo_anexo_id = ref(null)
 const justificativa = ref(null)
 const customRef = ref(null)
+const currentId = ref(null)
+
+const notaFiscalInput = ref(null)
+const arquivoInput = ref(null)
 
 const enableModal = reactive({
   cancel: false,
@@ -157,7 +163,7 @@ const enableModal = reactive({
 
 // * ACTIONS
 
-const statusDisabled = ref([1, 2])
+const statusDisabled = ref([1, 2, 10])
 
 const actions = computed(() => [
   {
@@ -231,13 +237,52 @@ const modalActions = [
 
 //* METHODS
 
-const openFile = async (pagamento, tipo_anexo_id) => {
-  await useOs().openBase64File(pagamento, tipo_anexo_id)
+const triggerInput = (id, tipo) => {
+  if (tipo === 'nf') {
+    currentId.value = id
+    notaFiscalInput.value.click()
+  } 
+  else {
+    currentId.value = id
+    arquivoInput.value.click()
+  }
+}
+
+const handleNFChange = (event) => {
+  uploadFile('nf', event.target.files[0])
+}
+
+const handleArquivoChange = (event) => {
+  uploadFile('doc', event.target.files[0])
 }
 
 const movimentacaoAprovado = (item) => {
   const findAprovado = item.movimentacoes_pagamento.find((mov) => mov.status_pagamento.id >= 4) // ? APROVADO
   return findAprovado ? formatDate(findAprovado.data_inicio) : 'Em análise'
+}
+
+const uploadFile = async (tipo, arquivoNovo) => {
+  try {
+    const formData = new FormData()
+    formData.append(tipo, arquivoNovo)
+    formData.append('tipo_anexo_id', tipo === 'nf' ? 3 : 4)
+    formData.append('pagamento_id', currentId.value)
+
+    const { success: successUpload, message: messageUpload } = await createArquivo(formData, currentId.value)
+    if (!successUpload) throw new Error(messageUpload)
+
+    $toast.success('Arquivo anexado com sucesso')
+    getPage()
+  } 
+  catch (error) {
+    console.error(error.message);
+    $toast.error('Erro ao anexar arquivo')
+  }
+}
+
+const validStatus = (item) => {
+  const valid = [1, 2, 3, 4, 5, 6, 10]
+  return !valid.includes(item.movimentacoes_pagamento[0].status_pagamento.id)
 }
 
 const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
@@ -250,12 +295,6 @@ const documentByType = (tipo, documento) => {
 }
 
 const isNotStatusAllowed = (status) => status !== 'Recusado' && status !== 'Cancelado'
-
-const uploadFile = (item, id) => {
-  pagamento.value = item
-  tipo_anexo_id.value = id
-  enableModal.upload = true
-}
 
 const cancelPayment = async (ids) => {
   if (!justificativa.value) return $toast.error('Informe a justificativa')

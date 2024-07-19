@@ -360,10 +360,13 @@ const validBeforeSend = async () => {
 }
 
 const sendStatus = async (status, id) => {
-  try {
-    if (status === 8 && !justificativa.value) throw new Error('Justificativa é obrigatória para prosseguir!')
+  loadingModal.value = true;
 
-    loadingModal.value = true
+  try {
+    const requireJustificativa = [2, 8, 9]
+    if (requireJustificativa.includes(status)) {
+      if (!justificativa.value || justificativa.value.length < 10) throw new Error('A justificativa deve ter no mínimo 10 caracteres')
+    }
 
     const justificativas = {
       disapprove: justificativa.value,
@@ -378,7 +381,7 @@ const sendStatus = async (status, id) => {
     if (!success) throw new Error(message)
 
     $toast.success('Status alterado com sucesso')
-    loadingModal.value = false
+    
     enableModal.confirm = false
     enableModal.allConfirm = false
     
@@ -388,8 +391,9 @@ const sendStatus = async (status, id) => {
   } 
 	catch (error) {
     console.error(error)
-    $toast.error('Erro ao alterar o status')
+    $toast.error(error.message)
   }
+  loadingModal.value = false;
 }
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''

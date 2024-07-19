@@ -142,9 +142,9 @@ export async function existNFEqual(numero_nf: string, fornecedor_id: string) {
   }
 }
 
-export async function postUpload(formData: FormData, id: Number) {
+export async function createArquivo(formData: FormData, id: Number) {
   try {
-    const { success, message, data } = await useApi(`/pagamento/upload/${id}`, {
+    const { success, message, data } = await useApi(`/pagamento/arquivo/${id}`, {
       method: 'POST',
       body: formData,
       headers: {
@@ -156,6 +156,20 @@ export async function postUpload(formData: FormData, id: Number) {
     return { success, message, data }
   } 
 	catch (error) {
+    return { success: false, message: error, data: null }
+  }
+}
+
+export async function deleteArquivo(id: Number) {
+  try {
+    const { success, message, data } = await useApi(`/pagamento/arquivo/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (!success) throw new Error(message)
+    return { success, message, data }
+  } 
+  catch (error) {
     return { success: false, message: error, data: null }
   }
 }

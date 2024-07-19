@@ -26,15 +26,16 @@
         <LayoutTitle title="Pagamentos">
           <div>
             <CustomText class="mr-5" v-if="countPayments > 0" :title="paymentsCountTitle" color="#118B9F" size="16" :bold="true" />
-            <v-chip color="#F68A1A" text="Pagamentos aprovados pela gerência"></v-chip>
+            <v-chip color="primary" text="Pagamentos aprovados pela gerência"></v-chip>
           </div>
         </LayoutTitle>
 
-        <v-card height="calc(100vh - 345px)" flat style="overflow-y: auto">
+        <v-card height="calc(100vh - 345px)" flat style="overflow-y: auto;">
           <v-card
             v-for="(payment, index) in payments"
             :key="`${payment}-${index}`"
             color="bgsecondary"
+            style="margin: 10px 0"
             :class="{
               'card-payment-box': true,
               'approved-box': payment.codigo_lancamento_omie,
@@ -49,41 +50,45 @@
               <v-col cols="10">
                 <v-row dense>
                   <v-col cols="5">
-                    <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" color="primary" disabled hide-details />
+                    <CustomInput label="Fornecedor" v-model="payment.fornecedor.razao_social" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Valor" v-model="payment.valor_total" color="primary" disabled mask="money" hide-details />
+                    <CustomInput label="Valor" v-model="payment.valor_total" disabled mask="money" hide-details />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Vencimento" v-model="payment.data_vencimento" color="primary" disabled hide-details />
+                    <CustomInput label="Vencimento" v-model="payment.data_vencimento" disabled hide-details />
                   </v-col>
 
-                  <v-col cols="auto" >
+                  <v-col cols="auto">
                     <v-chip color="blue" text="Internacional" v-if="payment.internacional" />
                     <v-chip color="secondary" text="Urgente" v-if="payment.urgente" />
                   </v-col>
 
                   <v-col cols="3">
-                    <CustomInput label="Categoria" v-model="payment.categoria.nome" color="primary" disabled hide-details />
+                    <CustomInput label="Categoria" v-model="payment.categoria.nome" disabled hide-details />
                   </v-col>
 
-                  <v-col cols="4" v-if="payment.projeto">
-                    <CustomInput label="Projeto" v-model="payment.projeto.nome" color="primary" disabled hide-details v-if="payment.projeto" />
+                  <!-- <v-col cols="4" v-if="payment.projeto">
+                    <CustomInput label="Projeto" v-model="payment.projeto.nome" disabled hide-details v-if="payment.projeto" />
+                  </v-col> -->
+
+                  <v-col cols="2">
+                    <CustomInput label="Tipo" v-model="payment.tipo_pagamento.nome" disabled hide-details />
                   </v-col>
 
                   <v-col cols="2">
-                    <CustomInput label="Tipo" v-model="payment.tipo_pagamento.nome" color="primary" disabled hide-details />
+                    <CustomInput label="Solicitante" v-model="payment.usuario.nome" disabled hide-details />
                   </v-col>
-
+                  
                   <v-col cols="2">
-                    <CustomInput label="Solicitante" v-model="payment.usuario.nome" color="primary" disabled hide-details />
+                    <CustomInput label="Setor de Referência" v-model="payment.setor_referencia.nome" disabled hide-details />
                   </v-col>
 
                   <!-- <v-col cols="2">
                     <CustomInput label="Internacional" :value="payment.fornecedor.internacional ? 'Sim' : 'Não'" color="primary" disabled hide-details />
-                  </v-col> -->                  
+                  </v-col> -->
 
                   <!-- <v-col cols="2" v-if="isTED(payment.tipo_pagamento.nome)">
                     <CustomInput label="Banco" v-model="payment.dados_bancarios.banco" color="primary" disabled hide-details />
@@ -118,8 +123,7 @@
               <v-col cols="2">
                 <v-row align="end" style="flex-direction: column" justify="center">
                   <v-col cols="auto">
-                    <v-chip v-if="sentWithSuccess(payment)" color="green" text="Enviado com sucesso" />
-                    <v-chip v-else-if="sentAndError(payment)" color="red" text="Erro ao enviar" />
+                    <v-chip v-if="payment.retorno_externo" :color="payment.retorno_externo.color" :text="payment.retorno_externo.success ? 'Enviado' : 'Erro ao enviar'" />
                     <v-chip v-else color="gray" text="Não enviado" />
                   </v-col>
 
@@ -148,14 +152,15 @@
               </v-col>
             </v-row>
 
-            <v-row justify="start">
-              <v-col v-if="payment.enviado_externo" cols="auto">
-                <v-alert :text="payment.retorno_externo?.codigo_status" :color="payment.retorno_externo?.color" density="compact" />
-                <v-tooltip activator="parent" text="Código de erro do sistema Omie" />
+            <v-row justify="start" dense v-if="payment.retorno_externo">
+              <v-col cols="auto" v-if="payment.retorno_externo.mensagem">
+                <v-alert :text="payment.retorno_externo?.mensagem" :color="payment.retorno_externo?.color" density="compact" variant="tonal" />
+                <v-tooltip activator="parent" location="bottom" text="Mensagem de erro do sistema" />
               </v-col>
-              <v-col v-if="payment.enviado_externo" cols="auto">
-                <v-alert :text="payment.retorno_externo?.descricao_status" :color="payment.retorno_externo?.color" density="compact" />
-                <v-tooltip activator="parent" text="Mensagem de erro do sistema Omie" />
+
+              <v-col cols="auto" v-if="payment.retorno_externo.complementos">
+                <v-alert :text="payment.retorno_externo?.complementos" :color="payment.retorno_externo?.color" density="compact" variant="tonal" />
+                <v-tooltip activator="parent" location="bottom" text="Mensagens de erro do Omie" />
               </v-col>
             </v-row>
           </v-card>
@@ -177,6 +182,7 @@
 
       <LazyModalConfirmCancel v-model:enable="enableModal.cancel" v-model:justificativa="justificativa" :actions="modalActions" :item="selectedPayment" />
       <LazyModalPagamento v-model:enable="enableModal.viewPayment" :id="selectedPayment?.id" />
+      <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="selectedPayment?.id" @getPagamento="getPaymentByClient()" />
     </v-form>
   </LayoutForm>
 </template>
@@ -184,9 +190,8 @@
 // * IMPORTS
 
 import dayjs from '#build/dayjs.imports.mjs'
-import { getEmpresa, getClientByPayment, getPagamentoByClient, sendPaymentsToOmie, postStatus } from '@api'
+import { getClientByPayment, getPagamentoByClient, sendPaymentsToOmie, postStatus } from '@api'
 
-const router = useRouter()
 const route = useRoute()
 const { $toast } = useNuxtApp()
 
@@ -204,13 +209,12 @@ const justificativa = ref(null)
 
 const selectedClient = ref(null)
 const selectedPayment = ref(null)
-const enableModal = reactive({ cancel: false, viewPayment: false })
+const enableModal = reactive({ cancel: false, viewPayment: false, edit: false })
 
 // * COMPUTEDS
 
 const countPayments = computed(() => payments.value.filter((payment) => payment.selectedOmie).length)
 const paymentsCountTitle = computed(() => `Pagamentos selecionados: ${countPayments.value}`)
-const hasPaymentSuccessFul = computed(() => payments.value.some((payment) => payment.enviado_externo && payment.codigo_lancamento_omie))
 
 const modalActions = computed(() => [
   { title: 'Fechar', icon: 'mdi-close', color: 'grey', type: 'cancel', click: () => (enableModal.cancel = false) },
@@ -226,8 +230,8 @@ const getClients = async () => {
 
     clients.value = data
   } 
-	catch (error) {
-    console.log(error)
+  catch (error) {
+    console.error(error.message)
     $toast.error('Erro ao buscar clientes')
   }
 }
@@ -243,8 +247,7 @@ const getPaymentByClient = async () => {
 
     showPayments.value = payments.value.length > 0
     notExistPayments.value = payments.value.length === 0
-  } 
-	catch (error) {
+  } catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar pagamentos')
   } finally {
@@ -255,42 +258,34 @@ const getPaymentByClient = async () => {
 const sendOmie = async () => {
   if (countPayments.value === 0) return $toast.error('Selecione ao menos um pagamento')
 
-  let errorCount = 0,
-    successCount = 0
+  let errorCount = 0
+  let successCount = 0
 
   const paymentsToSend = payments.value.filter((payment) => payment.selectedOmie)
 
   for await (const payment of paymentsToSend) {
-    let codigo = ''
     try {
       const { success, message, data } = await sendPaymentsToOmie(payment.id)
       if (!success) throw new Error(message)
 
-      if (!data.success) {
-        codigo = data.faultcode
-        throw new Error(data.message)
-      }
+      const findPayment = payments.value.find((p) => p.id === payment.id);
+      findPayment.selectedOmie = false;
+      
+      payment.codigo_lancamento_omie = data.codigo_lancamento_omie || null;
 
-      payment.codigo_lancamento_omie = data.codigo_lancamento_omie
+      payment.retorno_externo = { mensagem: data.message, color: data.success ? 'green' : '#e75c51', complementos: data.complementos.join(' | ') };
+      payment.enviado_externo = data.success;
 
-      const findPayment = payments.value.find((p) => p.id === payment.id)
-      findPayment.selectedOmie = false
-
-      payment.retorno_externo = { codigo_status: '1', descricao_status: 'Enviado com sucesso', color: 'green' }
-      payment.enviado_externo = true
-
-      successCount++
+      if (data.success) successCount++;
+      else errorCount++;
     } 
-	catch (error) {
-      payment.retorno_externo = { codigo_status: codigo, descricao_status: error.message, codigo_status: codigo, color: '#e75c51' }
-      payment.enviado_externo = true
+    catch (error) {
+      payment.retorno_externo = { mensagem: error.message, color: '#e75c51' }
+      payment.enviado_externo = true;
 
-      errorCount++
-      console.error(error.message)
+      errorCount++;
     }
   }
-
-  // await getPaymentByClient()
 
   loading.value = false
 
@@ -312,7 +307,7 @@ const sendPaidPayment = async (id) => {
 
     loading.value = false
   } 
-	catch (error) {
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao mover pagamento para provisionado')
   }
@@ -331,8 +326,8 @@ const cancelPayment = async () => {
 
     enableModal.cancel = false
     justificativa.value = null
-  } 
-	catch (error) {
+  }
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao cancelar pagamento')
   }
@@ -346,25 +341,17 @@ const viewPayment = (id) => {
   enableModal.viewPayment = true
 }
 
-// * AUX
+const editPayment = (id) => {
+  const payment = payments.value.find((payment) => payment.id === id)
+  if (!payment) return $toast.error('Pagamento não encontrado')
 
-const isPIX = (type) => type === 'PIX'
-const isTED = (type) => type === 'TED'
-const isBoleto = (type) => type === 'Boleto'
-const isPagOnline = (type) => type === 'Pagamento Online'
-const isCartao = (type) => type === 'Cartão de crédito' || type === 'Cartão de débito'
+  selectedPayment.value = payment
+  enableModal.edit = true
+}
 
-watch(selectedClient, async (value) => { if (selectedClient.value) await getPaymentByClient() })
-
-watch(route, (value) => {
-  console.log(value.query)
-  if(value.query.client_id) selectedClient.value = Number(value.query.client_id)
-}, {deep: true, immediate: true})
-
-const editPayment = (id) => router.push({ path: `../pagamento/${id}`, query: { client_id: selectedClient.value, edit: false } })
+// * UTILS
 
 const sentAndError = (payment) => payment.enviado_externo && !payment.codigo_lancamento_omie
-const sentWithSuccess = (payment) => payment.enviado_externo && payment.codigo_lancamento_omie
 
 const confirmCancelPayment = async (id) => {
   selectedPayment.value = payments.value.find((payment) => payment.id === id)
@@ -389,16 +376,6 @@ const formatPaymentData = (payment) => {
   return payment
 }
 
-const paymentSelectedOrNot = (selected) => {
-  if (selected) return 'mdi-checkbox-marked'
-  return 'mdi-checkbox-blank-outline'
-}
-
-const colorDependingOnReturn = (payment) => {
-  if (payment.enviado_externo && !payment.codigo_lancamento_omie) return '#e75c51'
-  else return 'green'
-}
-
 // * HOOKS
 
 onMounted(async () => await getClients())
@@ -408,9 +385,19 @@ onMounted(async () => await getClients())
 watch(selectedClient, async () => {
   if (selectedClient.value) await getPaymentByClient()
 })
-</script>
-<style scoped>
 
+watch(selectedClient, async (value) => {
+  if (selectedClient.value) await getPaymentByClient()
+})
+
+watch(route, (value) => {
+  if (value.query.client_id) selectedClient.value = Number(value.query.client_id)
+},
+{ deep: true, immediate: true })
+
+</script>
+
+<style scoped>
 .row-text {
   margin: 10px;
 }
@@ -454,14 +441,14 @@ watch(selectedClient, async () => {
 }
 
 .approved-box {
-  background-color: #ddffdd!important;
+  background-color: #ddffdd !important;
 }
 
 .error-box {
-  background-color: #ffdddd!important;
+  background-color: #ffdddd !important;
 }
 
 .selected-box {
-  background-color: #118c9f60!important;
+  background-color: #118c9f60 !important;
 }
 </style>
