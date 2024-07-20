@@ -119,9 +119,8 @@
       </CustomTableSelect>
     </LayoutForm>
 
-    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" @update="getPage()" />
-    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="itemView.id" @getPagamento="getPage()" />
-
+    <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" />
+    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="itemView.id" @getPagamento="getPage()"  />
 
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
@@ -164,7 +163,6 @@ const confirm = ref('delete')
 const itens = ref([])
 const itemView = ref({})
 const idsSelect = ref([])
-const ambos = ref(true)
 const loadingModal = ref(false)
 const permiteEditar = ref(false)
 const tableRef = ref(null)
@@ -275,7 +273,7 @@ const modalActionsConfirm = computed(() => [
     loading: loadingModal.value,
     click: async () => {
       if (confirm.value === 'approve') await sendStatus(4, [itemView.value.id])
-      if (confirm.value === 'revision') await sendStatus(2, [itemView.value.id])
+      else if (confirm.value === 'revision') await sendStatus(2, [itemView.value.id])
       else await sendStatus(9, [itemView.value.id])
     }
   }
@@ -295,7 +293,7 @@ const modalActionsConfirmAll = computed(() => [
     loading: loadingModal.value,
     click: async () => {
       if (confirm.value === 'approve') await sendStatus(4, idsSelect.value)
-      if (confirm.value === 'revision') await sendStatus(2, idsSelect.value)
+      else if (confirm.value === 'revision') await sendStatus(2, idsSelect.value)
       else await sendStatus(9, idsSelect.value)
     }
   }
@@ -336,15 +334,18 @@ const messageConfirmStatusAll = () => {
 }
 
 const sendStatus = async (status, id) => {
+  loadingModal.value = true
 
-  console.log(status, id)
   try {
-    if (status === 9 && !justificativa.value) throw new Error('Justificativa é obrigatória para prosseguir!')
-    loadingModal.value = true
+    const requireJustificativa = [2, 8, 9];
 
+    if (requireJustificativa.includes(status) && (!justificativa.value || justificativa.value.length < 10)){
+      throw new Error('A justificativa deve ter no mínimo 10 caracteres')
+    }
+  
     const { success, message } = await postStatus({ id, status, justificativa: justificativa.value, permite_editar: permiteEditar.value })
     if (!success) throw new Error(message)
-    loadingModal.value = false
+    
     enableModal.confirm = false
     enableModal.allConfirm = false
     $toast.success('Status alterado com sucesso')
@@ -352,33 +353,15 @@ const sendStatus = async (status, id) => {
     await tableRef.value.clearFilters()
     
     await getPage()
-
   } 
 	catch (error) {
     console.error(error)
-    $toast.error('Erro ao alterar status')
+    $toast.error(error.message)
   }
-}
-
-const valiDisapprovePayment = () => {
-  if (idsSelect.value.length === 0) {
-    loadingModal.value = false
-    return $toast.error('Selecione ao menos um pagamento')
-  }
-
-  if (ambos.value && !justificativa.ambos) {
-    loadingModal.value = false
-    return $toast.error('Informe a justificativa')
-  }
-  if (!ambos.value && (!justificativa.clientes || !justificativa.financeiro)) {
-    loadingModal.value = false
-    return $toast.error('Informe a justificativa')
-  }
+  loadingModal.value = false
 }
 
 const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
-
-
 
 const getPage = async () => {
   itens.value = new CustomStore({

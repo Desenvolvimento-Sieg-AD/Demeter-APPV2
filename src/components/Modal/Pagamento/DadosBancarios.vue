@@ -30,10 +30,8 @@
     <v-col cols="12" sm="6" :md="!isInternacional ? '8' : '6'">
       <CustomInput type="text" label="Observações" v-model="formValue.dados_complementares" hide-details />
     </v-col>
-  </v-row>
 
-  <v-row v-if="formValue.urgente" class="pa-3" dense style="margin-top: -22px;">
-    <v-col cols="12" sm="12" md="12">
+    <v-col cols="12" sm="12" md="12" v-if="formValue.urgente">
       <CustomInput 
         :required="formValue.urgente" 
         label="Justificativa da urgência" 
@@ -41,9 +39,7 @@
         hide-details="auto"
       />
     </v-col>
-  </v-row>
 
-  <v-row class="pa-3" dense style="margin-top: -22px;">
     <v-col cols="12" sm="6" md="3">
       <CustomInput
         append-inner-icon="mdi-cash-clock"
@@ -135,8 +131,11 @@
     <v-col v-if="form.tipo_id === 2" cols="1">
       <CustomInput type="text" mask="number" hide-details="auto" label="Dígito" v-model="formValue.dados_bancarios.digito" required :max="1" />
     </v-col>
-  </v-row>
 
+    <!-- <v-col cols="12">
+      <CustomInput required label="Motivo" type="textarea" :rows="4" :counter="500" v-model="formValue.motivo" append-inner-icon="mdi-chat-question-outline"  />
+    </v-col> -->
+  </v-row>
   
 </template>
 <script setup>

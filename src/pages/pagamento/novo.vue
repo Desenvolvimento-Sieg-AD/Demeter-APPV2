@@ -8,9 +8,9 @@
 
         <ModalPagamentoCategoria v-model:form="form" :documentRequired="documentRequired" />
 
-        <ModalPagamentoObservacoes v-model:form="form" :user="user" />
-
         <ModalPagamentoDadosBancarios v-model:form="form" :paymentsType="paymentsType" />
+
+        <ModalPagamentoObservacoes v-model:form="form" :user="user" />
       </v-form>
     </LayoutForm>
 
@@ -115,13 +115,12 @@ function buildFormData() {
 const sendForm = async () => {
   loading.value = true
   try {
-    if (isNaN(Number(form.value.projeto_id)) && requer_projeto.value) return cancelProcess('Selecione um projeto existente ou crie um novo projeto')
+    if (isNaN(Number(form.value.projeto_id)) && requer_projeto.value) throw new Error('Selecione um projeto')
 
     const { valid } = await formValidate.value.validate()
+    if (!valid) throw new Error('Preencha todos os campos obrigatórios')
 
-    if (!valid) return cancelProcess('Preencha todos os campos obrigatórios')
-
-    if (validDateToCard.value) return cancelProcess('Data de vencimento expirada')
+    if (validDateToCard.value) throw new Error('Data de vencimento expirada')
 
     const formData = buildFormData()
     const { success, message } = await postPagamento(formData)
@@ -139,13 +138,8 @@ const sendForm = async () => {
   catch (error) {
     loading.value = false
     console.error(error)
-    $toast.error('Erro ao criar uma solicitação de pagamento')
+    $toast.error(error.message)
   }
-}
-
-const cancelProcess = (message) => {
-  loading.value = false
-  $toast.error(message)
 }
 
 const definePaymentImportant = async () => {

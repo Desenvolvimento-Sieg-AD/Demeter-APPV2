@@ -62,7 +62,7 @@
 
 <script setup>
 //* IMPORTS
-import { postUpload } from '@api'
+import { createArquivo } from '@api'
 const { $toast } = useNuxtApp()
 
 const dayjs = useDayjs()
@@ -123,7 +123,7 @@ const sendUpload = async () => {
     formData.append('name_file', nameFile.value)
     formData.append('tipo_anexo_id', props.tipo_anexo_id)
 
-    const { success, message } = await postUpload(formData, props.item.id)
+    const { success, message } = await createArquivo(formData, props.item.id)
 
     if (!success) throw new Error(message)
 

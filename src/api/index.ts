@@ -4,3 +4,4 @@ export * from './pagamento';
 export * from './categoria';
 export * from './conversor';
 export * from './setores';
+export * from './projeto';

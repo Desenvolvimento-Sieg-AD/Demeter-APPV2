@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   sendToken: (token: string) => ipcRenderer.invoke('sendToken:app', token),
   sendLink: (link: string) => ipcRenderer.invoke('sendLink:app', link),
   updateAvailable: (callback: any) => ipcRenderer.on('updateAvailable:app', (event: IpcRendererEvent, version: string) => callback(event, version)),
+  hasFile: (filePath: any) => ipcRenderer.invoke('os:hasFile', filePath),
   getVersion: () => ipcRenderer.invoke('get:version')
 })

@@ -20,7 +20,7 @@
 
 				<v-row justify="center">
 					<v-col cols="12">
-						<CustomInput type="textarea" :rows="2" v-model="item.motivo" disabled hide-details label="Motivo do Pagamento"/>
+						<CustomInput type="textarea" :rows="4" v-model="item.motivo" disabled hide-details label="Motivo do Pagamento"/>
 					</v-col>
 				</v-row>
 
