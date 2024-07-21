@@ -474,8 +474,10 @@ const clearFiltersAndRefreshToolbar = () => {
   stored.searchText = null
   stored.columns = columns
   localStorage.setItem(storageKey.value, JSON.stringify(stored))
-
+   
+  companySelected()
   toolbarKey.value++
+ 
 }
 
 const resetTable = async () => {
@@ -501,7 +503,8 @@ const onOptionChanged = () => {
       comp.push(filters[2])
     } else {
       for (const filter of filters) {
-        if (filter[0] == 'empresa.apelido') {
+       
+        if (filter && filter[0] == 'empresa.apelido') {
           comp.push(filter[2])
         }
       }

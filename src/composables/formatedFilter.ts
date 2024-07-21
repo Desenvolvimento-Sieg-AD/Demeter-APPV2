@@ -1,4 +1,5 @@
 export const formatFilter = (filterArray: any) => {
+
     const formattedFilters = []
     for (let i = 0; i < filterArray.length; i++) {
       if (filterArray[i] === '=' ) continue
@@ -7,7 +8,7 @@ export const formatFilter = (filterArray: any) => {
         continue
       }
       if(Array.isArray(filterArray[i][0]) && filterArray[i].length > 2) {
-        console.log('to and',filterArray[i])
+       
           for(let j = 0; j < filterArray[i].length; j++){
               if(filterArray[i][j] === 'or') {
                   formattedFilters.push({ fieldName : 'or', value:undefined })
@@ -44,7 +45,7 @@ export const formatFilter = (filterArray: any) => {
   
       formattedFilters.push({ fieldName, value })
     }
-  
+
     return formattedFilters
   }
   
