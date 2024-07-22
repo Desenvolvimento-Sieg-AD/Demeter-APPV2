@@ -386,7 +386,7 @@ const getPagamentos = async () => {
   loading.value = true
 
   try {
-    const { success, message, data } = await getPagamentoByScope('usuario')
+    const { success, message, data } = await getPagamentoByScope('financeiroPendentes')
     if (!success) throw new Error(message)
 
     pagamentos.value = data
