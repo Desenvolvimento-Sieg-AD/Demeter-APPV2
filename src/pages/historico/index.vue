@@ -2,13 +2,15 @@
   <div>
     <LayoutForm>
       
-      <CustomTableSelect
+      <CustomTableMain
         :columns="colums"
         :items="pagamentos"
         :actions="actions"
         :loading="loading"
         scrolling="standard"
         allow-search
+        store-state
+        key-stored="pagamentos-historico-table"
         :noDataText="'Não há registros de pagamentos'"
         allowColumnResizing
         choose-columns
@@ -125,7 +127,7 @@
           </div>
         </template>
 
-      </CustomTableSelect>
+      </CustomTableMain>
     </LayoutForm>
     <LazyModalPagamento v-model:enable="enableModal" :id="itemView.id" />
   </div>

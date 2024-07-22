@@ -136,7 +136,7 @@
     </CustomTableMain>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
-    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="viewPayment.id" @getPagamento="getPage()" />
+    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="viewPayment.id" @getPagamento="getPagamentos()" />
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
       v-model:justificativa="justificativa"
@@ -146,9 +146,9 @@
       :actions="actionsModalConfirm"
     />
 
-    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPage" />
+    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPagamentos" />
 
-    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPage" />
+    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPagamentos" />
 
     <LazyModalConfirmAllStatus
       v-if="enableModal.allConfirm"
@@ -374,7 +374,7 @@ const sendStatus = async (status, id) => {
 
     await tableRef.value.clearFilters()
 
-    await getPage()
+    await getPagamentos()
   } catch (error) {
     console.error(error)
     $toast.error(error.message)
