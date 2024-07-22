@@ -25,7 +25,7 @@
           </v-col>
 
           <v-col cols="3">
-            <CustomInput disabled label="Setor Referência" hide-details v-model="pagamento.setor_referencia.nome" />
+            <CustomInput disabled label="Setor Solicitante" hide-details v-model="pagamento.setor_solicitante.nome" />
           </v-col>
 
           <v-col cols="3">
@@ -35,10 +35,10 @@
               itemValue="id"
               itemTitle="nome"
               :items="setores"
-              label="Setor Solicitante"
+              label="Setor Referência"
               :itemProps="setorProps"
               hide-details
-              v-model="pagamento.setor_solicitante.nome"
+              v-model="pagamento.setor_id"
               :disabled="!editavel"
             />
           </v-col>
@@ -155,31 +155,31 @@
           </v-col>
 
           <v-col v-if="pagamento.tipo_id == 1 && pagamento.tipo_chave_pix_id" cols="6">
-            <CustomInput :disabled="!editavel" label="Chave Pix" required hide-details v-model="pagamento.dados_bancarios.chave_pix" />
+            <CustomInput :disabled="!editavel" :mask="maskDescriptionPIX" label="Chave Pix" required hide-details v-model="pagamento.dados_bancarios.outhers" />
           </v-col>
 
           <!-- TED -->
 
           <v-col cols="3" v-if="pagamento.tipo_id == 2">
-            <CustomInput :disabled="!editavel" label="Banco" required hide-details v-model="pagamento.dados_bancarios.banco" />
+            <CustomInput :disabled="!editavel" mask="number" label="Banco" required hide-details v-model="pagamento.dados_bancarios.banco" />
           </v-col>
 
           <v-col cols="2" v-if="pagamento.tipo_id == 2">
-            <CustomInput :disabled="!editavel" label="Agência" required hide-details v-model="pagamento.dados_bancarios.agencia" />
+            <CustomInput :disabled="!editavel" mask="number" label="Agência" required hide-details v-model="pagamento.dados_bancarios.agencia" />
           </v-col>
 
           <v-col cols="3" v-if="pagamento.tipo_id == 2">
-            <CustomInput :disabled="!editavel" label="Conta" required hide-details v-model="pagamento.dados_bancarios.conta" />
+            <CustomInput :disabled="!editavel" mask="number" label="Conta" required hide-details v-model="pagamento.dados_bancarios.conta" />
           </v-col>
 
           <v-col cols="1" v-if="pagamento.tipo_id == 2">
-            <CustomInput :disabled="!editavel" label="Conta" required hide-details v-model="pagamento.dados_bancarios.digito" />
+            <CustomInput :disabled="!editavel" mask="number" label="Conta" required hide-details v-model="pagamento.dados_bancarios.digito" />
           </v-col>
 
           <!-- Boleto -->
 
           <v-col v-if="pagamento.tipo_id == 3" cols="9">
-            <CustomInput :disabled="!editavel" label="Código de Barras" required hide-details v-model="pagamento.dados_bancarios.outhers" />
+            <CustomInput :disabled="!editavel" :mask="maskDescriptionOuthers" label="Código de Barras" required hide-details v-model="pagamento.dados_bancarios.outhers" />
           </v-col>
 
           <!-- Pagamento Online -->
@@ -293,7 +293,8 @@ import {
   updatePagamento,
   getProjects,
   getProjetoByID,
-  deleteArquivo
+  deleteArquivo,
+  getContasDisponiveis
 } from '~/api'
 const { $toast } = useNuxtApp()
 const { openBase64File, copyFilePath } = useOs()
@@ -589,7 +590,7 @@ const update = async () => {
         }
       }
 
-      if (typeof pagamento.value[key] === 'object') continue
+      if (typeof pagamento.value[key] === 'object') continue;
 
       payload[key] = pagamento.value[key]
     }
@@ -606,6 +607,32 @@ const update = async () => {
   }
 
   loading.value = false
+}
+
+const maskDescriptionOuthers = computed(() => {
+  const tipo = tiposPagamento.value.find((tipo) => tipo.id === pagamento?.value?.tipo_id)
+  return tipo?.mask ?? ''
+})
+
+const maskDescriptionPIX = computed(() => {
+  const tipo = tiposChavePix.value.find((tipo) => tipo.id === pagamento?.value?.tipo_chave_pix_id)
+  return tipo?.mask ?? ''
+})
+
+const getCards = async () => {
+  try {
+    if (!pagamento.value.empresa_id) return $toast.error('Selecione uma empresa')
+    if (!pagamento.value.tipo_id) return $toast.error('Selecione um tipo de pagamento')
+
+    const { success, message, data } = await getContasDisponiveis(pagamento.value.empresa_id, pagamento.value.tipo_id)
+    if (!success) throw new Error(message)
+
+    empresaCartoes.value = data
+  } 
+  catch (error) {
+    console.error(error)
+    $toast.error('Erro ao buscar cartões')
+  }
 }
 
 //* INPUT PROPS
@@ -645,4 +672,9 @@ watch(
 // watch(() => fornecedor.internacional, getCategorias, { immediate: true })
 
 watch(() => pagamento?.value?.empresa_id, existRelation)
+
+watch(() => pagamento?.value?.tipo_id, async (value) => {
+  if (value == 5 || value == 6) getCards()
+}, { immediate: true })
+
 </script>

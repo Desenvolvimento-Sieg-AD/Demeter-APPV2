@@ -265,14 +265,4 @@ watch(() => formValue.value.tipo_id, (value) => {
   }
 }, { immediate: true })
 
-watch(() => formValue.value.tipo_id, (value) => {
-  if (value == 5 || value == 6) {
-    try {
-      getCards()
-    } 
-	catch (error) {
-      console.error(error.message)
-    }
-  }
-}, { immediate: true })
 </script>
