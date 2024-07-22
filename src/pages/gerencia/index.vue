@@ -1,16 +1,17 @@
 <template>
   <div>
     <LayoutForm>
-      <PaymentsValue :year="year" :month="month" :lastMonth="lastMonth" :today="today" />
+      <!-- <PaymentsValue :year="year" :month="month" :lastMonth="lastMonth" :today="today" /> -->
 
-      <v-divider class="my-2" />
-      <CustomTableSelect
+      <!-- <v-divider class="my-2" /> -->
+
+      <CustomTableMain
         ref="tableRef"
-        height="calc(100vh - 220px)"
+        height="calc(100vh - 170px)"
         :columns="colums"
-        :items="itens"
+        :items="pagamentos"
         :actions="actions"
-        :loading="false"
+        :loading="loading"
         scrolling="standard"
         allow-search
         allowColumnResizing
@@ -30,13 +31,6 @@
         @disapprovePayment="openDisapprovePayment"
         @approvePayment="openApprovePayment"
       >
-        <template #item-usuario="{ data: { data: item } }">
-          <div>
-            <v-tooltip :text="item.usuario.nome" activator="parent" location="top" />
-            {{ item.usuario.sigla }}
-          </div>
-        </template>
-
         <template #item-categoria="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             {{ item.categoria.nome }}
@@ -58,7 +52,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="notaFiscal(item.anexos_pagamento)">
-              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento).id)" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
               <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </div>
 
@@ -72,7 +66,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="documentoAnexo(item.anexos_pagamento)">
-              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento).id)" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
               <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
             </div>
 
@@ -95,32 +89,37 @@
           </div>
         </template>
 
-        <template #item-setor="{ data: { data: item } }">
+        <template #[`item-setor_referencia.nome`]="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-for="(set, index) in item.usuario.setores" :key="index" :class="classSetor(item, index)">
-              <v-tooltip :text="set.nome" activator="parent" location="top" />
-
-              {{ defineNameSetor(set.sigla, item, index) }}
-            </div>
+            <v-tooltip :text="item.setor_referencia.nome" activator="parent" location="bottom" />
+            {{ item.setor_referencia.sigla }}
           </div>
         </template>
 
-        <template #item-empresa="{ data: { data: item } }">
+        <template #[`#item-empresa.apelido`]="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <v-tooltip :text="item.empresa.nome" activator="parent" location="top" />
+            <v-tooltip :text="item.empresa.nome" activator="parent" location="bottom" />
             {{ item.empresa.apelido }}
           </div>
         </template>
+
+        <template #[`item-usuario.sigla`]="{ data: { data: item } }">
+          <div>
+            <v-tooltip :text="item.usuario.nome" activator="parent" location="bottom" />
+            {{ item.usuario.sigla }}
+          </div>
+        </template>
+
         <template #item-created_at="{ data: { data: item } }">
           <div class="template">
             {{ formatDate(item.created_at) }}
           </div>
         </template>
-      </CustomTableSelect>
+      </CustomTableMain>
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="itemView.id" />
-    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="itemView.id" @getPagamento="getPage()"  />
+    <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="itemView.id" @getPagamento="getPagamentos()"  />
 
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
@@ -147,6 +146,7 @@
 import CustomStore from 'devextreme/data/custom_store'
 
 import { postStatus } from '@api'
+import { getPagamentoByScope } from '~/api';
 const { $toast } = useNuxtApp()
 const colums = getColumns('gerencia')
 const { openBase64File } = useOs()
@@ -160,9 +160,10 @@ const enableModal = reactive({
 })
 
 const confirm = ref('delete')
-const itens = ref([])
+const pagamentos = ref([])
 const itemView = ref({})
 const idsSelect = ref([])
+const loading = ref(false)
 const loadingModal = ref(false)
 const permiteEditar = ref(false)
 const tableRef = ref(null)
@@ -173,9 +174,8 @@ const valueLastMonth = ref(0)
 const valueActualMonth = ref(0)
 const valueToday = ref(0)
 
-onMounted(async () => {
-  await getPage()
-})
+onMounted(async () => getPagamentos())
+
 const handleSelectionChange = (items) => {
   selections.value = items
   const ids = items.map((item) => item.id)
@@ -352,7 +352,7 @@ const sendStatus = async (status, id) => {
     
     await tableRef.value.clearFilters()
     
-    await getPage()
+    await getPagamentos()
   } 
 	catch (error) {
     console.error(error)
@@ -361,58 +361,25 @@ const sendStatus = async (status, id) => {
   loadingModal.value = false
 }
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
+const getPagamentos = async () => {
+  loading.value = true;
 
-const getPage = async () => {
-  itens.value = new CustomStore({
-    key: 'id',
-    async load(loadOptions) {
-      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
+  try {
+    const { success, message, data } = await getPagamentoByScope('gerencia')
+    if (!success) throw new Error(message)
+  
+    pagamentos.value = data
+  }
+  catch (error) {
+    console.error(error)
+    $toast.error('Erro ao buscar pagamentos')
+  }
 
-      const queryString = paramsName
-        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
-        .map((paramName) => {
-          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
-          return { [paramName]: loadOptions[paramName] }
-        })
-
-      const mergedObject = queryString.reduce((acc, obj) => {
-        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
-        return acc
-      }, {})
-
-      try {
-        const { success, message, data } = await useApi(`/pagamento/scope/gerencia`, {
-          query: {
-            paging: true,
-            limit: mergedObject.take,
-            offset: mergedObject.skip,
-            sort: mergedObject.sort,
-            filter: JSON.stringify(mergedObject.filter)
-          }
-        })
-
-        if (!success) throw new Error(message)
-        const { valores } = data
-        valueYear.value = valores.ano ?? 0
-        valueLastMonth.value = valores.ultimo_mes ?? 0
-        valueActualMonth.value = valores.mes ?? 0
-        valueToday.value = valores.hj ?? 0
-
-        return {
-          data: data.data,
-          totalCount: data.count
-        }
-      } 
-      catch (error) {
-        console.error(error)
-        $toast.error('Erro ao carregar os pagamentos')
-      }
-    }
-  })
+  loading.value = false
 }
 
-await getPage()
+getPagamentos()
+
 </script>
 
 <style scoped>

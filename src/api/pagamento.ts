@@ -142,6 +142,18 @@ export async function existNFEqual(numero_nf: string, fornecedor_id: string) {
   }
 }
 
+export async function getArquivoPagamento(id: Number) {
+  try {
+    const { success, message, data } = await useApi(`/pagamento/arquivo/${id}`)
+
+    if (!success) throw new Error(message)
+    return { success, message, data }
+  } 
+  catch (error) {
+    return { success: false, message: error, data: null }
+  }
+}
+
 export async function createArquivo(formData: FormData, id: Number) {
   try {
     const { success, message, data } = await useApi(`/pagamento/arquivo/${id}`, {

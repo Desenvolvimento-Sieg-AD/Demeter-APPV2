@@ -80,7 +80,6 @@ const selectedCategories = computed(() => categorias.value.filter((categoria) =>
 
 const defineFileTitle = (fileName) => (fileName.length > 20 ? fileName.replace(/.\w+$/g, '') : fileName)
 
-
 const loadCategorias = async (setor_solicitante_id, internacional, nacional) => {
   try {
     if (!setor_solicitante_id) return

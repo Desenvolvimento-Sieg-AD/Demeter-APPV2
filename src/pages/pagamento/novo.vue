@@ -228,28 +228,24 @@ const getPriceDollar = async () => {
   } 
   catch (error) {
     console.error(error)
-    $toast.error('Erro ao buscar valor do dolar')
+    $toast.error('Erro ao buscar valor do dolar, utilizando o valor aproximado de R$ 5,50')
+    form.value.valor_total = 5.5
   }
 }
 
 // * Watchers
 
-watch(
-  () => form.value.fornecedor.internacional,
-  async (nv, oV) => {
-    if (nv) {
-      paymentsType.value = paymentsType.value.filter((type) => type.modo_internacional)
-      await getPriceDollar()
-    } else await definePaymentImportant()
-  }
-)
+watch(() => form.value.fornecedor.internacional, async (nv, oV) => {
+  if (nv) { 
+    paymentsType.value = paymentsType.value.filter((type) => type.modo_internacional)
+    await getPriceDollar()
+  } else await definePaymentImportant()
+})
 
-watch(
-  () => form.value.valor_total_dolar,
-  (nv, oV) => {
-    if (nv) form.value.valor_total = priceNow.value * nv
-  }
-)
+watch(() => form.value.valor_total_dolar, (nv, oV) => {
+  if (nv) form.value.valor_total = priceNow.value * nv
+})
+
 </script>
 
 <style scoped>

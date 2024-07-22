@@ -1,149 +1,142 @@
 <template>
-  <div>
-    <LayoutForm>
-      <CustomTableSelect
-        ref="tableRef"
-        pager
-        store-state
-        :items="itens"
-        choose-columns
-        selectionCheck
-        :loading="loadingTable"
-        :columns="colums"
-        :actions="actions"
-        allowColumnResizing
-        allow-column-reordering
-        key-stored="pagamentos-pendentes-table"
-        :allowed-page-sizes="[5, 10, 15, 25, 30]"
-        :page-size="15"
-        @selectionChanged="handleSelectionChange"
-        noDataText="Não há nenhuma solicitação de pagamento"
-        :paymentsSelecteds="itemsSelects.length >= 1"
-        page="financeiro"
-        companiesFilter
-        @editPayment="openEditPayment"
-        @disapprovePayment="openDisapprovePayment"
-        @approvePayment="openApprovePayment"
-        height="calc(100vh - 170px)"
-      >
-        <template #item-usuario="{ data: { data: item } }">
-          <div>
-            <v-tooltip :text="item.usuario?.nome" activator="parent" location="top" />
-            {{ item.usuario?.sigla }}
-          </div>
-        </template>
+  <LayoutForm>
+    <CustomTableMain
+      ref="tableRef"
+      pager
+      store-state
+      :items="pagamentos"
+      choose-columns
+      selectionCheck
+      :loading="loading"
+      :columns="colums"
+      :actions="actions"
+      allowColumnResizing
+      allow-column-reordering
+      key-stored="pagamentos-pendentes-table"
+      :allowed-page-sizes="[5, 10, 15, 25, 30]"
+      :page-size="15"
+      @selectionChanged="handleSelectionChange"
+      noDataText="Não há nenhuma solicitação de pagamento"
+      :paymentsSelecteds="itemsSelects.length >= 1"
+      page="financeiro"
+      companiesFilter
+      @editPayment="openEditPayment"
+      @disapprovePayment="openDisapprovePayment"
+      @approvePayment="openApprovePayment"
+      height="calc(100vh - 170px)"
+    >
+      <template #[`item-usuario.sigla`]="{ data: { data: item } }">
+        <div>
+          <v-tooltip :text="item.usuario.nome" activator="parent" location="bottom" />
+          {{ item.usuario.sigla }}
+        </div>
+      </template>
 
-        <template #item-categoria="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            {{ item?.categoria?.nome }}
-          </div>
-        </template>
+      <template #item-categoria="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          {{ item?.categoria?.nome }}
+        </div>
+      </template>
 
-        <template #item-tipo="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            {{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
-          </div>
-        </template>
+      <template #item-tipo="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          {{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
+        </div>
+      </template>
 
-        <template #[`item-movimentacoes_pagamento.status_pagamento`]="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
-              <p class="font-weight-bold">
-                {{ item.movimentacoes_pagamento[0].status_pagamento.nome }}
-              </p>
-            </v-chip>
-          </div>
-        </template>
-
-        <template #item-urgente="{ data: { data: item } }">
-          <v-chip :color="item.urgente ? 'red' : 'gray'">
+      <template #item-movimentacoes_pagamento[0].status_pagamento.nome="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          <v-chip :color="item.movimentacoes_pagamento[0].status_pagamento.cor">
             <p class="font-weight-bold">
-              {{ item.urgente ? 'Sim' : 'Não' }}
+              {{ item.movimentacoes_pagamento[0].status_pagamento.nome }}
             </p>
           </v-chip>
-        </template>
+        </div>
+      </template>
 
-        <template #item-documento="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            {{ defineDocument(item.fornecedor.tipo, item.fornecedor.documento) }}
+      <template #item-urgente="{ data: { data: item } }">
+        <v-chip :color="item.urgente ? 'red' : 'gray'">
+          <p class="font-weight-bold">
+            {{ item.urgente ? 'Sim' : 'Não' }}
+          </p>
+        </v-chip>
+      </template>
+
+      <template #item-documento="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          {{ defineDocument(item.fornecedor.tipo, item.fornecedor.documento) }}
+        </div>
+      </template>
+
+      <template #item-anexo="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          <div v-if="notaFiscal(item.anexos_pagamento)">
+            <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento).id)" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+            <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
           </div>
-        </template>
 
-        <template #item-anexo="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            <div v-if="notaFiscal(item.anexos_pagamento)">
-              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
-              <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
-            </div>
-
-            <div v-else>
-              <v-icon disabled color="gray"> mdi-paperclip </v-icon>
-              <v-tooltip text="Sem Nota Fiscal" activator="parent" location="top" />
-            </div>
+          <div v-else>
+            <v-icon disabled color="gray"> mdi-paperclip </v-icon>
+            <v-tooltip text="Sem Nota Fiscal" activator="parent" location="top" />
           </div>
-        </template>
+        </div>
+      </template>
 
-        <template #item-doc="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            <div v-if="documentoAnexo(item.anexos_pagamento)">
-              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
-              <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
-            </div>
-
-            <div v-else>
-              <v-icon disabled color="gray">mdi-paperclip</v-icon>
-              <v-tooltip text="Sem Anexo" activator="parent" location="top" />
-            </div>
+      <template #item-doc="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          <div v-if="documentoAnexo(item.anexos_pagamento)">
+            <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento).id)" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+            <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
           </div>
-        </template>
 
-        <template #item-data="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            {{ formatDate(item.data_vencimento) }}
+          <div v-else>
+            <v-icon disabled color="gray">mdi-paperclip</v-icon>
+            <v-tooltip text="Sem Anexo" activator="parent" location="top" />
           </div>
-        </template>
+        </div>
+      </template>
 
-        <template #item-data_aprovacao="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            {{ formatDate(item.movimentacoes_pagamento[0].data_inicio) }}
-          </div>
-        </template>
+      <template #item-data="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          {{ formatDate(item.data_vencimento) }}
+        </div>
+      </template>
 
-        <template #item-created_at="{ data: { data: item } }">
-          <div class="template">
-            {{ formatDate(item.created_at) }}
-          </div>
-        </template>
+      <template #item-data_aprovacao="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          {{ formatDate(item.movimentacoes_pagamento[0].data_inicio) }}
+        </div>
+      </template>
 
-        <template #item-valor_total="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            {{ formatCurrency(item.valor_total) }}
-          </div>
-        </template>
+      <template #item-created_at="{ data: { data: item } }">
+        <div class="template">
+          {{ formatDate(item.created_at) }}
+        </div>
+      </template>
 
-        <template #item-setor="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            <div v-for="(set, index) in item.usuario.setores" :key="index" :class="classSetor(item, index)">
-              <v-tooltip :text="set.nome" activator="parent" location="top" />
+      <template #item-valor_total="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          {{ formatCurrency(item.valor_total) }}
+        </div>
+      </template>
 
-              {{ defineNameSetor(set.sigla, item, index) }}
-            </div>
-          </div>
-        </template>
+      <template #[`item-setor_referencia.nome`]="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          <v-tooltip :text="item.setor_referencia.nome" activator="parent" location="bottom" />
+          {{ item.setor_referencia.sigla }}
+        </div>
+      </template>
 
-        <template #item-empresa="{ data: { data: item } }">
-          <div class="d-flex align-center justify-center text-center">
-            <v-tooltip :text="item.empresa.nome" activator="parent" location="top" />
-            {{ item?.empresa?.apelido }}
-          </div>
-        </template>
-      </CustomTableSelect>
-    </LayoutForm>
+      <template #[`#item-empresa.apelido`]="{ data: { data: item } }">
+        <div class="d-flex align-center justify-center text-center">
+          <v-tooltip :text="item.empresa.nome" activator="parent" location="bottom" />
+          {{ item.empresa.apelido }}
+        </div>
+      </template>
+    </CustomTableMain>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
     <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="viewPayment.id" @getPagamento="getPage()" />
-
-
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
       v-model:justificativa="justificativa"
@@ -164,7 +157,7 @@
       :message="messageConfirmAllStatus"
       :actions="modalActionsAprovedAll"
     />
-  </div>
+  </LayoutForm>
 </template>
 
 <script setup>
@@ -172,6 +165,7 @@
 
 import CustomStore from 'devextreme/data/custom_store'
 import { postStatus } from '@api'
+import { getPagamentoByScope } from '~/api'
 const { $toast } = useNuxtApp()
 const colums = getColumns('financeiro')
 const { openBase64File } = useOs()
@@ -179,12 +173,12 @@ const { openBase64File } = useOs()
 // * DATA
 
 const confirm = ref('exportar')
-const itens = ref([])
+const pagamentos = ref([])
 const viewPayment = ref({})
 const itemsSelects = ref([])
 const justificativa = ref(null)
 const loadingModal = ref(false)
-const loadingTable = ref(false)
+const loading = ref(false)
 const tableRef = ref(null)
 
 const enableModal = reactive({
@@ -318,7 +312,7 @@ const modalActionsAprovedAll = computed(() => [
     type: 'success',
     loading: loadingModal.value,
     click: async () => await validBeforeSend()
-  },
+  }
 ])
 
 const messageConfirmStatus = computed(() => {
@@ -341,17 +335,10 @@ const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id ==
 
 const defineDocument = (tipo) => (tipo === 'juridico' ? maskCnpj(item.fornecedor.documento) : maskCpf(item.fornecedor.documento))
 
-const smallerIndex = (index, item) => index < item.length - 1
-
-const classSetor = (item, index) => (smallerIndex(index, item.usuario.setores) ? 'mr-2' : '')
-
-const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
-
 const handleSelectionChange = (items) => {
   itemsSelects.value = items
 }
 const validBeforeSend = async () => {
-
   const status_id = status[confirm.value]
 
   const lista_id = itemsSelects.value.map((item) => item.id)
@@ -360,7 +347,7 @@ const validBeforeSend = async () => {
 }
 
 const sendStatus = async (status, id) => {
-  loadingModal.value = true;
+  loadingModal.value = true
 
   try {
     const requireJustificativa = [2, 8, 9]
@@ -381,72 +368,37 @@ const sendStatus = async (status, id) => {
     if (!success) throw new Error(message)
 
     $toast.success('Status alterado com sucesso')
-    
+
     enableModal.confirm = false
     enableModal.allConfirm = false
-    
+
     await tableRef.value.clearFilters()
-    
+
     await getPage()
-  } 
-	catch (error) {
+  } catch (error) {
     console.error(error)
     $toast.error(error.message)
   }
-  loadingModal.value = false;
+  loadingModal.value = false
 }
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
+const getPagamentos = async () => {
+  loading.value = true
 
+  try {
+    const { success, message, data } = await getPagamentoByScope('usuario')
+    if (!success) throw new Error(message)
 
+    pagamentos.value = data
+  } catch (error) {
+    console.error(error)
+    $toast.error('Erro ao buscar pagamentos')
+  }
 
-const getPage = async () => {
-  itens.value = new CustomStore({
-    key: 'id',
-    async load(loadOptions) {
-      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
-
-      const queryString = paramsName
-        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
-        .map((paramName) => {
-          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
-          return { [paramName]: loadOptions[paramName] }
-        })
-
-      const mergedObject = queryString.reduce((acc, obj) => {
-        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
-        return acc
-      }, {})
-
-      try {
-        const { success, message, data } = await useApi(`/pagamento/scope/financeiroPendentes`, {
-          query: {
-            paging: true,
-            limit: mergedObject.take,
-            offset: mergedObject.skip,
-            sort: mergedObject.sort,
-            filter: JSON.stringify(mergedObject.filter)
-          }
-        })
-
-        if (!success) throw new Error(message)
-
-        data.data.forEach((item) => {
-          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
-          item.lote = item.movimentacoes_pagamento.at()?.lote
-        })
-
-        return { data: data.data, totalCount: data.count }
-      } 
-	catch (error) {
-        console.error(error)
-        $toast.error('Erro ao carregar os pagamentos')
-      }
-    }
-  })
+  loading.value = false
 }
 
-await getPage()
+getPagamentos()
 </script>
 
 <style scoped>

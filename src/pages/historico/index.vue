@@ -1,17 +1,12 @@
 <template>
   <div>
     <LayoutForm>
-      <PaymentsValue :year="valueYear" :month="valueActualMonth" :lastMonth="valueLastMonth" :today="valueToday" />
-
-      <v-divider class="my-2" />
       
       <CustomTableSelect
         :columns="colums"
-        :items="itens"
+        :items="pagamentos"
         :actions="actions"
-        :loading="false"
-        store-state
-        key-stored="pagamentos-historico-table"
+        :loading="loading"
         scrolling="standard"
         allow-search
         :noDataText="'Não há registros de pagamentos'"
@@ -19,14 +14,14 @@
         choose-columns
         allow-column-reordering
         :allowed-page-sizes="[5, 10, 15, 25]"
-        :page-size="15"
+        :page-size="25"
         companiesFilter
         pager
-        height="calc(100vh - 220px)"
+        height="calc(100vh - 170px)"
       >
-        <template #item-usuario="{ data: { data: item } }">
+      <template #[`item-usuario.sigla`]="{ data: { data: item } }">
           <div>
-            <v-tooltip :text="item.usuario.nome" activator="parent" location="top" />
+            <v-tooltip :text="item.usuario.nome" activator="parent" location="bottom" />
             {{ item.usuario.sigla }}
           </div>
         </template>
@@ -42,11 +37,11 @@
             {{ item.fornecedor.tipo === 'juridico' ? 'Jurídico' : 'Físico' }}
           </div>
         </template>
-        <template #item-movimentacoes_pagamento.status_pagamento="{ data: { data: item } }">
+        <template #item-movimentacoes_pagamento[0].status_pagamento.nome="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <v-chip :color="item.movimentacoes_pagamento[0]?.status_pagamento?.cor">
               <p class="font-weight-bold">
-                {{ item.movimentacoes_pagamento[0]?.status_pagamento?.nome }}
+                {{ item.movimentacoes_pagamento[0]?.status_pagamento?.label }}
               </p>
             </v-chip>
           </div>
@@ -61,7 +56,7 @@
         <template #item-anexo="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="notaFiscal(item.anexos_pagamento)">
-              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openBase64File(notaFiscal(item.anexos_pagamento).id)" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
               <v-tooltip text="Abrir Nota Fiscal" activator="parent" location="top" />
             </div>
 
@@ -75,7 +70,7 @@
         <template #item-doc="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             <div v-if="documentoAnexo(item.anexos_pagamento)">
-              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento))" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
+              <v-icon @click="openBase64File(documentoAnexo(item.anexos_pagamento).id)" color="blue" class="cursor-pointer"> mdi-paperclip </v-icon>
               <v-tooltip text="Abrir Anexo" activator="parent" location="top" />
             </div>
 
@@ -116,22 +111,20 @@
           </div>
         </template>
 
-        <template #item-setor="{ data: { data: item } }">
+        <template #[`item-setor_referencia.nome`]="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <div v-for="(set, index) in item.usuario.setores" :key="index" :class="classSetor(item, index)">
-              <v-tooltip :text="set.nome" activator="parent" location="top" />
-
-              {{ defineNameSetor(set.sigla, item, index) }}
-            </div>
+            <v-tooltip :text="item.setor_referencia.nome" activator="parent" location="bottom" />
+            {{ item.setor_referencia.sigla }}
           </div>
         </template>
 
-        <template #item-empresa="{ data: { data: item } }">
+        <template #[`#item-empresa.apelido`]="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
-            <v-tooltip :text="item.empresa.nome" activator="parent" location="top" />
+            <v-tooltip :text="item.empresa.nome" activator="parent" location="bottom" />
             {{ item.empresa.apelido }}
           </div>
         </template>
+
       </CustomTableSelect>
     </LayoutForm>
     <LazyModalPagamento v-model:enable="enableModal" :id="itemView.id" />
@@ -139,19 +132,16 @@
 </template>
 
 <script setup>
-import CustomStore from 'devextreme/data/custom_store'
+import { getPagamentoByScope } from '~/api';
+
 const { $toast } = useNuxtApp()
 const { openBase64File } = useOs()
 
 const colums = getColumns('historico')
-const itens = ref([])
+const pagamentos = ref([])
+const loading = ref(false)
 const enableModal = ref(false)
-
 const itemView = ref({})
-const valueYear = ref(0)
-const valueLastMonth = ref(0)
-const valueActualMonth = ref(0)
-const valueToday = ref(0)
 
 const actions = computed(() => [
   {
@@ -167,78 +157,30 @@ const actions = computed(() => [
   }
 ])
 
-const smallerIndex = (index, item) => index < item.length - 1
-
 const notaFiscal = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 3)
 
 const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id === 4)
 
-const classSetor = (item, index) => (smallerIndex(index, item.usuario.setores) ? 'mr-2' : '')
-
 const defineDocument = (tipo, documento) => (tipo === 'juridico' ? maskCnpj(documento) : maskCpf(documento))
 
-const defineNameSetor = (sigla, item, index) => (smallerIndex(index, item.usuario.setores) ? `${sigla}, ` : sigla)
+const getPagamentos = async () => {
+  loading.value = true;
 
-const isNotEmpty = (value) => value !== undefined && value !== null && value !== ''
+  try {
+    const { success, message, data } = await getPagamentoByScope('geral')
+    if (!success) throw new Error(message)
+  
+    pagamentos.value = data
+  }
+  catch (error) {
+    console.error(error)
+    $toast.error('Erro ao buscar pagamentos')
+  }
 
-
-const getPage = async () => {
-  itens.value = new CustomStore({
-    key: 'id',
-    async load(loadOptions) {
-      const paramsName = ['skip', 'take', 'requireTotalCount', 'requireGroupCount', 'sort', 'filter', 'totalSummary', 'group', 'groupSummary']
-
-      const queryString = paramsName
-        .filter((paramName) => isNotEmpty(loadOptions[paramName]))
-        .map((paramName) => {
-          if (paramName == 'filter') return { [paramName]: formatFilter(loadOptions[paramName]) }
-          return { [paramName]: loadOptions[paramName] }
-        })
-
-      const mergedObject = queryString.reduce((acc, obj) => {
-        Object.keys(obj).forEach((key) => (acc[key] = obj[key]))
-        return acc
-      }, {})
-
-      try {
-        const { success, message, data } = await useApi(`/pagamento/scope/geral`, {
-          query: {
-            paging: true,
-            limit: mergedObject.take,
-            offset: mergedObject.skip,
-            sort: mergedObject.sort,
-            filter: JSON.stringify(mergedObject.filter)
-          }
-        })
-
-        if (!success) throw new Error(message)
-        const { valores } = data
-        valueYear.value = valores.ano ?? 0
-        valueLastMonth.value = valores.ultimo_mes ?? 0
-        valueActualMonth.value = valores.mes ?? 0
-        valueToday.value = valores.hj ?? 0
-
-        data.data.forEach((item) => {
-          item.movimentacoes_pagamento.status_pagamento = item.movimentacoes_pagamento[0]?.status_pagamento?.nome
-
-          if (item.movimentacoes_pagamento[0]?.status_pagamento?.nome === 'Pago') {
-            item.data_pagamento = formatDate(item.movimentacoes_pagamento[0].data_inicio)
-          }
-
-          item.lote = item.movimentacoes_pagamento.at()?.lote
-        })
-
-        return { data: data.data, totalCount: data.count }
-      } 
-      catch (error) {
-        console.error(error)
-        $toast.error('Erro ao carregar os pagamentos')
-      }
-    }
-  })
+  loading.value = false
 }
 
-await getPage()
+getPagamentos()
 </script>
 
 <style scoped>

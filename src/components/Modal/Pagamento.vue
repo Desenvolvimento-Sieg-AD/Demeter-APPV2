@@ -182,7 +182,7 @@
         <LayoutTitle title="Arquivos" :margin="false" />
 
         <v-row align="start" justify="start" class="mb-2 d-flex flex-wrap mr-2" no-gutters style="height: 70px; overflow-y: auto">
-          <v-card flat color="bgtertiary" @click="openBase64File(arquivoNF)" class="d-flex flex-row align-center ma-2" width="300px" height="52px" v-if="arquivoNF">
+          <v-card flat color="bgtertiary" @click="openBase64File(arquivoNF.id)" class="d-flex flex-row align-center ma-2" width="300px" height="52px" v-if="arquivoNF">
             <v-icon color="primary" class="mx-2">mdi-file-document</v-icon>
             <v-card-text>
               <h3>Nota Fiscal</h3>
@@ -203,7 +203,7 @@
             </v-card-text>
           </v-card>
 
-          <v-card flat color="bgtertiary" @click="openBase64File(arquivoPagamento)" class="d-flex flex-row align-center ma-2" width="300px" height="52px" v-if="arquivoPagamento">
+          <v-card flat color="bgtertiary" @click="openBase64File(arquivoPagamento.id)" class="d-flex flex-row align-center ma-2" width="300px" height="52px" v-if="arquivoPagamento">
             <v-icon color="primary" class="mx-2">mdi-file-document</v-icon>
             <v-card-text>
               <h3>Arquivo anexo</h3>

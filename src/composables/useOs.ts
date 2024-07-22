@@ -1,3 +1,5 @@
+import { getArquivoPagamento } from "~/api";
+
 declare var window: Windows
 
 export default function useOs() {
@@ -6,20 +8,22 @@ export default function useOs() {
 
   const openFile = async (filePath: string) => await window.electronAPI.openFile(filePath)
 
-  const openBase64File = async (arquivo: any) => {
+  const openBase64File = async (id: number) => {
     const { $toast } = useNuxtApp();
 
     try {
+      const { success, message, data } = await getArquivoPagamento(id);
+      if (!success) throw new Error(message);
 
-      const exists = await window.electronAPI.hasFile(arquivo.caminho);
+      const exists = await window.electronAPI.hasFile(data.caminho);
       if (exists) {
-        await window.electronAPI.openFile(arquivo.caminho);
+        await window.electronAPI.openFile(data.caminho);
       }
-      else if (arquivo.base64) {
-        if (!arquivo.tipo_arquivo) throw new Error('Tipo do arquivo não definido');
+      else if (data.base64) {
+        if (!data.tipo_arquivo) throw new Error('Tipo do arquivo não definido');
 
-        const base64String = base64ArrayToString(arquivo.base64.data)
-        const base64URL = `data:${arquivo.tipo_arquivo.mime};base64,${base64String}`;
+        const base64String = base64ArrayToString(data.base64.data)
+        const base64URL = `data:${data.tipo_arquivo.mime};base64,${base64String}`;
         
         const newWindow = window.open();
         if (newWindow) {
@@ -32,12 +36,12 @@ export default function useOs() {
         }
       }
       else {
-        throw new Error('Arquivo não encontrado');
+        throw new Error('Arquivo não encontrado no diretório');
       }
     }
     catch (error) {
-      $toast.error('Não foi possível abrir o arquivo');
-      console.error('Erro ao abrir o arquivo:', error.message);
+      $toast.error(error.message);
+      console.error(error);
     }
   }
 
