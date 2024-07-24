@@ -165,15 +165,15 @@
           <!-- Motivo -->
 
           <v-col cols="12">
-            <CustomInput type="textarea" disabled label="Motivo do Pagamento" hide-details :rows="4" v-model="pagamento.motivo" />
+            <CustomInput type="textarea" readonly :rows="4" label="Motivo do Pagamento" hide-details v-model="pagamento.motivo" />
           </v-col>
 
           <v-col cols="12" v-if="pagamento.dados_complementares">
-            <CustomInput disabled label="Observações" hide-details v-model="pagamento.dados_complementares" />
+            <CustomInput type="textarea" readonly :rows="3" label="Observações" hide-details v-model="pagamento.dados_complementares" />
           </v-col>
 
           <v-col v-if="pagamento.urgente">
-            <CustomInput disabled label="Justificativa Urgência" hide-details v-model="pagamento.justificativa_urgente" />
+            <CustomInput type="textarea" readonly :rows="2" label="Justificativa Urgência" hide-details v-model="pagamento.justificativa_urgente" />
           </v-col>
         </v-row>
 
