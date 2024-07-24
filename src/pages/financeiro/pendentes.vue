@@ -146,9 +146,9 @@
       :actions="actionsModalConfirm"
     />
 
-    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPagamentos" />
+    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPagamentos()" />
 
-    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPagamentos" />
+    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPagamentos()" />
 
     <LazyModalConfirmAllStatus
       v-if="enableModal.allConfirm"
@@ -364,7 +364,6 @@ const sendStatus = async (status, id) => {
     const justificativaValue = justificativas[confirm.value]
 
     const { success, message } = await postStatus({ id, status, justificativa: justificativaValue })
-
     if (!success) throw new Error(message)
 
     $toast.success('Status alterado com sucesso')
@@ -372,10 +371,11 @@ const sendStatus = async (status, id) => {
     enableModal.confirm = false
     enableModal.allConfirm = false
 
-    await tableRef.value.clearFilters()
+    // await tableRef.value.clearFilters()
 
     await getPagamentos()
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error(error.message)
   }
