@@ -1,6 +1,6 @@
 <template>
   <LayoutForm>
-    <CustomTableMain
+    <CustomTable
       ref="tableRef"
       pager
       store-state
@@ -23,6 +23,7 @@
       @editPayment="openEditPayment"
       @disapprovePayment="openDisapprovePayment"
       @approvePayment="openApprovePayment"
+      @reviewPayment="openReviewPayment"
       height="calc(100vh - 170px)"
     >
       <template #[`item-usuario.sigla`]="{ data: { data: item } }">
@@ -133,46 +134,40 @@
           {{ item.empresa.apelido }}
         </div>
       </template>
-    </CustomTableMain>
+    </CustomTable>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
     <LazyModalPagamentoEdit v-model:enable="enableModal.edit" :id="viewPayment.id" @getPagamento="getPagamentos()" />
+
     <LazyModalConfirmStatus
       v-model:enable="enableModal.confirm"
       v-model:justificativa="justificativa"
-      :confirm="confirm"
-      :message="messageConfirmStatus"
+      :type="modalType"
       :item="viewPayment"
-      :actions="actionsModalConfirm"
+      :actions="modalActionsSingle"
     />
-
-    <LazyModalEditCount v-if="enableModal.editCount" v-model:enable="enableModal.editCount" :id="viewPayment.id" @update-success="getPagamentos()" />
-
-    <LazyModalEditCountAll v-if="enableModal.allEdit" v-model:enable="enableModal.allEdit" :items="itemsSelects" @update-success="getPagamentos()" />
 
     <LazyModalConfirmAllStatus
-      v-if="enableModal.allConfirm"
       v-model:enable="enableModal.allConfirm"
       v-model:justificativa="justificativa"
-      :message="messageConfirmAllStatus"
-      :actions="modalActionsAprovedAll"
+      :actions="modalActionsMultiple"
+      :type="modalType"
     />
+
   </LayoutForm>
 </template>
 
 <script setup>
 // * IMPORT
 
-import CustomStore from 'devextreme/data/custom_store'
-import { postStatus } from '@api'
-import { getPagamentoByScope } from '~/api'
+import { postStatus, getPagamentoByScope } from '@api'
+
 const { $toast } = useNuxtApp()
 const colums = getColumns('financeiro')
 const { openBase64File } = useOs()
 
 // * DATA
 
-const confirm = ref('exportar')
 const pagamentos = ref([])
 const viewPayment = ref({})
 const itemsSelects = ref([])
@@ -180,46 +175,48 @@ const justificativa = ref(null)
 const loadingModal = ref(false)
 const loading = ref(false)
 const tableRef = ref(null)
+const modalType = ref('aprovar')
 
 const enableModal = reactive({
-  link: false,
-  export: false,
   confirm: false,
-  allEdit: false,
-  editCount: false,
+  editMultiple: false,
   pagamento: false,
   allConfirm: false,
-  exportToClient: false,
   edit: false
 })
 
 // * COMPUTED && MODALS ACTIONS
 
 const status = {
-  approve: 3,
-  disapprove: 8,
-  revision: 2
+  aprovar: 3,
+  recusar: 8,
+  revisar: 2
 }
 
 const title = {
-  approve: 'Aprovar',
-  disapprove: 'Reprovar',
-  revision: 'Solicitar revisão'
+  aprovar: 'Aprovar',
+  recusar: 'Recusar',
+  revisar: 'Revisão'
 }
 
 const openApprovePayment = () => {
-  confirm.value = 'approve'
+  modalType.value = 'aprovar'
   enableModal.allConfirm = true
 }
 
 const openDisapprovePayment = () => {
-  confirm.value = 'disapprove'
+  modalType.value = 'recusar'
+  enableModal.allConfirm = true
+}
+
+const openReviewPayment = () => {
+  modalType.value = 'revisar'
   enableModal.allConfirm = true
 }
 
 const openEditPayment = () => {
   viewPayment.value = itemsSelects.value
-  enableModal.allEdit = true
+  enableModal.editMultiple = true
 }
 
 const actions = computed(() => [
@@ -247,7 +244,7 @@ const actions = computed(() => [
     click: (item) => {
       viewPayment.value = item
       enableModal.confirm = true
-      confirm.value = 'revision'
+      modalType.value = 'revisar'
     },
     active: true,
     disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
@@ -259,7 +256,7 @@ const actions = computed(() => [
     click: async (item) => {
       viewPayment.value = item
       enableModal.confirm = true
-      confirm.value = 'disapprove'
+      modalType.value = 'recusar'
     },
     active: true,
     disabled: (item) => item.movimentacoes_pagamento[0].status_pagamento.id === 3,
@@ -272,60 +269,50 @@ const actions = computed(() => [
     click: (item) => {
       viewPayment.value = item
       enableModal.confirm = true
-      confirm.value = 'approve'
+      modalType.value = 'aprovar'
     },
     active: true,
     type: 'success'
   }
 ])
 
-const actionsModalConfirm = computed(() => [
+const modalActionsSingle = computed(() => [
   {
     icon: 'mdi-close',
     title: 'Cancelar',
     type: 'grey',
+    disabled: loadingModal.value,
     click: () => (enableModal.confirm = false)
   },
   {
     icon: 'mdi-check',
-    title: title[confirm.value],
+    title: title[modalType.value],
     type: 'success',
     loading: loadingModal.value,
     click: async () => {
-      const status_id = status[confirm.value]
+      const status_id = status[modalType.value]
       await sendStatus(status_id, [viewPayment.value.id])
     },
     width: '200px'
   }
 ])
 
-const modalActionsAprovedAll = computed(() => [
+const modalActionsMultiple = computed(() => [
   {
     icon: 'mdi-close',
     title: 'Cancelar',
     type: 'grey',
+    disabled: loadingModal.value,
     click: () => (enableModal.allConfirm = false)
   },
   {
     icon: 'mdi-check',
-    title: title[confirm.value],
+    title: title[modalType.value],
     type: 'success',
     loading: loadingModal.value,
     click: async () => await validBeforeSend()
   }
 ])
-
-const messageConfirmStatus = computed(() => {
-  if (confirm.value === 'approve') return 'Deseja realmente aprovar essa solicitação de pagamento?'
-  else if (confirm.value === 'revision') return 'Deseja realmente solicitar revisão dessa solicitação de pagamento?'
-  return 'Deseja realmente reprovar essa solicitação de pagamento?'
-})
-
-const messageConfirmAllStatus = computed(() => {
-  if (confirm.value === 'approve') return 'Deseja realmente aprovar todas as solicitações de pagamentos selecionadas?'
-  else if (confirm.value === 'revision') return 'Deseja realmente solicitar revisão todas as solicitações de pagamentos selecionadas?'
-  return 'Deseja realmente reprovar todas as solicitações de pagamentos selecionadas?'
-})
 
 // * METHODS
 
@@ -335,15 +322,13 @@ const documentoAnexo = (anexos) => anexos.find((anexo) => anexo.tipo_anexo_id ==
 
 const defineDocument = (tipo) => (tipo === 'juridico' ? maskCnpj(item.fornecedor.documento) : maskCpf(item.fornecedor.documento))
 
-const handleSelectionChange = (items) => {
-  itemsSelects.value = items
-}
+const handleSelectionChange = (items) => itemsSelects.value = items
+
 const validBeforeSend = async () => {
-  const status_id = status[confirm.value]
+  const status_id = status[modalType.value];
+  const lista_id = itemsSelects.value.map((item) => item.id);
 
-  const lista_id = itemsSelects.value.map((item) => item.id)
-
-  await sendStatus(status_id, lista_id)
+  await sendStatus(status_id, lista_id);
 }
 
 const sendStatus = async (status, id) => {
@@ -356,17 +341,17 @@ const sendStatus = async (status, id) => {
     }
 
     const justificativas = {
-      disapprove: justificativa.value,
-      approve: 'Aprovado pelo Financeiro',
-      revision: justificativa.value
+      recusar: justificativa.value,
+      aprovar: 'Aprovado pelo Financeiro',
+      revisar: justificativa.value
     }
 
-    const justificativaValue = justificativas[confirm.value]
+    const justificativaValue = justificativas[modalType.value]
 
     const { success, message } = await postStatus({ id, status, justificativa: justificativaValue })
     if (!success) throw new Error(message)
 
-    $toast.success('Status alterado com sucesso')
+    $toast.success(message)
 
     enableModal.confirm = false
     enableModal.allConfirm = false
@@ -379,6 +364,7 @@ const sendStatus = async (status, id) => {
     console.error(error)
     $toast.error(error.message)
   }
+
   loadingModal.value = false
 }
 
@@ -390,7 +376,8 @@ const getPagamentos = async () => {
     if (!success) throw new Error(message)
 
     pagamentos.value = data
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
     $toast.error('Erro ao buscar pagamentos')
   }

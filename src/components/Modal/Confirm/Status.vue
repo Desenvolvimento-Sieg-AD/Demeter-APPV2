@@ -2,10 +2,9 @@
 	<LazyModal v-model:enable="enableValue" :actions="actions" :title="title" width="600px">
 		<template #content>
 			<div class="txt-center">
-				<CustomText :title="message" class="ml-2" color="#F68A1A" size="20" :bold="true" />
-				<br />
+				<h3 class="text-center title"> {{ messageValue }} </h3>
 
-				<v-row justify="center" class="mt-3">
+				<v-row justify="center" class="mt-2">
 					<v-col cols="4">
 						<CustomInput v-model="item.usuario.sigla" disabled hide-details label="Solicitante"/>
 					</v-col>
@@ -24,17 +23,16 @@
 					</v-col>
 				</v-row>
 
-				<v-row justify="center" v-if="confirm === 'disapprove' || confirm === 'revision' ">
+				<v-row justify="center" v-if="type === 'recusar' || type === 'revisar' ">
 					<v-col cols="12">
 						<CustomInput
 							type="textarea"
-							:rows="2"
+							:rows="3"
 							v-model="justificativaValue"
 							label="Justificativa"
-							placeholder="Digite a justificativa"
-							:rules="[v => !!v || 'Campo obrigatório']"
 							required
-							hide-details
+							hide-details="auto"
+							hint="Esta justificativa será enviada para os solicitantes via e-mail"
 							hide-label
 							/>
 						</v-col>
@@ -51,17 +49,14 @@ const props = defineProps({
 	item: { type: Object, required: true },
 	title: { type: String, default: 'Confirmação' },
 	enable: { type: Boolean, default: false },
-	confirm: { type: String, default: 'approve' },
-	message: { type: String, default: '' },
+	type: { type: String, default: 'aprovar' },
 	actions: { type: Array, default: () => [] },
-	page: { type: String, default: '' },
-	justificativa: { type: String, default: null },
-	permiteEditar: { type: Boolean, default: false },
+	justificativa: { type: String, default: null }
 });
 
 //* EMITS
 
-const emit = defineEmits(['close', 'update:enable', 'update:justificativa', 'update:permiteEditar']);
+const emit = defineEmits(['close', 'update:enable', 'update:justificativa']);
 
 //* COMPUTED
 
@@ -75,13 +70,24 @@ const justificativaValue = computed({
 	set: (value) => emit('update:justificativa', value),
 })
 
-const permiteEditar = computed({
-	get: () => props.permiteEditar,
-	set: (value) => emit('update:permiteEditar', value),
+const valor_total = computed(() => formatCurrency(props.item.valor_total));
+
+const data_vencimento = computed(() => formatDate(props.item.data_vencimento));
+
+const messageValue = computed(() => {
+  switch (props.type) {
+    case 'aprovar':
+      return 'Deseja realmente aprovar estes pagamentos?'
+    case 'revisar':
+      return 'Deseja realmente enviar estes pagamentos para revisão?'
+    case 'recusar':
+      return 'Deseja realmente recusar estes pagamentos?'
+    default:
+      return 'Deseja realmente realizar esta ação?'
+  }
 })
 
-const valor_total = computed(() => formatCurrency(props.item.valor_total)); 
-const data_vencimento = computed(() => formatDate(props.item.data_vencimento));
+//* WATCHERS
 
 watch(() => props.enable, (value) => {
 	if (!value) justificativaValue.value = null;	
@@ -92,5 +98,8 @@ watch(() => props.enable, (value) => {
 <style scoped>
 .txt-center {
 	text-align: center;
+}
+.title {
+  color: #f68a1a;
 }
 </style>

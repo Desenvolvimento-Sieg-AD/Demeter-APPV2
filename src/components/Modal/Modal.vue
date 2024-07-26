@@ -142,6 +142,7 @@ const colors = {
 	info: 'info',
 	success: 'green',
 	error: 'error',
+	revision: 'purple',
 };
 
 const showFade = ref(true);

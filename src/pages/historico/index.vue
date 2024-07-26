@@ -2,7 +2,7 @@
   <div>
     <LayoutForm>
       
-      <CustomTableMain
+      <CustomTable
         :columns="colums"
         :items="pagamentos"
         :actions="actions"
@@ -127,7 +127,7 @@
           </div>
         </template>
 
-      </CustomTableMain>
+      </CustomTable>
     </LayoutForm>
     <LazyModalPagamento v-model:enable="enableModal" :id="itemView.id" />
   </div>

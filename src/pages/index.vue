@@ -1,7 +1,7 @@
 <template>
   <div>
     <LayoutForm>
-      <CustomTableMain
+      <CustomTable
         :columns="columns"
         :items="pagamentos"
         :actions="actions"
@@ -129,7 +129,7 @@
           </div>
         </template>
 
-      </CustomTableMain>
+      </CustomTable>
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="pagamento.id" @getPagamento="getPagamentos()" />
@@ -307,12 +307,12 @@ const cancelPayment = async (ids) => {
     if (!success) throw new Error(message)
 
     enableModal.cancel = false
-    $toast.success('Pagamento cancelado com sucesso')
+    $toast.success(message)
     await getPagamentos()
   } 
 	catch (error) {
     console.error(error)
-    $toast.error('Erro ao cancelar pagamento')
+    $toast.error(error.message)
   }
 
   loadingAction.value = false

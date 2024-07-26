@@ -298,7 +298,6 @@ const sendPaidPayment = async (id) => {
 
   try {
     const { success, message } = await postStatus({ id: [id], status: 5 }) // * Pago
-
     if (!success) throw new Error(message)
 
     $toast.success('Pagamento provisionado com sucesso')

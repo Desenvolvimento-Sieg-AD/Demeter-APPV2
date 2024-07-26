@@ -1,7 +1,7 @@
 <template>
   <div>
     <LayoutForm>
-      <CustomTableMain
+      <CustomTable
         pager
         store-state
         :items="pagamentos"
@@ -127,7 +127,7 @@
             {{ item.empresa.apelido }}
           </div>
         </template>
-      </CustomTableMain>
+      </CustomTable>
     </LayoutForm>
 
     <LazyModalPagamento v-model:enable="enableModal.pagamento" :id="viewPayment.id" />
