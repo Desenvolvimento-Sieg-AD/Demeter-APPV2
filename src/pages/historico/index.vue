@@ -83,7 +83,7 @@
           </div>
         </template>
 
-        <template #item-data="{ data: { data: item } }">
+        <template #item-data_vencimento="{ data: { data: item } }">
           <div class="d-flex align-center justify-center text-center">
             {{ formatDate(item.data_vencimento) }}
           </div>

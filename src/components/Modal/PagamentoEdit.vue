@@ -199,11 +199,11 @@
           <!-- Motivo -->
 
           <v-col cols="12">
-            <CustomInput type="textarea" readonly label="Motivo do Pagamento" hide-details :rows="4" v-model="pagamento.motivo" :counter="500" />
+            <CustomInput type="textarea" :disabled="!editavel" label="Motivo do Pagamento" hide-details :rows="4" v-model="pagamento.motivo" :counter="500" />
           </v-col>
 
           <v-col cols="12" v-if="pagamento.dados_complementares">
-            <CustomInput type="textarea" readonly label="Observações" hide-details :rows="3" v-model="pagamento.dados_complementares" :counter="300" />
+            <CustomInput type="textarea" :disabled="!editavel" label="Observações" hide-details :rows="3" v-model="pagamento.dados_complementares" :counter="300" />
           </v-col>
 
           <v-col v-if="pagamento.urgente">
