@@ -1,21 +1,20 @@
 {
   "name": "sieg-pagamentos",
-  "version": "1.1.10",
+  "version": "1.1.14",
   "private": false,
   "author": "SIEG AD - Tecnologia",
   "description": "Sistema de Pagamentos - SIEG",
   "main": ".output/electron/background.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nuxt dev -o",
-    "build": "nuxt generate",
-    "builde": "nuxt generate && node build",
+    "dev:browser": "nuxt dev -o",
+    "build:browser": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && electron-builder install-app-deps",
     "transpile-electron": "tsc -p ./electron --outDir .output/electron",
-    "dev:electron:lin": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
-    "dev:electron": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
-    "build:electron": "set GENERATE_SOURCEMAP=false& yarn build && yarn transpile-electron && node build.js",
+    "dev:linux": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
+    "dev": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
+    "build": "set GENERATE_SOURCEMAP=false& yarn build:browser && yarn transpile-electron && node build.js",
     "package": "yarn build && yarn transpile-electron && electron-packager ./ --platform=win32 --outDir .output/electron --overwrite"
   },
   "devDependencies": {
