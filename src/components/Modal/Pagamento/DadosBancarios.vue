@@ -133,7 +133,7 @@
     </v-col>
 
     <!-- <v-col cols="12">
-      <CustomInput required label="Motivo" type="textarea" :rows="4" :counter="500" v-model="formValue.motivo" append-inner-icon="mdi-chat-question-outline"  />
+      <CustomInput required label="Motivo" type="textarea" :rows="4" :counter="2000" v-model="formValue.motivo" append-inner-icon="mdi-chat-question-outline"  />
     </v-col> -->
   </v-row>
   
