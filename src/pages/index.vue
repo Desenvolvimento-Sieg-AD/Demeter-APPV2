@@ -97,6 +97,12 @@
           </div>
         </template>
 
+        <template #item-data_pagamento="{ data: { data: item } }">
+          <div class="d-flex align-center justify-center text-center">
+            {{ formatDate(item.data_pagamento) }}
+          </div>
+        </template>
+        
         <template #item-created_at="{ data: { data: item } }">
           <div class="template">
             {{ formatDateTime(item.created_at) }}
